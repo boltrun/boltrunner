@@ -1,13 +1,13 @@
 mod baked_material;
 mod debug_menu;
-mod kill_feed;
+mod hud;
+mod hud_font;
 mod loading;
 mod map;
 mod map_menu;
 mod mipmaps;
 mod nameplates;
 mod powerups;
-mod scoreboard;
 mod title;
 mod view;
 mod weapon;
@@ -41,8 +41,7 @@ fn main() -> AppExit {
             GameNetworkingPlugin,
             loading::LoadingPlugin,
             title::TitlePlugin,
-            scoreboard::ScoreboardPlugin,
-            kill_feed::KillFeedPlugin,
+            hud::HudPlugin,
             MaterialPlugin::<baked_material::BakedMaterial>::default(),
             view::ViewPlugin,
             debug_menu::DebugMenuPlugin,

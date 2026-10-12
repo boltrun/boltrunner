@@ -15,7 +15,7 @@ use boltrunner_shared::{
 use lightyear::prelude::*;
 use std::collections::VecDeque;
 
-const VIEW_LAYER: usize = 1;
+pub(crate) const VIEW_LAYER: usize = 1;
 
 const MUZZLE_CLEARANCE: f32 = 0.015;
 const FLASH_HALF_LENGTH: f32 = 0.055;
@@ -73,7 +73,7 @@ struct MuzzleFlash;
 #[derive(Component)]
 struct MuzzleSocket;
 #[derive(Component)]
-struct WeaponCamera;
+pub(crate) struct WeaponCamera;
 #[derive(Component)]
 struct BoltVisual;
 #[derive(Component)]
@@ -119,7 +119,7 @@ fn setup(
         }),
     };
     // A separate depth buffer keeps the first-person gun out of nearby walls.
-    // This camera also draws the existing crosshair/FPS UI above the weapon.
+    // The HUD panels share this view; screen UI is drawn above both.
     commands.spawn((
         Camera3d::default(),
         WeaponCamera,

@@ -3,6 +3,14 @@ use boltrunner_shared::powerups::{Pickup, PickupKind};
 
 pub struct PowerupVisualsPlugin;
 
+pub(crate) fn pickup_color(kind: PickupKind) -> Color {
+    match kind {
+        PickupKind::Health => Color::srgb(0.20, 0.95, 0.43),
+        PickupKind::Speed => Color::srgb(1.0, 0.72, 0.18),
+        PickupKind::RapidFire => Color::srgb(0.76, 0.35, 1.0),
+    }
+}
+
 impl Plugin for PowerupVisualsPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup)
@@ -36,9 +44,9 @@ fn setup(
     commands.insert_resource(PickupAssets {
         cube: meshes.add(Cuboid::new(1.0, 1.0, 1.0)),
         sphere: meshes.add(Sphere::new(1.0).mesh().ico(2).unwrap()),
-        health: materials.add(material(Color::srgb(0.20, 0.95, 0.43))),
-        speed: materials.add(material(Color::srgb(1.0, 0.72, 0.18))),
-        rapid_fire: materials.add(material(Color::srgb(0.76, 0.35, 1.0))),
+        health: materials.add(material(pickup_color(PickupKind::Health))),
+        speed: materials.add(material(pickup_color(PickupKind::Speed))),
+        rapid_fire: materials.add(material(pickup_color(PickupKind::RapidFire))),
         highlight: materials.add(material(Color::srgb(0.96, 0.98, 1.0))),
     });
 }

@@ -19,6 +19,8 @@ bevy = { workspace = true, features = [
 lightyear = { workspace = true, features = ["client"] }
 boltrunner-shared.workspace = true
 boltrunner-client.workspace = true
+lyon_tessellation = "1"
+rustybuzz = "0.20"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 bevy = { workspace = true, features = ["webgl2"] }
