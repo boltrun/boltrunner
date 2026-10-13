@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use hookrunner_shared::{
+use boltrunner_shared::{
     protocol::LobbyChannel,
     tuning::{EditReply, EditRequest, FeatureSettings},
 };

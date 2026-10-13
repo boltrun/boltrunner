@@ -64,7 +64,7 @@ jobs:
           pull = gh('api', f'repos/{repo}/pulls/{pr}')
           if pull['state'] != 'open' or pull['head']['sha'] != os.environ['PR_SHA']:
               raise SystemExit('PR changed; skipping stale comment.')
-          marker = '<!-- hookrunner-preview -->'
+          marker = '<!-- boltrunner-preview -->'
           body = f"{marker}\n[Play PR #{pr}]({os.environ['PREVIEW_URL']})\n\nCommit: `{os.environ['PR_SHA']}`"
           pages = gh('api', '--paginate', '--slurp', f'repos/{repo}/issues/{pr}/comments')
           previous = next((c for page in pages for c in page
@@ -100,7 +100,7 @@ jobs:
               headers={'Authorization': f"Bearer {os.environ['PREVIEW_TOKEN']}"}, method='DELETE')
           with urllib.request.urlopen(request, timeout=60) as response:
               json.load(response)
-          marker = '<!-- hookrunner-preview -->'
+          marker = '<!-- boltrunner-preview -->'
           pages = json.loads(subprocess.check_output(['gh', 'api', '--paginate', '--slurp', f'repos/{repo}/issues/{pr}/comments']))
           previous = next((c for page in pages for c in page
                            if c['user']['login'] == 'github-actions[bot]' and marker in c['body']), None)

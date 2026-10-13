@@ -60,7 +60,7 @@ func unpack(ctx context.Context, archive, destination string) error {
 		if name == "" || path.Clean(name) != name || !filepath.IsLocal(name) || strings.Contains(name, "\\") {
 			return fmt.Errorf("invalid archive path %q", h.Name)
 		}
-		if name != "hookrunner-server" && name != "simulation-build.txt" && name != "dist" && !strings.HasPrefix(name, "dist/") {
+		if name != "boltrunner-server" && name != "simulation-build.txt" && name != "dist" && !strings.HasPrefix(name, "dist/") {
 			return fmt.Errorf("unexpected bundle file %q", name)
 		}
 		count++
@@ -70,7 +70,7 @@ func unpack(ctx context.Context, archive, destination string) error {
 		size += h.Size
 		target := filepath.Join(destination, name)
 		if h.Typeflag == tar.TypeDir {
-			if name == "hookrunner-server" || name == "simulation-build.txt" {
+			if name == "boltrunner-server" || name == "simulation-build.txt" {
 				return errors.New("server and simulation hash must be regular files")
 			}
 			if err = os.MkdirAll(target, 0700); err != nil {
@@ -85,7 +85,7 @@ func unpack(ctx context.Context, archive, destination string) error {
 			return err
 		}
 		mode := os.FileMode(0600)
-		if name == "hookrunner-server" {
+		if name == "boltrunner-server" {
 			mode = 0700
 		}
 		out, err := os.OpenFile(target, os.O_CREATE|os.O_EXCL|os.O_WRONLY, mode)
@@ -101,14 +101,14 @@ func unpack(ctx context.Context, archive, destination string) error {
 			return closeErr
 		}
 	}
-	for _, name := range []string{"hookrunner-server", "simulation-build.txt", "dist/index.html", "dist/build.json"} {
+	for _, name := range []string{"boltrunner-server", "simulation-build.txt", "dist/index.html", "dist/build.json"} {
 		info, err := os.Stat(filepath.Join(destination, name))
 		if err != nil || !info.Mode().IsRegular() {
 			return fmt.Errorf("bundle is missing %s", name)
 		}
 	}
 	// Do not execute an uploaded binary to discover its architecture or build ID.
-	binary, err := elf.Open(filepath.Join(destination, "hookrunner-server"))
+	binary, err := elf.Open(filepath.Join(destination, "boltrunner-server"))
 	if err != nil {
 		return err
 	}
@@ -159,7 +159,7 @@ func sandboxArgs(binary, address string) []string {
 	if _, err := os.Stat("/etc/ld.so.cache"); err == nil {
 		args = append(args, "--ro-bind", "/etc/ld.so.cache", "/etc/ld.so.cache")
 	}
-	return append(args, "--proc", "/proc", "--dev", "/dev", "--tmpfs", "/tmp", "--dir", "/app", "--ro-bind", binary, "/app/server", "--chdir", "/app", "--setenv", "HOOKRUNNER_BIND", address, "--setenv", "RUST_LOG", "info", "--", "/app/server")
+	return append(args, "--proc", "/proc", "--dev", "/dev", "--tmpfs", "/tmp", "--dir", "/app", "--ro-bind", binary, "/app/server", "--chdir", "/app", "--setenv", "BOLTRUNNER_BIND", address, "--setenv", "RUST_LOG", "info", "--", "/app/server")
 }
 
 type cappedLog struct {
@@ -240,7 +240,7 @@ func launchPreview(ctx context.Context, dir string, c config) (*preview, error) 
 			return nil, err
 		}
 		output := &cappedLog{file: logFile, remaining: 1 << 20}
-		p.cmd = exec.Command(c.bwrap, sandboxArgs(filepath.Join(dir, "hookrunner-server"), address)...)
+		p.cmd = exec.Command(c.bwrap, sandboxArgs(filepath.Join(dir, "boltrunner-server"), address)...)
 		p.cmd.Env = []string{"PATH=/usr/bin:/bin"}
 		p.cmd.Stdout, p.cmd.Stderr = output, output
 		started := make(chan error, 1)
@@ -349,7 +349,7 @@ func gameHandler(directory, address, build string) http.Handler {
 		} else {
 			w.Header().Set("Cache-Control", "no-cache")
 		}
-		requested := r.Header.Get("X-Hookrunner-Build")
+		requested := r.Header.Get("X-Boltrunner-Build")
 		parts := strings.Split(r.URL.Path, "/")
 		if len(parts) >= 3 && parts[1] == "pkg" {
 			requested = parts[2]

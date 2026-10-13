@@ -7,7 +7,7 @@ mod powerups;
 mod tuning;
 
 use bevy::{app::ScheduleRunnerPlugin, prelude::*};
-use hookrunner_shared::{
+use boltrunner_shared::{
     PlayerId, PlayerInput, PlayerState, ProtocolPlugin, SEND_INTERVAL, TICK_DURATION, TICK_HZ,
     arena, movement,
     player_color::{PALETTE, PlayerColor},
@@ -19,13 +19,13 @@ use std::{net::SocketAddr, time::Duration};
 
 fn main() {
     if std::env::args().nth(1).as_deref() == Some("--print-build") {
-        println!("{}", hookrunner_shared::SIMULATION_BUILD);
+        println!("{}", boltrunner_shared::SIMULATION_BUILD);
         return;
     }
-    let address: SocketAddr = std::env::var("HOOKRUNNER_BIND")
+    let address: SocketAddr = std::env::var("BOLTRUNNER_BIND")
         .unwrap_or_else(|_| "0.0.0.0:5000".into())
         .parse()
-        .expect("HOOKRUNNER_BIND must be an IP:port");
+        .expect("BOLTRUNNER_BIND must be an IP:port");
     App::new()
         .add_plugins((
             MinimalPlugins.set(ScheduleRunnerPlugin::run_loop(Duration::from_millis(2))),
@@ -38,7 +38,7 @@ fn main() {
         .add_plugins(tuning::TuningPlugin)
         .add_plugins(loading::LoadingPlugin)
         .insert_resource(BindAddress(address))
-        .init_resource::<hookrunner_shared::match_state::MatchState>()
+        .init_resource::<boltrunner_shared::match_state::MatchState>()
         .init_resource::<matches::MatchClock>()
         .init_resource::<history::PlayerHistory>()
         .init_resource::<powerups::PickupDirector>()
@@ -88,10 +88,10 @@ fn start(mut commands: Commands, address: Res<BindAddress>) {
     );
     commands.trigger(Start { entity });
     info!(
-        "Hookrunner: ws://{} ({TICK_HZ:.0} Hz simulation, {TICK_HZ:.0} Hz snapshots)",
+        "Boltrunner: ws://{} ({TICK_HZ:.0} Hz simulation, {TICK_HZ:.0} Hz snapshots)",
         address.0
     );
-    info!("Simulation build: {}", hookrunner_shared::SIMULATION_BUILD);
+    info!("Simulation build: {}", boltrunner_shared::SIMULATION_BUILD);
 }
 
 fn configure_link(event: On<Add, LinkOf>, mut commands: Commands) {
@@ -117,8 +117,8 @@ fn spawn_players(
         (With<ClientOf>, With<Connected>),
     >,
     players: Query<(&PlayerState, &PlayerColor)>,
-    round: Res<hookrunner_shared::match_state::MatchState>,
-    settings: Res<hookrunner_shared::tuning::FeatureSettings>,
+    round: Res<boltrunner_shared::match_state::MatchState>,
+    settings: Res<boltrunner_shared::tuning::FeatureSettings>,
     mut commands: Commands,
 ) {
     let mut occupied = Vec::new();
@@ -133,7 +133,7 @@ fn spawn_players(
             if joined {
                 continue;
             }
-            let name = match hookrunner_shared::nickname::validate(&request.nickname) {
+            let name = match boltrunner_shared::nickname::validate(&request.nickname) {
                 Ok(name) => name,
                 Err(reason) => {
                     replies.send::<LobbyChannel>(JoinRejected {
@@ -176,14 +176,14 @@ fn spawn_players(
                 color,
                 PlayerState {
                     tuning: settings.values.simulation,
-                    health: hookrunner_shared::health::Health(
+                    health: boltrunner_shared::health::Health(
                         settings.values.simulation.max_health as u16,
                     ),
-                    jump: hookrunner_shared::protocol::JumpState {
+                    jump: boltrunner_shared::protocol::JumpState {
                         air_jumps_remaining: settings.values.simulation.air_jumps as u8,
                         ..default()
                     },
-                    dash: hookrunner_shared::protocol::DashState::new(settings.values.simulation),
+                    dash: boltrunner_shared::protocol::DashState::new(settings.values.simulation),
                     position,
                     yaw: spawn.yaw,
                     view_yaw_offset: spawn.yaw,
@@ -212,8 +212,8 @@ fn spawn_players(
 
 fn simulate(
     mut commands: Commands,
-    mut round: ResMut<hookrunner_shared::match_state::MatchState>,
-    settings: Res<hookrunner_shared::tuning::FeatureSettings>,
+    mut round: ResMut<boltrunner_shared::match_state::MatchState>,
+    settings: Res<boltrunner_shared::tuning::FeatureSettings>,
     mut players: Query<(
         &PlayerId,
         &mut PlayerState,

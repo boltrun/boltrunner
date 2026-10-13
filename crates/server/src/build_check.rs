@@ -2,7 +2,7 @@ use aeronet_websocket::{
     server::HandshakeHandler,
     tungstenite::{handshake::server::ErrorResponse, http::StatusCode},
 };
-use hookrunner_shared::SIMULATION_BUILD;
+use boltrunner_shared::SIMULATION_BUILD;
 
 #[expect(
     clippy::result_large_err,

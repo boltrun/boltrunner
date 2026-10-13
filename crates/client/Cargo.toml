@@ -1,5 +1,5 @@
 [package]
-name = "hookrunner-client"
+name = "boltrunner-client"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -8,5 +8,5 @@ license.workspace = true
 [dependencies]
 bevy = { workspace = true, features = ["bevy_log"] }
 lightyear = { workspace = true, features = ["client"] }
-hookrunner-shared.workspace = true
+boltrunner-shared.workspace = true
 url = "2"

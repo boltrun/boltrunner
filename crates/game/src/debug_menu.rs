@@ -8,8 +8,8 @@ use bevy::{
     prelude::*,
     window::PrimaryWindow,
 };
-use hookrunner_client::{Session, tuning::TuningClient};
-use hookrunner_shared::tuning::{Category, Edit, PARAMETERS, Parameter};
+use boltrunner_client::{Session, tuning::TuningClient};
+use boltrunner_shared::tuning::{Category, Edit, PARAMETERS, Parameter};
 
 #[derive(Resource, Default)]
 pub(crate) struct DebugMenu {
@@ -95,7 +95,7 @@ impl Plugin for DebugMenuPlugin {
                 Update,
                 (interact, edit_keys, present, highlight, fit, scroll)
                     .chain()
-                    .after(hookrunner_client::tuning::sync)
+                    .after(boltrunner_client::tuning::sync)
                     .before(crate::view::CameraUpdated),
             );
     }

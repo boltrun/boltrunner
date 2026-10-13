@@ -26,7 +26,7 @@
 @SolidClass base(Target) color(0.5 0.5 1) = trigger_teleport : "Teleport to misc_teleporter_dest" []
 @SolidClass base(Target) color(0.2 0.7 1) = trigger_warpzone : "Paired portal; one wavy material face defines its opening" []
 @SolidClass color(1 0.2 0.1) = trigger_hurt : "Instant hazard respawn" []
-@SolidClass = func_bobbing : "Imported decorative brush, static in Hookrunner" [
+@SolidClass = func_bobbing : "Imported decorative brush, static in Boltrunner" [
     height(float) : "Original bob height (not simulated)" : 4
 ]
 @PointClass base(Target) size(-16 -16 -16, 16 16 16) model({ "path": model, "scale": modelscale }) = misc_model : "Static MD3 decoration" [

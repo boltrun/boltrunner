@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compile the editable Quake 3 map into Hookrunner's current runtime assets.
+"""Compile the editable Quake 3 map into Boltrunner's current runtime assets.
 
 Normal builds are offline. --fetch imports missing, checksum-verified upstream
 sources at the pinned commit. Requires q3map2 (setup-map-tools.sh), numpy and Pillow.

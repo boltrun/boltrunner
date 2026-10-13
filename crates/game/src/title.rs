@@ -3,8 +3,8 @@ use bevy::{
     input::keyboard::{Key, KeyboardInput},
     prelude::*,
 };
-use hookrunner_client::{JoinGame, Session, SessionPhase};
-use hookrunner_shared::{
+use boltrunner_client::{JoinGame, Session, SessionPhase};
+use boltrunner_shared::{
     PlayerId,
     nickname::{self, MAX_NICKNAME_CHARS},
     player_color::{PALETTE, PlayerColor},
@@ -19,7 +19,7 @@ impl Plugin for TitlePlugin {
                 Update,
                 (edit, present)
                     .chain()
-                    .after(hookrunner_client::update_session),
+                    .after(boltrunner_client::update_session),
             );
     }
 }
@@ -73,7 +73,7 @@ fn setup(mut commands: Commands) {
             })
             .with_children(|panel| {
                 panel.spawn((
-                    Text::new("HOOKRUNNER"),
+                    Text::new("BOLTRUNNER"),
                     TextFont {
                         font_size: 42.0,
                         ..default()

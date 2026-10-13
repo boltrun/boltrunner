@@ -1,7 +1,7 @@
 //! Server-confirmed kills; rendering is shared by web and native clients.
 use bevy::prelude::*;
-use hookrunner_client::Session;
-use hookrunner_shared::{match_state::MatchState, player_color::PlayerColor};
+use boltrunner_client::Session;
+use boltrunner_shared::{match_state::MatchState, player_color::PlayerColor};
 
 pub struct KillFeedPlugin;
 impl Plugin for KillFeedPlugin {

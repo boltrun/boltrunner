@@ -13,8 +13,8 @@ license = "GPL-3.0-only"
 bevy = { version = "=0.18.1", default-features = false, features = ["std", "async_executor", "serialize"] }
 lightyear = { version = "=0.26.4", default-features = false, features = ["std", "replication", "prediction", "interpolation", "input_native", "websocket", "raw_connection"] }
 serde = { version = "1", features = ["derive"] }
-hookrunner-shared = { path = "crates/shared" }
-hookrunner-client = { path = "crates/client" }
+boltrunner-shared = { path = "crates/shared" }
+boltrunner-client = { path = "crates/client" }
 
 [profile.dev]
 debug = 0

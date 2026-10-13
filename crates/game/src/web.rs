@@ -1,5 +1,5 @@
 use bevy::{prelude::*, window::CursorOptions};
-use hookrunner_client::ServerUrl;
+use boltrunner_client::ServerUrl;
 
 pub fn configure(app: &mut App) {
     let window = web_sys::window().unwrap();
@@ -28,7 +28,7 @@ pub fn configure(app: &mut App) {
             })
             .set(WindowPlugin {
                 primary_window: Some(Window {
-                    title: "Hookrunner".into(),
+                    title: "Boltrunner".into(),
                     canvas: Some("#game".into()),
                     fit_canvas_to_parent: true,
                     prevent_default_event_handling: true,

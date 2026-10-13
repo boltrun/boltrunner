@@ -5,8 +5,8 @@ use bevy::{
     prelude::*,
     window::{CursorOptions, PrimaryWindow},
 };
-use hookrunner_client::{NetworkPresentation, NetworkStats, PresentationPosition, Session};
-use hookrunner_shared::{
+use boltrunner_client::{NetworkPresentation, NetworkStats, PresentationPosition, Session};
+use boltrunner_shared::{
     PlayerId, PlayerInput, PlayerState, arena, level, player_color::PlayerColor,
 };
 use lightyear::prelude::{client::input::InputSystems, input::native::*, *};
@@ -94,7 +94,7 @@ fn build_scene(mut commands: Commands) {
         }),
         Transform::from_translation(
             arena::spawn(0, default()).position
-                + Vec3::Y * hookrunner_shared::tuning::SimulationTuning::default().eye_height,
+                + Vec3::Y * boltrunner_shared::tuning::SimulationTuning::default().eye_height,
         )
         .with_rotation(Quat::from_rotation_y(arena::spawn(0, default()).yaw)),
         PlayerCamera,
@@ -184,7 +184,7 @@ fn attach_visuals(
 
 pub(crate) fn look_input(
     mut look: ResMut<Look>,
-    settings: Res<hookrunner_client::tuning::TuningClient>,
+    settings: Res<boltrunner_client::tuning::TuningClient>,
     menu: Res<crate::debug_menu::DebugMenu>,
     session: Res<Session>,
     motion: Res<AccumulatedMouseMotion>,
@@ -276,7 +276,7 @@ fn sync_shapes(
 }
 
 fn follow_camera(
-    settings: Res<hookrunner_client::tuning::TuningClient>,
+    settings: Res<boltrunner_client::tuning::TuningClient>,
     look: Res<Look>,
     menu: Res<crate::debug_menu::DebugMenu>,
     mut local: Query<
@@ -311,7 +311,7 @@ fn follow_camera(
             } else {
                 (death.total_ticks.saturating_sub(death.remaining_ticks) as f32
                     / (tuning.death_camera_time.max(f32::EPSILON)
-                        * hookrunner_shared::TICK_HZ as f32))
+                        * boltrunner_shared::TICK_HZ as f32))
                     .clamp(0.0, 1.0)
             };
             let eased = 1.0 - (1.0 - progress).powi(2);
@@ -364,7 +364,7 @@ fn follow_camera(
 
 fn update_hud(
     mut commands: Commands,
-    rounds: Query<&hookrunner_shared::match_state::MatchState>,
+    rounds: Query<&boltrunner_shared::match_state::MatchState>,
     players: Query<(&PlayerId, &PlayerState, &PlayerColor), With<Predicted>>,
     stats: Res<NetworkStats>,
     session: Res<Session>,
@@ -401,12 +401,12 @@ fn update_hud(
                 Some(*color),
             ));
             if state.speed_ticks > 0 {
-                let seconds = (state.speed_ticks as f64 / hookrunner_shared::TICK_HZ).ceil() as u32;
+                let seconds = (state.speed_ticks as f64 / boltrunner_shared::TICK_HZ).ceil() as u32;
                 spans.push((format!("\nSpeed boost: {seconds}s"), None));
             }
             if state.rapid_fire_ticks > 0 {
                 let seconds =
-                    (state.rapid_fire_ticks as f64 / hookrunner_shared::TICK_HZ).ceil() as u32;
+                    (state.rapid_fire_ticks as f64 / boltrunner_shared::TICK_HZ).ceil() as u32;
                 spans.push((format!("\nRapid fire: {seconds}s"), None));
             }
             if let Some(death) = state.death {
@@ -414,7 +414,7 @@ fn update_hud(
                     spans.push((" | Waiting for next match".into(), None));
                 } else {
                     let seconds =
-                        (death.remaining_ticks as f64 / hookrunner_shared::TICK_HZ).ceil() as u32;
+                        (death.remaining_ticks as f64 / boltrunner_shared::TICK_HZ).ceil() as u32;
                     spans.push((format!(" | Respawn in {seconds}s"), None));
                 }
             }

@@ -3438,40 +3438,40 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dfa686283ad6dd069f105e5ab091b04c62850d3e4cf5d67debad1933f55023df"
 
 [[package]]
-name = "hookrunner-client"
+name = "boltrunner-client"
 version = "0.1.0"
 dependencies = [
  "bevy",
- "hookrunner-shared",
+ "boltrunner-shared",
  "lightyear",
  "url",
 ]
 
 [[package]]
-name = "hookrunner-game"
+name = "boltrunner-game"
 version = "0.1.0"
 dependencies = [
  "bevy",
- "hookrunner-client",
- "hookrunner-shared",
+ "boltrunner-client",
+ "boltrunner-shared",
  "lightyear",
  "web-sys",
 ]
 
 [[package]]
-name = "hookrunner-server"
+name = "boltrunner-server"
 version = "0.1.0"
 dependencies = [
  "aeronet_websocket",
  "bevy",
- "hookrunner-shared",
+ "boltrunner-shared",
  "lightyear",
  "rand 0.9.5",
  "url",
 ]
 
 [[package]]
-name = "hookrunner-shared"
+name = "boltrunner-shared"
 version = "0.1.0"
 dependencies = [
  "bevy",

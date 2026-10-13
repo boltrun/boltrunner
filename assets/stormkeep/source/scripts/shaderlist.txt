@@ -1,4 +1,4 @@
-// Hookrunner: imported shader libraries used by the editable map.
+// Boltrunner: imported shader libraries used by the editable map.
 common
 effects_warpzone
 exx

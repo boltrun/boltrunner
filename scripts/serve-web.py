@@ -31,7 +31,7 @@ class PreviewHandler(SimpleHTTPRequestHandler):
         except (OSError, ValueError, KeyError):
             self.send_error(503, 'The browser build is unavailable')
             return None
-        requested = self.headers.get('X-Hookrunner-Build')
+        requested = self.headers.get('X-Boltrunner-Build')
         parts = urlsplit(self.path).path.split('/')
         if len(parts) >= 3 and parts[1] == 'pkg':
             requested = parts[2]
@@ -60,7 +60,7 @@ def main():
         parser.error('Build the browser client first: ./scripts/build-web.sh')
     handler = partial(PreviewHandler, directory=str(directory))
     with ThreadingHTTPServer((args.bind, args.port), handler) as server:
-        print(f'Hookrunner preview: http://{args.bind}:{server.server_port}', flush=True)
+        print(f'Boltrunner preview: http://{args.bind}:{server.server_port}', flush=True)
         try:
             server.serve_forever()
         except KeyboardInterrupt:

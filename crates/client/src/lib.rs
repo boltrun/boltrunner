@@ -1,7 +1,7 @@
 mod timing;
 pub mod tuning;
 use bevy::prelude::*;
-use hookrunner_shared::{
+use boltrunner_shared::{
     PlayerId, PlayerInput, PlayerState, ProtocolPlugin, TICK_DURATION, movement,
     protocol::{JoinRejected, JoinRequest, LobbyChannel, PlayerName},
 };
@@ -87,14 +87,14 @@ fn join_game(
     if session.phase != SessionPhase::Title {
         return;
     }
-    let nickname = match hookrunner_shared::nickname::validate(&event.nickname) {
+    let nickname = match boltrunner_shared::nickname::validate(&event.nickname) {
         Ok(nickname) => nickname,
         Err(error) => {
             session.error = Some(error.into());
             return;
         }
     };
-    if hookrunner_shared::player_color::PlayerColor::new(event.color).is_none() {
+    if boltrunner_shared::player_color::PlayerColor::new(event.color).is_none() {
         session.error = Some("Choose a valid color.".into());
         return;
     }
@@ -113,7 +113,7 @@ fn open_connection(commands: &mut Commands, url: &ServerUrl, session: &mut Sessi
     let mut endpoint = url::Url::parse(&url.0).expect("game server URL must be valid");
     endpoint
         .query_pairs_mut()
-        .append_pair("build", hookrunner_shared::SIMULATION_BUILD);
+        .append_pair("build", boltrunner_shared::SIMULATION_BUILD);
     #[cfg(target_arch = "wasm32")]
     let config = ClientConfig;
     #[cfg(not(target_arch = "wasm32"))]
@@ -175,9 +175,9 @@ fn send_join(
 
 type SessionReplicas = Or<(
     With<PlayerId>,
-    With<hookrunner_shared::weapon::Projectile>,
-    With<hookrunner_shared::match_state::MatchState>,
-    With<hookrunner_shared::tuning::FeatureSettings>,
+    With<boltrunner_shared::weapon::Projectile>,
+    With<boltrunner_shared::match_state::MatchState>,
+    With<boltrunner_shared::tuning::FeatureSettings>,
 )>;
 
 pub fn update_session(
@@ -188,8 +188,8 @@ pub fn update_session(
         (Option<&Disconnected>, &mut MessageReceiver<JoinRejected>),
         With<Client>,
     >,
-    players: Query<(&PlayerName, &hookrunner_shared::player_color::PlayerColor), With<Predicted>>,
-    rounds: Query<Entity, With<hookrunner_shared::match_state::MatchState>>,
+    players: Query<(&PlayerName, &boltrunner_shared::player_color::PlayerColor), With<Predicted>>,
+    rounds: Query<Entity, With<boltrunner_shared::match_state::MatchState>>,
     replicas: Query<Entity, SessionReplicas>,
 ) {
     let Some(entity) = session.connection else {
@@ -277,7 +277,7 @@ fn attach_input(mut commands: Commands, players: Query<Entity, LocalPlayerWithou
 pub struct PredictedShots(pub Vec<PredictedShot>);
 
 pub struct PredictedShot {
-    pub bolt: hookrunner_shared::weapon::Projectile,
+    pub bolt: boltrunner_shared::weapon::Projectile,
     pub tick: Tick,
 }
 
@@ -294,7 +294,7 @@ fn predict(
                 shots.0.drain(..128);
             }
             shots.0.push(PredictedShot {
-                bolt: hookrunner_shared::weapon::Projectile::from_shot(id.0, &state, &input.0),
+                bolt: boltrunner_shared::weapon::Projectile::from_shot(id.0, &state, &input.0),
                 tick: timeline.tick(),
             });
         }

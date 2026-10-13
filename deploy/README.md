@@ -4,23 +4,23 @@ go version
 command -v bwrap
 
 # Run from the repository.
-mkdir -p "$HOME/.local/bin" "$HOME/.config/hookrunner"
-(cd deploy/previewd && go build -o "$HOME/.local/bin/hookrunner-previewd" .)
-cp deploy/preview.env.example "$HOME/.config/hookrunner/preview.env"
-chmod 600 "$HOME/.config/hookrunner/preview.env"
+mkdir -p "$HOME/.local/bin" "$HOME/.config/boltrunner"
+(cd deploy/previewd && go build -o "$HOME/.local/bin/boltrunner-previewd" .)
+cp deploy/preview.env.example "$HOME/.config/boltrunner/preview.env"
+chmod 600 "$HOME/.config/boltrunner/preview.env"
 
 # Generate PREVIEW_TOKEN, then set it, PREVIEW_IP and PREVIEW_REPOSITORY.
 openssl rand -hex 32
-${EDITOR:-vi} "$HOME/.config/hookrunner/preview.env"
+${EDITOR:-vi} "$HOME/.config/boltrunner/preview.env"
 # Private repo: also set PREVIEW_GITHUB_TOKEN with Contents: Read and Pull requests: Read.
 # Allow inbound TCP 8080 and 20000-20100 in the VPS/cloud firewall.
 
 # Start the daemon.
 set -a
-. "$HOME/.config/hookrunner/preview.env"
+. "$HOME/.config/boltrunner/preview.env"
 set +a
-export PREVIEW_DATA="$HOME/.local/share/hookrunner-previews"
-exec "$HOME/.local/bin/hookrunner-previewd"
+export PREVIEW_DATA="$HOME/.local/share/boltrunner-previews"
+exec "$HOME/.local/bin/boltrunner-previewd"
 ```
 
 ```sh

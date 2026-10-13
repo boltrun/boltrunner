@@ -20,7 +20,7 @@ func (s *service) githubJSON(ctx context.Context, path string, value any) error 
 		return err
 	}
 	request.Header.Set("Accept", "application/vnd.github+json")
-	request.Header.Set("User-Agent", "hookrunner-previewd")
+	request.Header.Set("User-Agent", "boltrunner-previewd")
 	if s.config.githubToken != "" {
 		request.Header.Set("Authorization", "Bearer "+s.config.githubToken)
 	}

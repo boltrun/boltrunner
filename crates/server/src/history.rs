@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use hookrunner_shared::{PlayerId, PlayerState, TICK_DURATION};
+use boltrunner_shared::{PlayerId, PlayerState, TICK_DURATION};
 use lightyear::{interpolation::plugin::InterpolationDelay, prelude::*};
 use std::collections::VecDeque;
 

@@ -16,7 +16,7 @@ struct LoadingStarted(Instant);
 pub fn prepare_world(commands: &mut Commands) {
     let started = Instant::now();
     info!("Loading game [0/4, 0%]: reading map metadata");
-    let map = hookrunner_shared::level::data();
+    let map = boltrunner_shared::level::data();
     info!(
         "Loading game [1/4, 25%]: {} loaded ({} spawns, {} triggers)",
         map.name,
@@ -24,7 +24,7 @@ pub fn prepare_world(commands: &mut Commands) {
         map.triggers.len()
     );
     info!("Loading game [1/4, 25%]: building collision world");
-    let _ = hookrunner_shared::level::world();
+    let _ = boltrunner_shared::level::world();
     info!("Loading game [2/4, 50%]: collision world ready");
     commands.insert_resource(LoadingStarted(started));
 }

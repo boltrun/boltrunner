@@ -18,10 +18,10 @@ if ! command -v "$bindgen" >/dev/null || [[ "$($bindgen --version)" != "wasm-bin
   echo "Install the matching WASM tool: cargo install wasm-bindgen-cli --version $expected --locked" >&2
   exit 1
 fi
-cargo build --locked --release --target wasm32-unknown-unknown -p hookrunner-game
-package_dir=$(mktemp -d "${TMPDIR:-/tmp}/hookrunner-web.XXXXXX")
+cargo build --locked --release --target wasm32-unknown-unknown -p boltrunner-game
+package_dir=$(mktemp -d "${TMPDIR:-/tmp}/boltrunner-web.XXXXXX")
 trap 'rm -rf -- "$package_dir"' EXIT
-"$bindgen" --target web --out-dir "$package_dir" --out-name hookrunner_web "${CARGO_TARGET_DIR:-target}/wasm32-unknown-unknown/release/hookrunner.wasm"
+"$bindgen" --target web --out-dir "$package_dir" --out-name boltrunner_web "${CARGO_TARGET_DIR:-target}/wasm32-unknown-unknown/release/boltrunner.wasm"
 python3 - "$package_dir" <<'PY'
 import hashlib
 import json
@@ -70,7 +70,7 @@ with zipfile.ZipFile(destination / 'stormkeep-source.zip', 'w', zipfile.ZIP_DEFL
                                   'scripts/map_bsp.py', 'scripts/setup-map-tools.sh',
                                   'scripts/requirements-maps.txt']):
         archive.write(path, path)
-    for path in sorted(pathlib.Path('editor/Hookrunner').iterdir()):
+    for path in sorted(pathlib.Path('editor/Boltrunner').iterdir()):
         archive.write(path, path)
 
 # Include the editable weapon and exporter.
@@ -82,13 +82,13 @@ with zipfile.ZipFile(destination / 'starter-pistol-source.zip', 'w', zipfile.ZIP
         archive.write(path, path)
 
 # Publish the page only after both files from the new build are ready.
-page = template.replace('__HOOKRUNNER_WEB_MODULE__', f'./pkg/{version}/hookrunner_web.js')
-page = page.replace('__HOOKRUNNER_ASSET_ROOT__', f'./pkg/{version}/assets')
-page = page.replace('__HOOKRUNNER_BUILD__', version)
-page = page.replace('__HOOKRUNNER_BUILD_SYNC__', build_sync)
-page = page.replace('__HOOKRUNNER_LOADING__', loading)
-page = page.replace('__HOOKRUNNER_WASM_URL__', f'./pkg/{version}/hookrunner_web_bg.wasm')
-page = page.replace('__HOOKRUNNER_WASM_BYTES__', str((package / 'hookrunner_web_bg.wasm').stat().st_size))
+page = template.replace('__BOLTRUNNER_WEB_MODULE__', f'./pkg/{version}/boltrunner_web.js')
+page = page.replace('__BOLTRUNNER_ASSET_ROOT__', f'./pkg/{version}/assets')
+page = page.replace('__BOLTRUNNER_BUILD__', version)
+page = page.replace('__BOLTRUNNER_BUILD_SYNC__', build_sync)
+page = page.replace('__BOLTRUNNER_LOADING__', loading)
+page = page.replace('__BOLTRUNNER_WASM_URL__', f'./pkg/{version}/boltrunner_web_bg.wasm')
+page = page.replace('__BOLTRUNNER_WASM_BYTES__', str((package / 'boltrunner_web_bg.wasm').stat().st_size))
 staged_page = pathlib.Path('dist/.index.html.tmp')
 staged_page.write_text(page)
 staged_page.replace('dist/index.html')

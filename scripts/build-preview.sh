@@ -6,15 +6,15 @@ if [[ $(uname -m) != aarch64 || $(uname -s) != Linux ]]; then
   echo 'Preview bundles must be built on Linux ARM64.' >&2
   exit 1
 fi
-cargo build --locked --release -p hookrunner-server
+cargo build --locked --release -p boltrunner-server
 ./scripts/build-web.sh --release
 # Avoid including an earlier bundle in a manually repeated build.
 rm -f dist/preview.tar.gz
-package_dir=$(mktemp -d "${TMPDIR:-/tmp}/hookrunner-preview.XXXXXX")
+package_dir=$(mktemp -d "${TMPDIR:-/tmp}/boltrunner-preview.XXXXXX")
 trap 'rm -rf -- "$package_dir"' EXIT
-server="${CARGO_TARGET_DIR:-target}/release/hookrunner-server"
+server="${CARGO_TARGET_DIR:-target}/release/boltrunner-server"
 cp "$server" "$package_dir/"
 "$server" --print-build > "$package_dir/simulation-build.txt"
 cp -R dist "$package_dir/dist"
-tar -C "$package_dir" -czf dist/preview.tar.gz hookrunner-server simulation-build.txt dist
+tar -C "$package_dir" -czf dist/preview.tar.gz boltrunner-server simulation-build.txt dist
 echo 'Preview bundle: dist/preview.tar.gz'

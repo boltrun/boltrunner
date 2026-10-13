@@ -19,7 +19,7 @@ mod platform;
 mod platform;
 
 use bevy::{prelude::*, winit::WinitSettings};
-use hookrunner_client::GameNetworkingPlugin;
+use boltrunner_client::GameNetworkingPlugin;
 
 fn main() -> AppExit {
     let mut app = App::new();

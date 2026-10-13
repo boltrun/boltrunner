@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use hookrunner_shared::{
+use boltrunner_shared::{
     protocol::LobbyChannel,
     tuning::{Edit, EditReply, EditRequest, FeatureSettings},
 };
@@ -15,7 +15,7 @@ pub struct TuningClient {
     next_id: u64,
 }
 impl TuningClient {
-    pub fn values(&self) -> hookrunner_shared::tuning::SettingsValues {
+    pub fn values(&self) -> boltrunner_shared::tuning::SettingsValues {
         self.settings
             .as_ref()
             .map_or_else(Default::default, |s| s.values)

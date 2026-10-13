@@ -68,7 +68,7 @@ def compiler_map(text, compiler):
     # Every brushDef gets its own closing brace. Patch and entity braces stay intact.
     text = '\n'.join(lines)
     text = re.sub(r'(brushDef\n\{\n(?:[^\n]+\n)+?)(\})', r'\1}\n\2', text)
-    # Hookrunner treats these two decorative portal models as static geometry.
+    # Boltrunner treats these two decorative portal models as static geometry.
     return text.replace('"classname" "misc_gamemodel"', '"classname" "misc_model"') + '\n'
 
 

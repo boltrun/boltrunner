@@ -7,7 +7,7 @@ use bevy::{
     prelude::*,
     render::render_resource::{TextureFormat, TextureViewDescriptor, TextureViewDimension},
 };
-use hookrunner_shared::level::{self, BinaryReader};
+use boltrunner_shared::level::{self, BinaryReader};
 
 #[derive(Resource)]
 pub struct MapTextures {
@@ -240,8 +240,8 @@ pub fn finish_loading(
 }
 
 pub fn tune_lighting(
-    settings: Res<hookrunner_client::tuning::TuningClient>,
-    mut previous: Local<Option<hookrunner_shared::tuning::PresentationTuning>>,
+    settings: Res<boltrunner_client::tuning::TuningClient>,
+    mut previous: Local<Option<boltrunner_shared::tuning::PresentationTuning>>,
     mut materials: ResMut<Assets<BakedMaterial>>,
     mut ambient: ResMut<GlobalAmbientLight>,
 ) {

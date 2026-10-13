@@ -1,6 +1,6 @@
 use crate::NetworkStats;
 use bevy::prelude::*;
-use hookrunner_shared::{PlayerState, TICK_DURATION};
+use boltrunner_shared::{PlayerState, TICK_DURATION};
 use lightyear::{
     interpolation::{
         interpolation_history::ConfirmedHistory,
@@ -30,7 +30,7 @@ impl Plugin for TimingPlugin {
                 Update,
                 (
                     trim_history::<PlayerState>,
-                    trim_history::<hookrunner_shared::weapon::Projectile>,
+                    trim_history::<boltrunner_shared::weapon::Projectile>,
                 )
                     .after(InterpolationSystems::Prepare)
                     .before(InterpolationSystems::Interpolate),

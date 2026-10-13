@@ -1,7 +1,7 @@
 //! Screen-space labels projected from the replicated player positions.
 use bevy::{prelude::*, transform::TransformSystems, window::PrimaryWindow};
-use hookrunner_client::Session;
-use hookrunner_shared::{
+use boltrunner_client::Session;
+use boltrunner_shared::{
     PlayerId, PlayerState, level, player_color::PlayerColor, protocol::PlayerName,
 };
 use lightyear::prelude::Predicted;
@@ -25,7 +25,7 @@ struct HealthText {
 #[derive(Component)]
 struct HealthBar(Entity);
 
-fn plate_scale(distance: f32, tuning: hookrunner_shared::tuning::PresentationTuning) -> f32 {
+fn plate_scale(distance: f32, tuning: boltrunner_shared::tuning::PresentationTuning) -> f32 {
     (tuning.nameplate_reference_distance / distance.max(f32::EPSILON))
         .max(tuning.nameplate_min_scale)
 }
@@ -38,7 +38,7 @@ fn plate_top(anchor_y: f32, scale: f32) -> f32 {
 fn sync(
     mut commands: Commands,
     session: Res<Session>,
-    settings: Res<hookrunner_client::tuning::TuningClient>,
+    settings: Res<boltrunner_client::tuning::TuningClient>,
     time: Res<Time<Real>>,
     mut visibility: Local<HashMap<Entity, bool>>,
     mut elapsed: Local<f32>,

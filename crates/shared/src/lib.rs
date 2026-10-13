@@ -14,7 +14,7 @@ pub mod weapon;
 pub use protocol::{PlayerId, PlayerInput, PlayerState, ProtocolPlugin};
 
 /// Exact shared simulation/map fingerprint, checked before WebSocket upgrade.
-pub const SIMULATION_BUILD: &str = env!("HOOKRUNNER_SIMULATION_BUILD");
+pub const SIMULATION_BUILD: &str = env!("BOLTRUNNER_SIMULATION_BUILD");
 
 pub const TICK_HZ: f64 = 120.0;
 pub const TICK_DURATION: std::time::Duration =

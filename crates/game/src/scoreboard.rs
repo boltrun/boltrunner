@@ -1,7 +1,7 @@
 //! Match presentation lives in Bevy on both platforms.
 use bevy::{input::mouse::MouseWheel, prelude::*, window::PrimaryWindow};
-use hookrunner_client::Session;
-use hookrunner_shared::{PlayerId, match_state::MatchState, player_color::PlayerColor};
+use boltrunner_client::Session;
+use boltrunner_shared::{PlayerId, match_state::MatchState, player_color::PlayerColor};
 use lightyear::prelude::Predicted;
 
 pub struct ScoreboardPlugin;

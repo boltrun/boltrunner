@@ -9,7 +9,7 @@ function watchBuild({ build, onCurrent, onReload, onError }) {
     try {
       const response = await fetch('./build.json', {
         cache: 'no-store',
-        headers: { 'X-Hookrunner-Build': build },
+        headers: { 'X-Boltrunner-Build': build },
       });
       if (!response.ok) throw new Error('The current game build is unavailable. Retrying…');
       const latest = (await response.json()).build;

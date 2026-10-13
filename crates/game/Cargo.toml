@@ -1,12 +1,12 @@
 [package]
-name = "hookrunner-game"
+name = "boltrunner-game"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 
 [[bin]]
-name = "hookrunner"
+name = "boltrunner"
 path = "src/main.rs"
 
 [dependencies]
@@ -17,8 +17,8 @@ bevy = { workspace = true, features = [
     "default_font", "png", "bevy_gltf", "bevy_scene", "reflect_auto_register",
 ] }
 lightyear = { workspace = true, features = ["client"] }
-hookrunner-shared.workspace = true
-hookrunner-client.workspace = true
+boltrunner-shared.workspace = true
+boltrunner-client.workspace = true
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 bevy = { workspace = true, features = ["webgl2"] }

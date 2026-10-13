@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use hookrunner_shared::{
+use boltrunner_shared::{
     PlayerId, PlayerInput, PlayerState, TICK_DURATION, health, level,
     weapon::{self, Impact, Projectile, ShotImpact},
 };
@@ -25,8 +25,8 @@ pub fn advance_projectiles(
     timeline: Res<LocalTimeline>,
     history: Res<crate::history::PlayerHistory>,
     mut clients: Query<&mut MessageSender<ShotImpact>, With<Connected>>,
-    mut round: ResMut<hookrunner_shared::match_state::MatchState>,
-    settings: Res<hookrunner_shared::tuning::FeatureSettings>,
+    mut round: ResMut<boltrunner_shared::match_state::MatchState>,
+    settings: Res<boltrunner_shared::tuning::FeatureSettings>,
     mut players: Query<(&PlayerId, &mut PlayerState, &ActionState<PlayerInput>)>,
 ) {
     if round.results {
@@ -74,7 +74,7 @@ pub fn advance_projectiles(
                 victim: damaged,
             };
             for mut sender in &mut clients {
-                sender.send::<hookrunner_shared::protocol::LobbyChannel>(event.clone());
+                sender.send::<boltrunner_shared::protocol::LobbyChannel>(event.clone());
             }
             commands.entity(entity).despawn();
             continue;

@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use hookrunner_shared::{
+use boltrunner_shared::{
     PlayerId, PlayerState, level,
     match_state::MatchState,
     powerups::{Pickup, PickupKind},

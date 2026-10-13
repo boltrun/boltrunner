@@ -7,8 +7,8 @@ use bevy::{
     scene::SceneInstanceReady,
     transform::helper::TransformHelper,
 };
-use hookrunner_client::{PredictedShot, PredictedShots};
-use hookrunner_shared::{
+use boltrunner_client::{PredictedShot, PredictedShots};
+use boltrunner_shared::{
     PlayerId, PlayerState, level,
     weapon::{Projectile, ShotImpact},
 };
@@ -252,7 +252,7 @@ impl MuzzleView<'_, '_> {
 }
 
 fn detect_shots(
-    settings: Res<hookrunner_client::tuning::TuningClient>,
+    settings: Res<boltrunner_client::tuning::TuningClient>,
     mut feedback: ResMut<Feedback>,
     mut shots: ResMut<PredictedShots>,
     time: Res<Time<Real>>,
@@ -302,8 +302,8 @@ fn local_shots(
     for shot in feedback.pending_shots.drain(..) {
         let mut bolt = shot.bolt;
         let age = ((timeline.tick() - shot.tick) as f32).max(0.0)
-            * hookrunner_shared::TICK_DURATION.as_secs_f32();
-        if age >= bolt.lifetime_ticks as f32 * hookrunner_shared::TICK_DURATION.as_secs_f32() {
+            * boltrunner_shared::TICK_DURATION.as_secs_f32();
+        if age >= bolt.lifetime_ticks as f32 * boltrunner_shared::TICK_DURATION.as_secs_f32() {
             continue;
         }
         let muzzle_offset = geometry.map_or(Vec3::ZERO, |(muzzle, _, _)| muzzle - bolt.origin);
@@ -348,7 +348,7 @@ fn attach_bolts(
 
 fn bolt_transform(
     bolt: &Projectile,
-    tuning: hookrunner_shared::tuning::PresentationTuning,
+    tuning: boltrunner_shared::tuning::PresentationTuning,
 ) -> Transform {
     let distance = bolt.position.distance(bolt.origin);
     let length = distance.clamp(0.02, tuning.beam_length);
@@ -358,7 +358,7 @@ fn bolt_transform(
 }
 
 fn receive_impacts(
-    settings: Res<hookrunner_client::tuning::TuningClient>,
+    settings: Res<boltrunner_client::tuning::TuningClient>,
     mut commands: Commands,
     time: Res<Time<Real>>,
     assets: Res<WeaponAssets>,
@@ -423,7 +423,7 @@ fn reconcile_bolts(
             continue;
         }
         let lead = ((timeline.tick() - tick.tick) as f32).clamp(0.0, 30.0)
-            * hookrunner_shared::TICK_DURATION.as_secs_f32();
+            * boltrunner_shared::TICK_DURATION.as_secs_f32();
         let position = confirmed.0.position + confirmed.0.direction * confirmed.0.speed * lead;
         let difference = local.bolt.position - position;
         local.correction = if difference.length() < 3.0 {
@@ -437,14 +437,14 @@ fn reconcile_bolts(
             .bolt
             .lifetime_ticks
             .saturating_sub(local.bolt.remaining_ticks)) as f32
-            * hookrunner_shared::TICK_DURATION.as_secs_f32()
+            * boltrunner_shared::TICK_DURATION.as_secs_f32()
             + lead;
         local.confirmed_tick = Some(tick.tick);
     }
 }
 
 fn advance_local_bolts(
-    settings: Res<hookrunner_client::tuning::TuningClient>,
+    settings: Res<boltrunner_client::tuning::TuningClient>,
     mut commands: Commands,
     time: Res<Time>,
     mut bolts: Query<(Entity, &mut LocalBolt, &mut Transform)>,
@@ -464,7 +464,7 @@ fn advance_local_bolts(
         local.age += time.delta_secs();
         local.correction *= (-35.0 * time.delta_secs()).exp();
         if local.age
-            >= local.bolt.lifetime_ticks as f32 * hookrunner_shared::TICK_DURATION.as_secs_f32()
+            >= local.bolt.lifetime_ticks as f32 * boltrunner_shared::TICK_DURATION.as_secs_f32()
         {
             commands.entity(entity).despawn();
             continue;
@@ -493,7 +493,7 @@ fn hit_feedback(
 }
 
 fn sync_bolts(
-    settings: Res<hookrunner_client::tuning::TuningClient>,
+    settings: Res<boltrunner_client::tuning::TuningClient>,
     feedback: Res<Feedback>,
     mut bolts: Query<(&Projectile, &mut Transform, &mut Visibility), With<BoltVisual>>,
 ) {
@@ -517,7 +517,7 @@ fn sync_bolts(
 }
 
 fn animate_weapon(
-    settings: Res<hookrunner_client::tuning::TuningClient>,
+    settings: Res<boltrunner_client::tuning::TuningClient>,
     mut camera: Single<(&mut Projection, &mut AmbientLight), With<WeaponCamera>>,
     time: Res<Time>,
     mut feedback: ResMut<Feedback>,
@@ -570,7 +570,7 @@ fn spawn_impact(
     assets: &WeaponAssets,
     position: Vec3,
     normal: Vec3,
-    tuning: hookrunner_shared::tuning::PresentationTuning,
+    tuning: boltrunner_shared::tuning::PresentationTuning,
 ) {
     let rotation = Quat::from_rotation_arc(Vec3::Z, normal);
     commands
@@ -607,7 +607,7 @@ fn spawn_impact(
 }
 
 fn fade_impacts(
-    settings: Res<hookrunner_client::tuning::TuningClient>,
+    settings: Res<boltrunner_client::tuning::TuningClient>,
     mut commands: Commands,
     time: Res<Time>,
     mut impacts: Query<(Entity, &mut ImpactFlash, &Children)>,

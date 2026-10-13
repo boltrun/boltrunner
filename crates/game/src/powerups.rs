@@ -1,5 +1,5 @@
 use bevy::{light::NotShadowCaster, prelude::*};
-use hookrunner_shared::powerups::{Pickup, PickupKind};
+use boltrunner_shared::powerups::{Pickup, PickupKind};
 
 pub struct PowerupVisualsPlugin;
 

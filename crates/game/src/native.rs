@@ -2,11 +2,11 @@ use bevy::{
     prelude::*,
     window::{CursorGrabMode, CursorOptions, PresentMode, PrimaryWindow, WindowResolution},
 };
-use hookrunner_client::ServerUrl;
+use boltrunner_client::ServerUrl;
 
-const HELP: &str = "Hookrunner native client
+const HELP: &str = "Boltrunner native client
 
-Usage: hookrunner [OPTIONS]
+Usage: boltrunner [OPTIONS]
   --server URL       WebSocket server (default ws://127.0.0.1:5000)
   --width PIXELS     Requested physical window width (default 1280)
   --height PIXELS    Requested physical window height (default 720)
@@ -86,7 +86,7 @@ pub fn configure(app: &mut App) {
                 })
                 .set(WindowPlugin {
                     primary_window: Some(Window {
-                        title: "Hookrunner — native".into(),
+                        title: "Boltrunner — native".into(),
                         resolution: WindowResolution::new(options.width, options.height)
                             .with_scale_factor_override(1.0),
                         present_mode: if options.uncapped {
@@ -109,7 +109,7 @@ pub fn configure(app: &mut App) {
 }
 
 fn capture_pointer(
-    session: Res<hookrunner_client::Session>,
+    session: Res<boltrunner_client::Session>,
     settings: Res<crate::debug_menu::DebugMenu>,
     buttons: Res<ButtonInput<MouseButton>>,
     keys: Res<ButtonInput<KeyCode>>,

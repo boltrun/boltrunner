@@ -47,7 +47,7 @@ func env(name, fallback string) string {
 func loadConfig() (config, error) {
 	c := config{
 		listen: env("PREVIEW_LISTEN", ":8080"), ip: os.Getenv("PREVIEW_IP"),
-		token: os.Getenv("PREVIEW_TOKEN"), repository: env("PREVIEW_REPOSITORY", "hookrunner/hookrunner"),
+		token: os.Getenv("PREVIEW_TOKEN"), repository: env("PREVIEW_REPOSITORY", "boltrun/boltrunner"),
 		githubToken: os.Getenv("PREVIEW_GITHUB_TOKEN"), data: env("PREVIEW_DATA", "local/previews"),
 	}
 	if net.ParseIP(c.ip) == nil {

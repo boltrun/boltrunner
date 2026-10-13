@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use hookrunner_shared::{
+use boltrunner_shared::{
     PlayerId, PlayerInput, PlayerState,
     match_state::{MatchState, ScoreRow},
     movement,
@@ -20,11 +20,11 @@ impl Default for MatchClock {
     fn default() -> Self {
         Self {
             remaining: Duration::from_secs_f32(
-                hookrunner_shared::tuning::MatchTuning::default().match_duration,
+                boltrunner_shared::tuning::MatchTuning::default().match_duration,
             ),
             feed_fraction: Duration::ZERO,
             phase_duration: Duration::from_secs_f32(
-                hookrunner_shared::tuning::MatchTuning::default().match_duration,
+                boltrunner_shared::tuning::MatchTuning::default().match_duration,
             ),
         }
     }
@@ -43,7 +43,7 @@ pub fn advance(
     time: Res<Time<Real>>,
     mut clock: ResMut<MatchClock>,
     mut round: ResMut<MatchState>,
-    settings: Res<hookrunner_shared::tuning::FeatureSettings>,
+    settings: Res<boltrunner_shared::tuning::FeatureSettings>,
     mut players: Query<(
         &PlayerId,
         &PlayerName,
