@@ -47,11 +47,14 @@ asset_directories = {
     **{f"{m['id']}/built/textures": pathlib.Path('assets') / m['id'] / 'built/textures' for m in registry['maps']},
     'shaders': pathlib.Path('assets/shaders'),
     'fonts': pathlib.Path('assets/fonts'),
+    'characters': pathlib.Path('assets/characters'),
     'weapons/starter_pistol/built': pathlib.Path('assets/weapons/starter_pistol/built'),
 }
 for name, directory in asset_directories.items():
-    for path in sorted(directory.iterdir()):
-        digest.update(f'{name}/{path.name}'.encode())
+    for path in sorted(directory.rglob('*')):
+        if not path.is_file():
+            continue
+        digest.update(f'{name}/{path.relative_to(directory)}'.encode())
         digest.update(hashlib.sha256(path.read_bytes()).digest())
 version = digest.hexdigest()[:16]
 destination = pathlib.Path('dist/pkg') / version

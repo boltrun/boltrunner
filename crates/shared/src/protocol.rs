@@ -14,6 +14,7 @@ pub struct JoinRequest {
     pub map_revision: u64,
     pub nickname: String,
     pub color: u8,
+    pub character: String,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
@@ -243,6 +244,14 @@ impl Plugin for ProtocolPlugin {
             .add_direction(NetworkDirection::ClientToServer);
         app.register_message::<JoinRejected>()
             .add_direction(NetworkDirection::ServerToClient);
+        app.register_message::<crate::characters::ChangeCharacter>()
+            .add_direction(NetworkDirection::ClientToServer);
+        app.register_message::<crate::characters::CharacterReply>()
+            .add_direction(NetworkDirection::ServerToClient);
+        app.component::<crate::characters::CharacterCatalog>()
+            .replicate();
+        app.component::<crate::characters::PlayerCharacter>()
+            .replicate();
         app.register_message::<crate::tuning::EditRequest>()
             .add_direction(NetworkDirection::ClientToServer);
         app.register_message::<crate::tuning::EditReply>()
@@ -253,6 +262,8 @@ impl Plugin for ProtocolPlugin {
             .replicate();
         app.component::<PlayerName>().replicate();
         app.component::<crate::player_color::PlayerColor>()
+            .replicate();
+        app.component::<crate::equipment::PlayerEquipment>()
             .replicate();
         app.component::<PlayerId>().replicate();
         app.component::<crate::weapon::Projectile>()
