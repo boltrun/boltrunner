@@ -60,6 +60,12 @@ pub fn set_debug_menu(open: bool) {
     );
     if open && let Some(document) = web_sys::window().and_then(|window| window.document()) {
         document.exit_pointer_lock();
+    } else if !open && let Some(document) = web_sys::window().and_then(|window| window.document()) {
+        if let Some(canvas) = document.get_element_by_id("game") {
+            if canvas.get_attribute("data-playing").as_deref() == Some("true") {
+                canvas.request_pointer_lock();
+            }
+        }
     }
 }
 

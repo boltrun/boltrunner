@@ -62,7 +62,6 @@ impl MatchState {
             .map(|r| (r.nickname.clone(), r.color))
         {
             let killer = killer
-                .filter(|id| *id != victim)
                 .and_then(|id| self.rows.iter().find(|r| r.id == id))
                 .map(|r| (r.nickname.clone(), r.color));
             self.kill_feed.push(KillEntry {
