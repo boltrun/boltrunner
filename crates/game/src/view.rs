@@ -49,6 +49,7 @@ impl Plugin for ViewPlugin {
                     update_hud,
                 )
                     .chain()
+                    .after(boltrunner_client::update_session)
                     .after(InterpolationSystems::Interpolate)
                     .after(NetworkPresentation),
             );
@@ -64,7 +65,7 @@ pub(crate) struct Look {
     jump_press: u16,
 }
 #[derive(Component)]
-struct PlayerVisual;
+pub(crate) struct PlayerVisual;
 #[derive(Component)]
 struct BodyShape {
     radius: f32,
@@ -160,6 +161,7 @@ fn attach_visuals(
         });
         commands.entity(entity).with_children(|parent| {
             parent.spawn((
+                crate::characters::FallbackCharacter,
                 Mesh3d(meshes.add(Capsule3d::new(
                     state.tuning.player_radius,
                     state.tuning.player_height - 2.0 * state.tuning.player_radius,
@@ -172,6 +174,7 @@ fn attach_visuals(
                 Transform::from_xyz(0.0, state.tuning.player_height / 2.0, 0.0),
             ));
             parent.spawn((
+                crate::characters::FallbackCharacter,
                 Mesh3d(meshes.add(Cuboid::new(0.55, 0.18, 0.16))),
                 Visor,
                 MeshMaterial3d(visor),
@@ -186,6 +189,7 @@ pub(crate) fn look_input(
     settings: Res<boltrunner_client::tuning::TuningClient>,
     menu: Res<crate::debug_menu::DebugMenu>,
     maps: Res<crate::map_menu::MapMenu>,
+    characters: Res<crate::character_menu::CharacterMenu>,
     session: Res<Session>,
     motion: Res<AccumulatedMouseMotion>,
     keys: Res<ButtonInput<KeyCode>>,
@@ -195,6 +199,7 @@ pub(crate) fn look_input(
     look.locked = session.is_playing()
         && !menu.open
         && !maps.open
+        && !characters.open
         && !local.iter().any(|p| p.match_paused)
         && window.0.focused
         && crate::platform::pointer_locked(window.1);
@@ -280,6 +285,7 @@ fn follow_camera(
     settings: Res<boltrunner_client::tuning::TuningClient>,
     look: Res<Look>,
     menu: Res<crate::debug_menu::DebugMenu>,
+    characters: Res<crate::character_menu::CharacterMenu>,
     mut local: Query<
         (&PlayerState, Option<&PresentationPosition>, &mut Visibility),
         With<Predicted>,
@@ -348,7 +354,7 @@ fn follow_camera(
             return;
         }
         *body = Visibility::Hidden;
-        crosshair.display = if menu.open {
+        crosshair.display = if menu.open || characters.open {
             Display::None
         } else {
             Display::Flex

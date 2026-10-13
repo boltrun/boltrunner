@@ -1,0 +1,113 @@
+Type Tda Hatsune Miku V4X Ver1.00
+Original creator: Tda. Adaptation: Boltrunner.
+Original model terms retained from https://mmd.gg/db/model/hatsune-miku-v4x/
+
+◆◇—　Tda式初音ミク V4X　Ver1.00　—◇◆
+
+◆解説
+初音ミク V4XのMikuMikuDance（MMD）用モデルデータです。
+PMXですので対応したバージョンをお使いください。（ver9.26.で動作確認しています）
+
+・内容物
+◇Tda式初音ミク V4X　Ver1.00.pmx
+
+・AutoLuminousを使用しない場合はモーフ「AL未使用」を１にして使用してください。
+（ALに対応するため材質の色がAL用になっているので）
+詳しくは「AL注意点.jpg」を参照してください。
+
+・下記のMMEの適用方法に書いてあるエフェクトの使用を推奨です。
+・髪などに半透明を使っているのでMMDでの描画順にご注意ください。透過された先の背景やキャラ等が見えなくなる可能性があります。
+
+・顔にはシェーディングが入らない設定になっているのでシェーディング入れたい場合は肌と同じトゥーン設定をしたうえで
+顔に嫌な影が入らないようにライティングに気を付けて使ってください。
+
+・モーフ「恐ろしい子！」を50％くらいにすると「ｺｯﾁﾐﾝﾅ」目を再現できます。
+
+・モーフ「瞳縦潰れ」は瞬き等のまぶたを閉じる際にあわせて使うと作画のような柔らかさを再現できます。
+
+・モーフ「あ２」は他の口を縦に大きく開けるのに使うと相性が良いと思われます。
+
+・モーフ「ハンサム」を0.1～0.2くらいにすると少し大人になった感じになるかもしれません。
+◆MMDで読み込む～MMEの適用方法
+1.MMDをインストールします。
+入手先　VPVP（http://www.geocities.jp/higuchuu4/）
+「1.3　MikuMikuDance（DirectX9 Ver）」をDL・インストールします。
+2.MMEをインストールします。
+入手先　http://www.nicovideo.jp/watch/sm12149815
+中に入っている「MMEffect.txt」の「●インストール方法」に従いインストールして下さい。
+3.MMDを起動しモデルを読み込みます。MMDのウィンドウにドラッグ＆ドロップで大丈夫です。
+4.エフェクトファイルを読み込みます。
+例としてブログ等に上げていた画像で使ったエフェクトを適用します。
+・AutoLuminous　そぼろ様
+http://www.nicovideo.jp/watch/sm16087751
+・Diffusion7　そぼろ様
+http://www.nicovideo.jp/watch/sm12182051
+・SSAO　mqdl様
+http://www.nicovideo.jp/watch/sm13796840
+以上のエフェクトをDLします。
+この組み合わせで出る色を想定して調整してあるので使用を推奨します。Diffusion7は少し弱めで。
+「AutoLuminous.x」「SSAO.x」「Diffusion.x」を読み込みます。MMDのウィンドウにドラッグ＆ドロップで大丈夫です。
+5.好きなように眺めたり動かしたりモーションを流し込んだりして下さい。
+MMDが動かないという場合や更に詳しく知りたい方はVPVPwikiをご覧下さい。
+http://www6.atwiki.jp/vpvpwiki/
+◆利用規約・免責
+・この作品はピアプロ・キャラクター・ライセンス（http://piapro.jp/license/pcl/summary）に基づいて
+クリプトン・フューチャー・メディア株式会社のキャラクター「初音ミク V4X」を描いたものです。
+・このデータを使用する際は上記キャラクター利用のガイドラインとこの利用規約の両方に沿ってお使いください。
+・利用規約の内容に納得出来ない、守れない場合はこのデータを使用しないで下さい。
+・このデータを使用したことにより何らかのトラブルが発生した場合でも、当方は一切の責任を負いません。
+・利用規約に更新があった場合は常に最新の内容が優先して適用されます。
+・商用利用に関しては版権元であるクリプトン・フューチャー・メディア株式会社様から許可が出るものに関してのみお受けしております。
+・動画・静画等への利用を目的とした改造・改変は問題ありません。
+改造する際は以下を守って下さい。以下を守っている限り私に報告や許可を取らずに改造・改変とそのモデルの配布が可能です。
+1.「Tda式モデル」としての改造である事
+2.配布する場合はreadmeを同梱し、改造元（初音ミク V4X）と作者（Tda）、改造した人を明記する
+禁止事項
+1.改造していないデータの再配布（トレード含む）
+2.Tda式以外の別モデルを作るためにモデルの一部を移植したり素材として使用する
+（例・ツインテールを別のモデルに移植する・服を別のモデルに移植する　等）
+動画や画像のネタやストーリー等を表現するために必要な場合のみ改造可能ですがそのデータを配布することは禁止
+3.パーツ移植を禁止しているモデルからパーツを移植する等の他の人に迷惑をかけるような改造や使用
+4.R-18作品での使用
+5.金銭が発生するような使用(クリプトン・フューチャー・メディアの許可を得れば大丈夫です)
+◆謝辞
+MMD・PMDE・MME・プラグイン等各種ツールを公開してくださっている作者様
+助言や不具合の報告等をして頂いている皆様
+物理演算対応のCSVやパッチを配布して頂いた皆様
+静画や動画等を作ってくれている皆様
+このモデルを作るにあたってお世話になった皆様に感謝し御礼申し上げます。
+また、公認をくださったクリプトン・フューチャー・メディア株式会社様に感謝します。
+
+◆更新履歴
+2017.04.01　Ver1.00
+こっそり誤字修正
+2017.08.31　Ver1.00
+正式公開
+
+◆制作者
+Tda〖http://u16hp.blog134.fc2.com/〗
+
+◆問い合わせ窓口
+ナルパジン〖 〗
+Reminder: This summary English translation is for reference. Should any conflicts arise, the original Japanese Terms of Service shall take precedence over English Terms of Service.
+For more details, refer to the original Japanese text.
+◆ Terms of Service and Disclaimer
+・The overall design of this 3DCG model is based on the character Hatsune Miku V4X of Crypton Future Media Inc. This model is created under Piapro Character License.
+Here is Piapro Character License. http://piapro.jp/license/pcl/summary
+・Use this model within the limit of Piapro Character License and this Terms of Service.
+・You may not use this model if you don’t agree to Piapro Character License and this Terms of Service.
+・Tda shall not be responsible for any damage and loss caused or alleged to be caused by or in connection with using this model.
+・The latest version shall take precedence if this Terms of Service is revised.
+・When using this model for commercial purposes, you shall obtain prior permission from Crypton Future Media Inc., the copyright holder of Hatsune Miku, and then contact Tda.
+・Editing this model for your videos and pictures is allowed within the limit of the conditions below. You don’t have to obtain prior permission from Tda.
+1. Do not ruin the feature and image of Tda style. The edited model(s) shall be clearly recognized as Tda-styled model(s).
+2. When distributing edited model(s), attach both the original Japanese Terms of Service and this English Terms of Service, credit the original name of this model Type Tda Hatsune Miku V4X, the original creator Tda and editor(s).
+Prohibitions
+1. Redistributing the unprocessed original model. Trading the original model is also forbidden.
+2. Editing this model into naked or base model(s).
+3. Removing any part(s) of this model, regardless of in the original form or edited form, and attaching it/them to other model(s) to create and/or edit the model(s) that is/are not Tda-styled. (e.g. attaching Tda Miku’s pigtail(s) and/or clothes to other model(s).)
+The only exception is the minimum edit for a video or a picture in which Tda Hatsune Miku V4X plays the main role, but distributing the edited model(s) under this exception is forbidden.
+4. Removing any part(s) from non-editable model(s) and attaching it/them to this model.
+5. Any edit that violates public moral and orders (e.g. NC-17/X-rated expression)
+Modeling: Tda
+Contact:  Revised on August 31, 2017.

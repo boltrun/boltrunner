@@ -1,0 +1,10 @@
+{
+  "source": "https://github.com/davidkbd/RelightedEngine/tree/29920b24e4268175dad77f66bba63466ec96eef0/Engine/Characters/Sonic",
+  "author": "davidkbd · Sonic © SEGA",
+  "license": "MIT repository; character belongs to SEGA",
+  "original_sha256": "22c47812554ae506ebdf010480fec24c85e060de53de0fc229c809e2e4cdecb3",
+  "original_vrm_metadata": null,
+  "stripped_morphs": false,
+  "alpha_materials": [],
+  "texture_sha256": "29ebc89ac54c0ed8d6c0c200659f506d9bf5b5bfab113d8982718390d3d19e87"
+}

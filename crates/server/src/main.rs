@@ -1,5 +1,7 @@
 mod build_check;
+mod characters;
 mod combat;
+mod equipment;
 mod history;
 mod loading;
 mod maps;
@@ -49,7 +51,9 @@ fn main() {
             tick_duration: TICK_DURATION,
         })
         .add_plugins(ProtocolPlugin)
+        .add_plugins(equipment::EquipmentPlugin)
         .add_plugins(tuning::TuningPlugin)
+        .add_plugins(characters::CharactersPlugin)
         .add_plugins(loading::LoadingPlugin)
         .add_plugins(maps::MapsPlugin)
         .insert_resource(BindAddress(address))
@@ -134,6 +138,7 @@ fn spawn_players(
     players: Query<(&PlayerState, &PlayerColor)>,
     round: Res<boltrunner_shared::match_state::MatchState>,
     settings: Res<boltrunner_shared::tuning::FeatureSettings>,
+    catalog: Res<boltrunner_shared::characters::CharacterCatalog>,
     mut commands: Commands,
 ) {
     let mut occupied = Vec::new();
@@ -151,6 +156,12 @@ fn spawn_players(
             if request.map != round.map || request.map_revision != round.map_revision {
                 replies.send::<LobbyChannel>(JoinRejected {
                     reason: "The server map changed. Reconnect before joining.".into(),
+                });
+                continue;
+            }
+            if !catalog.accepts(&request.character) {
+                replies.send::<LobbyChannel>(JoinRejected {
+                    reason: "Choose an available character.".into(),
                 });
                 continue;
             }
@@ -194,6 +205,8 @@ fn spawn_players(
             commands.spawn((
                 PlayerId(id),
                 PlayerName(name.clone()),
+                boltrunner_shared::equipment::PlayerEquipment::default(),
+                boltrunner_shared::characters::PlayerCharacter(request.character),
                 color,
                 PlayerState {
                     tuning: settings.values.simulation,
