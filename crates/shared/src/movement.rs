@@ -12,6 +12,7 @@ pub fn step(state: &mut PlayerState, input: &PlayerInput) {
         .air_jumps_remaining
         .min(state.tuning.air_jumps as u8);
     if state.match_paused {
+        state.weapon.last_reload_press = input.reload_press;
         state.jump.last_press = input.jump_press;
         state.dash.last_press = input.dash_press;
         return;
@@ -28,7 +29,20 @@ pub fn step(state: &mut PlayerState, input: &PlayerInput) {
         return;
     }
     let previous = state.position;
-    step_in_world(level::world(), state, input);
+    if state.drone.is_some_and(|drone| drone.controlling) {
+        // Flight controls must not also trigger jumps or dashes on the exposed body.
+        state.jump.last_press = input.jump_press;
+        state.dash.last_press = input.dash_press;
+        let body_input = PlayerInput {
+            yaw: PlayerInput::encode_yaw(state.yaw - state.view_yaw_offset),
+            jump_press: input.jump_press,
+            dash_press: input.dash_press,
+            ..default()
+        };
+        step_in_world(level::world(), state, &body_input);
+    } else {
+        step_in_world(level::world(), state, input);
+    }
     apply_map_triggers(state, input, previous);
     crate::weapon::step(state, input);
 }
@@ -50,6 +64,19 @@ pub fn kill(state: &mut PlayerState, pitch: f32) {
     state.dash.remaining_ticks = 0;
     state.speed_ticks = 0;
     state.rapid_fire_ticks = 0;
+    if let Some(drone) = &mut state.drone {
+        drone.controlling = false;
+        drone.velocity = Vec3::ZERO;
+        drone.previous_position = drone.position;
+        drone.detonate = true;
+    }
+    state.weapon.slots = [None; 2];
+    state.weapon.reload_ticks = 0;
+    state.weapon.reload_total_ticks = 0;
+    state.weapon.firing = false;
+    state.weapon.charge_ticks = 0;
+    state.burn_ticks = 0;
+    state.burn_owner = None;
 }
 
 pub fn respawn(state: &mut PlayerState, input: &PlayerInput) {
@@ -73,7 +100,11 @@ pub fn respawn(state: &mut PlayerState, input: &PlayerInput) {
         },
         weapon: crate::weapon::WeaponState {
             shot: state.weapon.shot,
-            ..default()
+            last_slot_press: input.slot_press,
+            last_dev_press: input.dev_weapon_press,
+            last_fire_press: input.fire_press,
+            last_reload_press: input.reload_press,
+            ..crate::weapon::WeaponState::new(state.tuning)
         },
         grounded: true,
         ..default()

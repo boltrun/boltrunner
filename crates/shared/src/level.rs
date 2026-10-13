@@ -300,6 +300,11 @@ impl CollisionWorld {
 
     /// Continuous collision for cameras and small, fast energy projectiles.
     pub fn sweep_sphere(&self, origin: Vec3, delta: Vec3, radius: f32) -> Option<f32> {
+        self.sweep_sphere_hit(origin, delta, radius)
+            .map(|hit| hit.fraction)
+    }
+
+    pub fn sweep_sphere_hit(&self, origin: Vec3, delta: Vec3, radius: f32) -> Option<Hit> {
         cast_shapes(
             &Isometry3::identity(),
             &Vector3::zeros(),
@@ -314,7 +319,10 @@ impl CollisionWorld {
             },
         )
         .expect("triangle mesh/sphere shape cast is supported")
-        .map(|hit| hit.time_of_impact)
+        .map(|hit| Hit {
+            fraction: hit.time_of_impact,
+            normal: Vec3::new(hit.normal1.x, hit.normal1.y, hit.normal1.z),
+        })
     }
 
     pub fn new(vertices: Vec<Point3<f32>>, indices: Vec<[u32; 3]>) -> Self {
