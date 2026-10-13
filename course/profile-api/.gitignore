@@ -1,0 +1,5 @@
+/target/
+/local/
+/log/
+/data/
+.env
