@@ -1,3 +1,4 @@
+mod bots;
 mod build_check;
 mod combat;
 mod history;
@@ -52,6 +53,7 @@ fn main() {
         .add_plugins(tuning::TuningPlugin)
         .add_plugins(loading::LoadingPlugin)
         .add_plugins(maps::MapsPlugin)
+        .add_plugins(bots::BotsPlugin)
         .insert_resource(BindAddress(address))
         .init_resource::<boltrunner_shared::match_state::MatchState>()
         .init_resource::<matches::MatchClock>()
@@ -76,7 +78,14 @@ fn main() {
         )
         .add_systems(
             PostUpdate,
-            (combat::publish_projectiles, matches::publish).before(ReplicationSystems::Send),
+            matches::publish.before(ReplicationSystems::Send),
+        )
+        .add_systems(
+            PostUpdate,
+            (combat::publish_projectiles, combat::expose_projectiles)
+                .chain()
+                .after(ReplicationBufferSystems::BeforeBuffer)
+                .before(ReplicationBufferSystems::Buffer),
         )
         .run();
 }
@@ -131,14 +140,23 @@ fn spawn_players(
         ),
         (With<ClientOf>, With<Connected>),
     >,
-    players: Query<(&PlayerState, &PlayerColor)>,
+    players: Query<(
+        Entity,
+        &PlayerState,
+        &PlayerColor,
+        Has<boltrunner_shared::protocol::BotPlayer>,
+    )>,
     round: Res<boltrunner_shared::match_state::MatchState>,
     settings: Res<boltrunner_shared::tuning::FeatureSettings>,
     mut commands: Commands,
 ) {
     let mut occupied = Vec::new();
     let mut occupied_colors = [false; PALETTE.len()];
-    for (state, color) in &players {
+    let mut replaceable = [None; PALETTE.len()];
+    for (entity, state, color, bot) in &players {
+        if bot {
+            replaceable[color.0 as usize] = Some(entity);
+        }
         occupied.push(state.position);
         occupied_colors[color.0 as usize] = true;
     }
@@ -169,17 +187,52 @@ fn spawn_players(
                 });
                 continue;
             };
-            if occupied_colors[color.0 as usize] {
+            let humans = occupied_colors
+                .iter()
+                .enumerate()
+                .filter(|(index, used)| **used && replaceable[*index].is_none())
+                .count();
+            if humans >= arena::MAX_PLAYERS || humans >= PALETTE.len() {
+                replies.send::<LobbyChannel>(JoinRejected {
+                    reason: "The server is full. Please try again later.".into(),
+                });
+                continue;
+            }
+            let color_index = color.0 as usize;
+            if occupied_colors[color_index] && replaceable[color_index].is_none() {
                 replies.send::<LobbyChannel>(JoinRejected {
                     reason: "This color is taken. Choose another.".into(),
                 });
                 continue;
             }
-            if occupied.len() >= arena::MAX_PLAYERS {
+            // Reserve a human's color and capacity before committing any removal.
+            // Prefer the bot of that color; if only capacity is exhausted, yield
+            // another bot instead. Humans are never evicted for a new join.
+            let replacement = if let Some(bot) = replaceable[color_index] {
+                Some((color_index, bot))
+            } else if occupied.len() >= arena::MAX_PLAYERS {
+                replaceable
+                    .iter()
+                    .enumerate()
+                    .find_map(|(index, bot)| bot.map(|bot| (index, bot)))
+            } else {
+                None
+            };
+            if occupied.len() >= arena::MAX_PLAYERS && replacement.is_none() {
                 replies.send::<LobbyChannel>(JoinRejected {
                     reason: "The server is full. Please try again later.".into(),
                 });
                 continue;
+            }
+            if let Some((index, bot)) = replacement {
+                replaceable[index] = None;
+                occupied_colors[index] = false;
+                commands.entity(bot).despawn();
+                if let Ok((_, state, _, _)) = players.get(bot) {
+                    if let Some(index) = occupied.iter().position(|p| *p == state.position) {
+                        occupied.swap_remove(index);
+                    }
+                }
             }
             let spawn_index = arena::choose_spawn(
                 rand::random::<u32>() as usize,
@@ -239,7 +292,7 @@ fn simulate(
         &PlayerId,
         &mut PlayerState,
         &ActionState<PlayerInput>,
-        &ControlledBy,
+        Option<&ControlledBy>,
     )>,
     links: Query<(
         &PingManager,
@@ -257,7 +310,7 @@ fn simulate(
         }
         if state.weapon.shot != previous_shot {
             let lag = links
-                .get(control.owner)
+                .get(control.map_or(Entity::PLACEHOLDER, |c| c.owner))
                 .ok()
                 .map_or(0.0, |(ping, delay)| history::validated_delay(ping, delay));
             commands.spawn((

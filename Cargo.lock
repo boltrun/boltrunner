@@ -1884,6 +1884,51 @@ dependencies = [
 ]
 
 [[package]]
+name = "boltrunner-client"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "boltrunner-shared",
+ "lightyear",
+ "url",
+]
+
+[[package]]
+name = "boltrunner-game"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "boltrunner-client",
+ "boltrunner-shared",
+ "lightyear",
+ "web-sys",
+]
+
+[[package]]
+name = "boltrunner-server"
+version = "0.1.0"
+dependencies = [
+ "aeronet_websocket",
+ "bevy",
+ "boltrunner-shared",
+ "lightyear",
+ "rand 0.9.5",
+ "url",
+]
+
+[[package]]
+name = "boltrunner-shared"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "lightyear",
+ "parry3d",
+ "serde",
+ "serde_json",
+ "sha2",
+]
+
+[[package]]
 name = "bumpalo"
 version = "3.20.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3436,51 +3481,6 @@ name = "hexf-parse"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dfa686283ad6dd069f105e5ab091b04c62850d3e4cf5d67debad1933f55023df"
-
-[[package]]
-name = "boltrunner-client"
-version = "0.1.0"
-dependencies = [
- "bevy",
- "boltrunner-shared",
- "lightyear",
- "url",
-]
-
-[[package]]
-name = "boltrunner-game"
-version = "0.1.0"
-dependencies = [
- "bevy",
- "boltrunner-client",
- "boltrunner-shared",
- "lightyear",
- "web-sys",
-]
-
-[[package]]
-name = "boltrunner-server"
-version = "0.1.0"
-dependencies = [
- "aeronet_websocket",
- "bevy",
- "boltrunner-shared",
- "lightyear",
- "rand 0.9.5",
- "url",
-]
-
-[[package]]
-name = "boltrunner-shared"
-version = "0.1.0"
-dependencies = [
- "bevy",
- "lightyear",
- "parry3d",
- "serde",
- "serde_json",
- "sha2",
-]
 
 [[package]]
 name = "httlib-huffman"

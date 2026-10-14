@@ -91,6 +91,13 @@ pub enum Category {
     PickupEffects,
     PickupSpawning,
     Match,
+    Bots,
+    BotPerception,
+    BotAim,
+    BotCombat,
+    BotNavigation,
+    BotLoot,
+
     Camera,
     DeathCamera,
     Presentation,
@@ -123,6 +130,12 @@ impl Category {
         Self::PickupEffects,
         Self::PickupSpawning,
         Self::Match,
+        Self::Bots,
+        Self::BotPerception,
+        Self::BotAim,
+        Self::BotCombat,
+        Self::BotNavigation,
+        Self::BotLoot,
         Self::Camera,
         Self::DeathCamera,
         Self::Presentation,
@@ -155,6 +168,13 @@ impl Category {
             Self::PickupEffects => "effects",
             Self::PickupSpawning => "spawning",
             Self::Match => "match",
+            Self::Bots => "bots",
+            Self::BotPerception => "perception",
+            Self::BotAim => "aim",
+            Self::BotCombat => "combat",
+            Self::BotNavigation => "navigation",
+            Self::BotLoot => "loot",
+
             Self::Camera => "camera",
             Self::DeathCamera => "death",
             Self::Presentation => "presentation",
@@ -188,6 +208,13 @@ impl Category {
             Self::PickupEffects => Some(Self::Powerups),
             Self::PickupSpawning => Some(Self::Powerups),
             Self::Match => None,
+            Self::Bots => Some(Self::Player),
+            Self::BotPerception => Some(Self::Bots),
+            Self::BotAim => Some(Self::Bots),
+            Self::BotCombat => Some(Self::Bots),
+            Self::BotNavigation => Some(Self::Bots),
+            Self::BotLoot => Some(Self::Bots),
+
             Self::Camera => None,
             Self::DeathCamera => Some(Self::Camera),
             Self::Presentation => None,
@@ -338,6 +365,53 @@ tuning_parameters! {
     PickupPlayerDistance => pickup_player_distance: f32 = 2.0, PickupSpawning, 0.0, 100.0, "units", "Minimum distance from players when a pickup appears.";
     PickupRadius => pickup_radius: f32 = 1.05, PickupSpawning, 0.0, 10.0, "units", "Player-center distance for collecting a pickup. Walls still block collection.";
  }
+ bots: BotTuning {
+    BotCount => bot_count: i64 = crate::player_color::PALETTE.len() as i64, Bots, 0.0, crate::player_color::PALETTE.len() as f64, "bots", "Requested server-controlled opponents. Defaults to filling every available place, limited by server capacity and free palette colors. Zero disables bots. Humans always take priority over bots for colors and places.";
+    BotReactionTime => bot_reaction_time: f32 = 0.49, BotPerception, 0.0, 5.0, "seconds", "Visible time required before firing at a newly acquired target. Evaluated at the decision interval.";
+    BotDetectionRange => bot_detection_range: f32 = 55.0, BotPerception, 0.0, 500.0, "units", "Maximum distance for detecting visible opponents. Walls always block detection.";
+    BotDetectionFov => bot_detection_fov: f32 = 197.25385, BotPerception, 0.0, 360.0, "degrees", "Full field of view centered on the current look direction. 360 detects opponents in every direction.";
+    BotTargetMemory => bot_target_memory: f32 = 3.0, BotPerception, 0.0, 30.0, "seconds", "Time after last sighting before reacquisition requires a fresh reaction delay. Does not reveal hidden positions.";
+    BotAimError => bot_aim_error: f32 = 1.776169, BotAim, 0.0, 45.0, "degrees", "Maximum horizontal and vertical aim oscillation. Zero removes deliberate error.";
+    BotTurnSpeed => bot_turn_speed: f32 = 158.13635, BotAim, 0.0, 1440.0, "degrees/s", "Maximum yaw and pitch tracking speed; zero stops turning.";
+    BotFireTolerance => bot_fire_tolerance: f32 = 4.583662, BotAim, 0.0, 90.0, "degrees", "Maximum remaining yaw and pitch aiming error at which firing is allowed.";
+    BotAimHeight => bot_aim_height: f32 = 0.65, BotAim, 0.0, 1.0, "fraction", "Aim point above target feet as a fraction of target capsule height.";
+    BotLeadFactor => bot_lead_factor: f32 = 0.65, BotAim, 0.0, 2.0, "multiplier", "Fraction of visible target velocity used to lead projectile shots.";
+    BotLeadTime => bot_lead_time: f32 = 0.4, BotAim, 0.0, 3.0, "seconds", "Maximum projectile flight time considered for leading the target.";
+    BotAimYawFrequency => bot_aim_yaw_frequency: f32 = 4.3, BotAim, 0.0, 30.0, "radians/s", "Horizontal oscillation speed of deliberate aiming error.";
+    BotAimPitchFrequency => bot_aim_pitch_frequency: f32 = 3.1, BotAim, 0.0, 30.0, "radians/s", "Vertical oscillation speed of deliberate aiming error.";
+    BotCombatDistance => bot_combat_distance: f32 = 14.0, BotCombat, 0.0, 100.0, "units", "Approach the opponent when farther away than this distance.";
+    BotRetreatDistance => bot_retreat_distance: f32 = 5.0, BotCombat, 0.0, 100.0, "units", "Back away when the opponent is nearer than this distance. Must not exceed combat_distance.";
+    BotStrafeWeight => bot_strafe_weight: f32 = 0.8, BotCombat, 0.0, 5.0, "weight", "Sideways movement weight before normalizing movement direction. Zero disables strafing.";
+    BotApproachWeight => bot_approach_weight: f32 = 0.6, BotCombat, 0.0, 5.0, "weight", "Weight of forward and retreat movement relative to strafing.";
+    BotStrafeInterval => bot_strafe_interval: f32 = 1.5, BotCombat, 0.05, 30.0, "seconds", "Time between alternating strafe directions, staggered between bots.";
+    BotEvasionInterval => bot_evasion_interval: f32 = 3.0, BotCombat, 0.0, 60.0, "seconds", "Minimum time between combat jump/dash attempts. Zero disables both.";
+    BotJumpChance => bot_jump_chance: f32 = 0.5, BotCombat, 0.0, 1.0, "probability", "Fraction of safe combat evasion attempts that jump instead of dashing. Zero always attempts dash; one always jumps.";
+    BotSafetyDistance => bot_safety_distance: f32 = 1.6, BotNavigation, 0.1, 10.0, "units", "Forward ground and obstruction probe length for combat steering. Does not change physical player movement speed.";
+    BotThinkInterval => bot_think_interval: f32 = 0.125, BotNavigation, 0.05, 2.0, "seconds", "Interval between expensive visibility and tactical decisions. Steering remains at 120 Hz. Minimum bounds server work.";
+    BotRepathInterval => bot_repath_interval: f32 = 1.0, BotNavigation, 0.1, 30.0, "seconds", "Minimum interval for refreshing pickup route priorities. Invalidated targets can be replaced immediately.";
+    BotWaypointRadius => bot_waypoint_radius: f32 = 0.75, BotNavigation, 0.05, 1.5, "units", "Distance at which a navigation waypoint counts as reached.";
+    BotLootStopRadius => bot_loot_stop_radius: f32 = 0.3, BotNavigation, 0.01, 2.0, "units", "Distance from a reachable pickup goal at which direct approach stops.";
+    BotStuckInterval => bot_stuck_interval: f32 = 1.0, BotNavigation, 0.1, 10.0, "seconds", "Time between checks for failure to move.";
+    BotStuckDistance => bot_stuck_distance: f32 = 0.3, BotNavigation, 0.01, 3.0, "units", "Minimum displacement during a stuck check interval.";
+    BotStuckJumpAttempts => bot_stuck_jump_attempts: i64 = 2, BotNavigation, 0.0, 10.0, "attempts", "Number of consecutive stuck checks allowed to attempt an escape jump.";
+    BotIdleTurn => bot_idle_turn: f32 = 11.459156, BotNavigation, 0.0, 180.0, "degrees/decision", "Look-around angle per decision when no reachable route or pickup is available.";
+    BotPatrolDistance => bot_patrol_distance: f32 = 3.0, BotNavigation, 0.0, 50.0, "units", "Minimum distance for choosing a patrol destination among reachable navigation nodes.";
+    BotLootRange => bot_loot_range: f32 = 35.0, BotLoot, 0.0, 300.0, "units", "Search radius for reachable powerups and optional equipment offers.";
+    BotCombatPriorityRange => bot_combat_priority_range: f32 = 12.0, BotLoot, 0.0, 100.0, "units", "A visible opponent within this radius takes priority over travelling to any pickup.";
+    BotUrgentHealth => bot_urgent_health: f32 = 0.35, BotLoot, 0.0, 1.0, "fraction", "Health fraction below which emergency pickup reevaluation is requested.";
+    BotUrgentUtility => bot_urgent_utility: f32 = 70.0, BotLoot, 0.0, 1000.0, "utility", "Pickup utility that can justify seeking loot during distant combat.";
+    BotUsefulUtility => bot_useful_utility: f32 = 40.0, BotLoot, 0.0, 1000.0, "utility", "Utility needed for a nearby pickup to justify a short detour during distant combat.";
+    BotNearbyLootRange => bot_nearby_loot_range: f32 = 6.0, BotLoot, 0.0, 50.0, "units", "Distance for a useful pickup to qualify as a short combat detour.";
+    BotImmediateLootRange => bot_immediate_loot_range: f32 = 3.0, BotLoot, 0.0, 50.0, "units", "Distance at which any desired pickup may be approached during distant combat.";
+    BotLootCommitment => bot_loot_commitment: f32 = 1.6, BotLoot, 1.0, 10.0, "multiplier", "Preference for retaining the current pickup goal instead of oscillating between similar goals.";
+    BotLootDistanceScale => bot_loot_distance_scale: f32 = 10.0, BotLoot, 0.1, 100.0, "units", "Distance scale for reducing pickup priority with travel distance. Larger values favor distant valuable loot.";
+    BotHealthMissing => bot_health_missing: f32 = 0.05, BotLoot, 0.0, 1.0, "fraction", "Minimum missing health before a bot deliberately seeks a health pickup.";
+    BotHealthUtility => bot_health_utility: f32 = 20.0, BotLoot, 0.0, 1000.0, "utility", "Base utility of a useful health pickup.";
+    BotMissingHealthUtility => bot_missing_health_utility: f32 = 100.0, BotLoot, 0.0, 1000.0, "utility", "Additional health pickup utility multiplied by missing health fraction.";
+    BotBuffRefreshTime => bot_buff_refresh_time: f32 = 1.0, BotLoot, 0.0, 60.0, "seconds", "Remaining speed/rapid-fire duration below which a bot seeks a refresh.";
+    BotSpeedUtility => bot_speed_utility: f32 = 25.0, BotLoot, 0.0, 1000.0, "utility", "Priority of a speed pickup when a refresh is needed. Zero disables seeking it.";
+    BotRapidFireUtility => bot_rapid_fire_utility: f32 = 30.0, BotLoot, 0.0, 1000.0, "utility", "Priority of a rapid-fire pickup when a refresh is needed. Zero disables seeking it.";
+ }
  presentation: PresentationTuning {
     CameraFov => camera_fov: f32 = 90.0, Camera, 10.0, 160.0, "degrees", "Vertical field of view for the world camera.";
     MouseSensitivity => mouse_sensitivity: f32 = 0.002, Camera, 0.0, 0.1, "radians/pixel", "Mouse turn sensitivity, applied to all players.";
@@ -415,6 +489,9 @@ impl FeatureSettings {
                 }
             }
             Edit::ResetAll => next = SettingsValues::default(),
+        }
+        if next.bots.bot_retreat_distance > next.bots.bot_combat_distance {
+            return Err("bot_retreat_distance must not exceed bot_combat_distance.".into());
         }
         let sim = next.simulation;
         if sim.player_height < 2.0 * sim.player_radius {
