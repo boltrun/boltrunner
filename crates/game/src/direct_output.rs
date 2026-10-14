@@ -1,5 +1,8 @@
 use bevy::{
-    camera::{CameraOutputMode, ClearColorConfig, Hdr, MainPassResolutionOverride, RenderTarget},
+    camera::{
+        CameraOutputMode, ClearColorConfig, Hdr, MainPassResolutionOverride,
+        NormalizedRenderTarget, RenderTarget,
+    },
     core_pipeline::{
         core_3d::{
             AlphaMask3d, Opaque3d, Transparent3d, main_opaque_pass_3d, main_transparent_pass_3d,
@@ -22,9 +25,8 @@ use bevy::{
     ui_render::{TransparentUi, UiCameraView, UiViewTarget, ui_pass},
 };
 
-// The WebGL client has two LDR views, MSAA Off and no screen-space postprocessing.
-// Draw world, weapon and UI into the same sRGB output attachment, then let wgpu
-// present it. This removes Bevy's otherwise redundant full-resolution copy.
+// Draw the two window views directly to the sRGB output. Offscreen character
+// previews retain Bevy's intermediate attachments, MSAA and final output copy.
 pub(crate) fn install(app: &mut App) {
     app.add_systems(PostStartup, configure_cameras);
     app.sub_app_mut(RenderApp)
@@ -50,8 +52,15 @@ fn configure_cameras(
         "gl",
         "Direct output targets the WebGL renderer"
     );
-    assert_eq!(cameras.iter().count(), 2);
+    let mut window_views = 0;
     for (mut camera, world, msaa, hdr, target, tone) in &mut cameras {
+        if !matches!(
+            target,
+            RenderTarget::Window(bevy::window::WindowRef::Primary)
+        ) {
+            continue;
+        }
+        window_views += 1;
         assert_eq!(*msaa, Msaa::Off);
         assert!(!hdr && camera.viewport.is_none());
         assert_eq!(camera.order, if world { 0 } else { 1 });
@@ -63,8 +72,11 @@ fn configure_cameras(
             target,
             RenderTarget::Window(bevy::window::WindowRef::Primary)
         ));
+        // Bevy still needs Write to acquire and present the window surface.
+        // The final copy is skipped per view by offscreen_view below.
         camera.output_mode = CameraOutputMode::default();
     }
+    assert_eq!(window_views, 2);
 }
 
 fn install_passes(world: &mut World) {
@@ -95,6 +107,9 @@ fn install_passes(world: &mut World) {
             1
         );
         schedule.add_systems((
+            upscaling
+                .run_if(offscreen_view)
+                .after(Core3dSystems::PostProcess),
             (direct_opaque, direct_transparent)
                 .chain()
                 .in_set(Core3dSystems::MainPass),
@@ -103,6 +118,13 @@ fn install_passes(world: &mut World) {
                 .before(upscaling),
         ));
     });
+}
+
+fn offscreen_view(view: ViewQuery<&ExtractedCamera>) -> bool {
+    !matches!(
+        view.into_inner().target,
+        Some(NormalizedRenderTarget::Window(_))
+    )
 }
 
 fn direct_opaque(
@@ -126,10 +148,12 @@ fn direct_opaque(
     let (camera, view, target, depth, sky_pipeline, sky_group, uniform, resolution_override) =
         view.into_inner();
     assert!(resolution_override.is_none() && camera.viewport.is_none());
-    assert_eq!(
-        Some(target.main_texture_format()),
-        target.out_texture_view_format()
-    );
+    if matches!(camera.target, Some(NormalizedRenderTarget::Window(_))) {
+        assert_eq!(
+            Some(target.main_texture_format()),
+            target.out_texture_view_format()
+        );
+    }
     let (Some(opaque), Some(mask)) = (
         opaques.get(&view.retained_view_entity),
         masks.get(&view.retained_view_entity),
@@ -143,7 +167,13 @@ fn direct_opaque(
     };
     // Both views share this output attachment's clear-once state. The world
     // clears it; the weapon, transparent geometry and UI retain its color.
-    let colors = [target.out_texture_color_attachment(clear)];
+    let colors = [
+        if matches!(camera.target, Some(NormalizedRenderTarget::Window(_))) {
+            target.out_texture_color_attachment(clear)
+        } else {
+            Some(target.get_color_attachment())
+        },
+    ];
     let diagnostics = context.diagnostic_recorder();
     let diagnostics = diagnostics.as_deref();
     let mut pass = context.begin_tracked_render_pass(RenderPassDescriptor {
@@ -196,7 +226,13 @@ fn direct_transparent(
     if phase.items.is_empty() {
         return;
     }
-    let colors = [target.out_texture_color_attachment(None)];
+    let colors = [
+        if matches!(camera.target, Some(NormalizedRenderTarget::Window(_))) {
+            target.out_texture_color_attachment(None)
+        } else {
+            Some(target.get_color_attachment())
+        },
+    ];
     let diagnostics = context.diagnostic_recorder();
     let diagnostics = diagnostics.as_deref();
     let mut pass = context.begin_tracked_render_pass(RenderPassDescriptor {
@@ -236,11 +272,19 @@ fn direct_ui(
         return;
     };
     assert!(camera.viewport.is_none());
-    assert_eq!(
-        Some(target.main_texture_format()),
-        target.out_texture_view_format()
-    );
-    let colors = [target.out_texture_color_attachment(None)];
+    if matches!(camera.target, Some(NormalizedRenderTarget::Window(_))) {
+        assert_eq!(
+            Some(target.main_texture_format()),
+            target.out_texture_view_format()
+        );
+    }
+    let colors = [
+        if matches!(camera.target, Some(NormalizedRenderTarget::Window(_))) {
+            target.out_texture_color_attachment(None)
+        } else {
+            Some(target.get_unsampled_color_attachment())
+        },
+    ];
     let diagnostics = context.diagnostic_recorder();
     let diagnostics = diagnostics.as_deref();
     let mut pass = context.begin_tracked_render_pass(RenderPassDescriptor {

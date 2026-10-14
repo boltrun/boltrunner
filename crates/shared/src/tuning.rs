@@ -84,6 +84,19 @@ pub enum Category {
     Weapons,
     Pistol,
     Projectiles,
+    Flamethrower,
+    Shotgun,
+    MachineGun,
+    RocketLauncher,
+    Laser,
+    Sniper,
+    Drone,
+    Ricochet,
+    Karambit,
+    Arc,
+    Grenade,
+    ElectroPlasma,
+    SeekerPlasma,
     World,
     Triggers,
     Spawning,
@@ -91,6 +104,13 @@ pub enum Category {
     PickupEffects,
     PickupSpawning,
     Match,
+    Bots,
+    BotPerception,
+    BotAim,
+    BotCombat,
+    BotNavigation,
+    BotLoot,
+
     Camera,
     DeathCamera,
     Presentation,
@@ -116,6 +136,19 @@ impl Category {
         Self::Weapons,
         Self::Pistol,
         Self::Projectiles,
+        Self::Flamethrower,
+        Self::Shotgun,
+        Self::MachineGun,
+        Self::RocketLauncher,
+        Self::Laser,
+        Self::Sniper,
+        Self::Drone,
+        Self::Ricochet,
+        Self::Karambit,
+        Self::Arc,
+        Self::Grenade,
+        Self::ElectroPlasma,
+        Self::SeekerPlasma,
         Self::World,
         Self::Triggers,
         Self::Spawning,
@@ -123,6 +156,12 @@ impl Category {
         Self::PickupEffects,
         Self::PickupSpawning,
         Self::Match,
+        Self::Bots,
+        Self::BotPerception,
+        Self::BotAim,
+        Self::BotCombat,
+        Self::BotNavigation,
+        Self::BotLoot,
         Self::Camera,
         Self::DeathCamera,
         Self::Presentation,
@@ -148,6 +187,19 @@ impl Category {
             Self::Weapons => "weapons",
             Self::Pistol => "pistol",
             Self::Projectiles => "projectiles",
+            Self::Flamethrower => "flamethrower",
+            Self::Shotgun => "shotgun",
+            Self::MachineGun => "machine_gun",
+            Self::RocketLauncher => "rocket_launcher",
+            Self::Laser => "laser",
+            Self::Sniper => "sniper",
+            Self::Drone => "drone",
+            Self::Ricochet => "ricochet",
+            Self::Karambit => "karambit",
+            Self::Arc => "arc_cannon",
+            Self::Grenade => "plasma_launcher",
+            Self::ElectroPlasma => "electro_plasma",
+            Self::SeekerPlasma => "seeker_plasma",
             Self::World => "world",
             Self::Triggers => "triggers",
             Self::Spawning => "spawning",
@@ -155,6 +207,13 @@ impl Category {
             Self::PickupEffects => "effects",
             Self::PickupSpawning => "spawning",
             Self::Match => "match",
+            Self::Bots => "bots",
+            Self::BotPerception => "perception",
+            Self::BotAim => "aim",
+            Self::BotCombat => "combat",
+            Self::BotNavigation => "navigation",
+            Self::BotLoot => "loot",
+
             Self::Camera => "camera",
             Self::DeathCamera => "death",
             Self::Presentation => "presentation",
@@ -181,6 +240,19 @@ impl Category {
             Self::Weapons => None,
             Self::Pistol => Some(Self::Weapons),
             Self::Projectiles => Some(Self::Weapons),
+            Self::Flamethrower
+            | Self::Shotgun
+            | Self::MachineGun
+            | Self::RocketLauncher
+            | Self::Laser
+            | Self::Sniper
+            | Self::Drone
+            | Self::Ricochet
+            | Self::Karambit
+            | Self::Arc
+            | Self::Grenade
+            | Self::ElectroPlasma
+            | Self::SeekerPlasma => Some(Self::Weapons),
             Self::World => None,
             Self::Triggers => Some(Self::World),
             Self::Spawning => Some(Self::World),
@@ -188,6 +260,13 @@ impl Category {
             Self::PickupEffects => Some(Self::Powerups),
             Self::PickupSpawning => Some(Self::Powerups),
             Self::Match => None,
+            Self::Bots => Some(Self::Player),
+            Self::BotPerception => Some(Self::Bots),
+            Self::BotAim => Some(Self::Bots),
+            Self::BotCombat => Some(Self::Bots),
+            Self::BotNavigation => Some(Self::Bots),
+            Self::BotLoot => Some(Self::Bots),
+
             Self::Camera => None,
             Self::DeathCamera => Some(Self::Camera),
             Self::Presentation => None,
@@ -280,7 +359,12 @@ macro_rules! tuning_parameters {
             }
             fn set(&mut self, parameter: Parameter, value: Number) -> Result<(), String> {
                 parameter.spec().validate(value)?;
+                let previous_height = self.simulation.player_height;
+                let previous_eye = self.simulation.eye_height;
                 match parameter { $($(Parameter::$id => self.$group.$field = <$ty as TunableNumber>::from_number(value)?,)+)+ }
+                if parameter == Parameter::PlayerHeight {
+                    self.simulation.eye_height = previous_eye * (self.simulation.player_height / previous_height);
+                }
                 Ok(())
             }
         }
@@ -307,16 +391,145 @@ tuning_parameters! {
     GroundProbe => ground_probe_distance: f32 = 0.025, Collision, 0.001, 1.0, "units", "Downward support check used to allow ground jumps and replenish air jumps.";
     GroundSnap => ground_snap_distance: f32 = 0.03, Collision, 0.001, 1.0, "units", "Additional downward floor-following distance. Moving players also add step_height.";
     PlayerRadius => player_radius: f32 = 0.4, Body, 0.05, 3.0, "units", "Capsule radius for world collision, projectile hits and map triggers. Height must be at least twice this value. Changing size inside tight geometry may require respawning.";
-    PlayerHeight => player_height: f32 = 1.8, Body, 0.1, 10.0, "units", "Full capsule height, measured from the feet. Must be at least twice player_radius and no lower than eye_height.";
-    EyeHeight => eye_height: f32 = 1.6, Body, 0.0, 10.0, "units", "Camera and shot origin height above the feet. Must not exceed player_height.";
+    PlayerHeight => player_height: f32 = 1.8, Body, 0.1, 10.0, "units", "Full capsule height from the feet. Changing it proportionally scales eye_height, including the camera and shot origin. Must be at least twice player_radius.";
+    EyeHeight => eye_height: f32 = 1.6, Body, 0.0, 10.0, "units", "Camera and shot origin height above the feet. Automatically scales when player_height changes; can also be adjusted independently. Must not exceed player_height.";
     MaxHealth => max_health: i64 = 100, Health, 1.0, 65535.0, "HP", "Full health on spawn. Lowering this clamps current health; raising it does not heal existing players.";
     RespawnTime => respawn_time: f32 = 3.0, Health, 0.0, 60.0, "seconds", "Delay after death, rounded to simulation ticks. Zero respawns on the next tick. Existing deaths keep their original delay.";
-    FireInterval => fire_interval: f32 = 0.2, Pistol, 0.0, 60.0, "seconds", "Minimum interval between automatic shots, rounded to simulation ticks. Zero fires once per simulation tick. Existing cooldowns keep their duration.";
-    ProjectileDamage => projectile_damage: i64 = 25, Projectiles, 0.0, 65535.0, "HP", "Damage per confirmed player hit. New shots capture this value; existing projectiles keep their damage.";
+    FireInterval => fire_interval: f32 = 0.26, Pistol, 0.0, 60.0, "seconds", "Minimum interval between automatic shots, rounded to simulation ticks. Zero fires once per simulation tick. Existing cooldowns keep their duration.";
+    ProjectileDamage => projectile_damage: i64 = 20, Projectiles, 0.0, 65535.0, "HP", "Damage per confirmed player hit. New shots capture this value; existing projectiles keep their damage.";
     ProjectileSpeed => projectile_speed: f32 = 120.0, Projectiles, 0.0, 1000.0, "units/s", "Projectile travel speed. New shots capture this value.";
     ProjectileRadius => projectile_radius: f32 = 0.045, Projectiles, 0.001, 3.0, "units", "Collision sphere radius for both walls and players. New shots capture this value; visual beam width is independent.";
     ProjectileLifetime => projectile_lifetime: f32 = 2.0, Projectiles, 0.001, 60.0, "seconds", "Maximum projectile lifetime, rounded to simulation ticks. New shots capture this value. Range is speed multiplied by lifetime.";
+
+    PistolAmmo => pistol_ammo: i64 = 12, Pistol, 1.0, 65535.0, "shots", "Pistol magazine capacity; reserves are infinite.";
+    PistolReload => pistol_reload: f32 = 0.9, Pistol, 0.01, 30.0, "seconds", "Time for a full magazine exchange or recharge. Switching cancels the unfinished reload and preserves current ammunition.";
+    FlameReload => flame_reload: f32 = 1.6, Flamethrower, 0.01, 30.0, "seconds", "Time for a full magazine exchange or recharge. Switching cancels the unfinished reload and preserves current ammunition.";
+    ShotgunReload => shotgun_reload: f32 = 0.55, Shotgun, 0.01, 30.0, "seconds", "Time to insert one round; firing can interrupt after an insertion.";
+    MgReload => mg_reload: f32 = 1.8, MachineGun, 0.01, 30.0, "seconds", "Time for a full magazine exchange or recharge. Switching cancels the unfinished reload and preserves current ammunition.";
+    RocketReload => rocket_reload: f32 = 1.1, RocketLauncher, 0.01, 30.0, "seconds", "Time to insert one round; firing can interrupt after an insertion.";
+    LaserReload => laser_reload: f32 = 1.4, Laser, 0.01, 30.0, "seconds", "Time for a full magazine exchange or recharge. Switching cancels the unfinished reload and preserves current ammunition.";
+    SniperReload => sniper_reload: f32 = 1.5, Sniper, 0.01, 30.0, "seconds", "Time for a full magazine exchange or recharge. Switching cancels the unfinished reload and preserves current ammunition.";
+    BallReload => ball_reload: f32 = 1.1, Ricochet, 0.01, 30.0, "seconds", "Time for a full magazine exchange or recharge. Switching cancels the unfinished reload and preserves current ammunition.";
+    ArcReload => arc_reload: f32 = 1.0, Arc, 0.01, 30.0, "seconds", "Time for a full magazine exchange or recharge. Switching cancels the unfinished reload and preserves current ammunition.";
+    GrenadeReload => grenade_reload: f32 = 1.4, Grenade, 0.01, 30.0, "seconds", "Time for a full magazine exchange or recharge. Switching cancels the unfinished reload and preserves current ammunition.";
+    ElectroReload => electro_reload: f32 = 1.3, ElectroPlasma, 0.01, 30.0, "seconds", "Time for a full magazine exchange or recharge. Switching cancels the unfinished reload and preserves current ammunition.";
+    SeekerReload => seeker_reload: f32 = 1.25, SeekerPlasma, 0.01, 30.0, "seconds", "Time for a full magazine exchange or recharge. Switching cancels the unfinished reload and preserves current ammunition.";
+    FlameFuel => flame_fuel: f32 = 5.0, Flamethrower, 0.1, 500.0, "seconds", "Magazine fuel capacity in active flame seconds; reserves are infinite.";
+    LaserFuel => laser_fuel: f32 = 4.0, Laser, 0.1, 500.0, "seconds", "Magazine charge capacity in active beam seconds; charging and idle time consume none. Reserves are infinite.";
+    ShotgunAmmo => shotgun_ammo: i64 = 6, Shotgun, 1.0, 65535.0, "shots", "Magazine capacity. New pickups and reloads fill to this limit; reserves are infinite. Existing magazines retain their rounds.";
+    MgAmmo => mg_ammo: i64 = 40, MachineGun, 1.0, 65535.0, "shots", "Magazine capacity. New pickups and reloads fill to this limit; reserves are infinite. Existing magazines retain their rounds.";
+    RocketAmmo => rocket_ammo: i64 = 3, RocketLauncher, 1.0, 65535.0, "shots", "Magazine capacity. New pickups and reloads fill to this limit; reserves are infinite. Existing magazines retain their rounds.";
+    SniperAmmo => sniper_ammo: i64 = 5, Sniper, 1.0, 65535.0, "shots", "Magazine capacity. New pickups and reloads fill to this limit; reserves are infinite. Existing magazines retain their rounds.";
+    BallAmmo => ball_ammo: i64 = 12, Ricochet, 1.0, 65535.0, "shots", "Magazine capacity. New pickups and reloads fill to this limit; reserves are infinite. Existing magazines retain their rounds.";
+    ArcAmmo => arc_ammo: i64 = 10, Arc, 1.0, 65535.0, "shots", "Magazine capacity. New pickups and reloads fill to this limit; reserves are infinite. Existing magazines retain their rounds.";
+    GrenadeAmmo => grenade_ammo: i64 = 5, Grenade, 1.0, 65535.0, "shots", "Magazine capacity. New pickups and reloads fill to this limit; reserves are infinite. Existing magazines retain their rounds.";
+    ElectroAmmo => electro_ammo: i64 = 24, ElectroPlasma, 1.0, 65535.0, "shots", "Magazine capacity. New pickups and reloads fill to this limit; reserves are infinite. Existing magazines retain their rounds.";
+    SeekerAmmo => seeker_ammo: i64 = 12, SeekerPlasma, 1.0, 65535.0, "shots", "Magazine capacity. New pickups and reloads fill to this limit; reserves are infinite. Existing magazines retain their rounds.";
+    ElectroDamage => electro_damage: i64 = 20, ElectroPlasma, 0.0, 65535.0, "HP", "Electro plasma direct-hit damage.";
+    ElectroInterval => electro_interval: f32 = 0.18, ElectroPlasma, 0.01, 30.0, "seconds", "Interval between electro plasma shots.";
+    ElectroSpeed => electro_speed: f32 = 50.0, ElectroPlasma, 0.1, 1000.0, "units/s", "Electro plasma orb speed.";
+    ElectroRadius => electro_radius: f32 = 0.12, ElectroPlasma, 0.01, 3.0, "units", "Electro plasma orb collision radius.";
+    ElectroLifetime => electro_lifetime: f32 = 4.0, ElectroPlasma, 0.1, 500.0, "seconds", "Maximum orb flight time.";
+    ElectroFieldTime => electro_field_time: f32 = 2.0, ElectroPlasma, 0.0, 500.0, "seconds", "Electrical field lifetime after a wall impact.";
+    ElectroFieldRadius => electro_field_radius: f32 = 1.5, ElectroPlasma, 0.1, 10.0, "units", "Electrical field damage radius; walls block damage.";
+    ElectroFieldDps => electro_field_dps: f32 = 14.0, ElectroPlasma, 0.0, 1000.0, "HP/s", "Field damage per second, including damage to its owner. Overlapping fields from the same owner apply only the strongest damage.";
+    SeekerDamage => seeker_damage: i64 = 26, SeekerPlasma, 0.0, 65535.0, "HP", "Seeker plasma direct-hit damage.";
+    SeekerInterval => seeker_interval: f32 = 0.3, SeekerPlasma, 0.01, 30.0, "seconds", "Interval between seeker plasma shots.";
+    SeekerSpeed => seeker_speed: f32 = 18.0, SeekerPlasma, 0.1, 1000.0, "units/s", "Slow orb speed; movement and dashes can dodge it.";
+    SeekerRadius => seeker_radius: f32 = 0.13, SeekerPlasma, 0.01, 3.0, "units", "Seeker plasma orb collision radius.";
+    SeekerLifetime => seeker_lifetime: f32 = 5.0, SeekerPlasma, 0.1, 500.0, "seconds", "Maximum seeker orb flight time.";
+    SeekerTurn => seeker_turn: f32 = 25.0, SeekerPlasma, 0.0, 360.0, "degrees/s", "Maximum steering speed, without target leading or obstacle avoidance.";
+    SeekerRange => seeker_range: f32 = 40.0, SeekerPlasma, 0.1, 1000.0, "units", "Maximum distance to a visible steering target.";
+    SeekerCone => seeker_cone: f32 = 35.0, SeekerPlasma, 0.0, 89.0, "degrees", "Half-angle of the forward target acquisition cone.";
+    KarambitAngle => karambit_angle: f32 = 120.0, Karambit, 1.0, 180.0, "degrees", "Full width of the melee sector; every visible target in reach can be hit once.";
+    WeaponSwitchTime => weapon_switch_time: f32 = 0.25, Weapons, 0.0, 5.0, "seconds", "Delay before firing a newly selected weapon. Cooldowns and machine-gun heat survive switching.";
+    FlameDps => flame_dps: f32 = 85.0, Flamethrower, 0.0, 1000.0, "HP/s", "Damage per second inside the flame cone. Fractional damage is accumulated on the server.";
+    FlameRange => flame_range: f32 = 7.0, Flamethrower, 0.1, 100.0, "units", "Maximum reach of the flame cone; walls block damage.";
+    FlameSpeed => flame_speed: f32 = 18.0, Flamethrower, 0.1, 200.0, "units/s", "Speed at which the flame jet reaches full length after firing starts.";
+    FlameAngle => flame_angle: f32 = 18.0, Flamethrower, 0.1, 80.0, "degrees", "Half-angle of the flame cone.";
+    FlameBurnDps => flame_burn_dps: f32 = 8.0, Flamethrower, 0.0, 1000.0, "HP/s", "Lingering damage after the victim leaves the flame cone.";
+    FlameBurnTime => flame_burn_time: f32 = 1.0, Flamethrower, 0.0, 30.0, "seconds", "Burn duration; another contact refreshes it.";
+    ShotgunDamage => shotgun_damage: i64 = 12, Shotgun, 0.0, 65535.0, "HP/pellet", "Damage of each pellet before distance falloff.";
+    ShotgunPellets => shotgun_pellets: i64 = 10, Shotgun, 1.0, 32.0, "pellets", "Independent random pellet directions per shot.";
+    ShotgunSpread => shotgun_spread: f32 = 7.0, Shotgun, 0.0, 60.0, "degrees", "Half-angle of a uniformly sampled spread cone.";
+    ShotgunInterval => shotgun_interval: f32 = 0.8, Shotgun, 0.01, 10.0, "seconds", "Interval between shotgun blasts.";
+    ShotgunSpeed => shotgun_speed: f32 = 120.0, Shotgun, 0.1, 1000.0, "units/s", "Speed of new pellets.";
+    ShotgunRadius => shotgun_radius: f32 = 0.025, Shotgun, 0.001, 1.0, "units", "Pellet collision radius.";
+    ShotgunLifetime => shotgun_lifetime: f32 = 0.4, Shotgun, 0.01, 10.0, "seconds", "Pellet flight lifetime.";
+    ShotgunFalloffStart => shotgun_falloff_start: f32 = 8.0, Shotgun, 0.0, 500.0, "units", "Distance at which pellet damage begins to fall.";
+    ShotgunFalloffEnd => shotgun_falloff_end: f32 = 20.0, Shotgun, 0.01, 1000.0, "units", "Distance at which pellet damage reaches the minimum fraction.";
+    ShotgunMinDamage => shotgun_min_damage: f32 = 0.3, Shotgun, 0.0, 1.0, "fraction", "Minimum fraction of pellet damage at long range.";
+    MgDamage => mg_damage: i64 = 12, MachineGun, 0.0, 65535.0, "HP", "Damage per machine-gun bullet.";
+    MgInterval => mg_interval: f32 = 1.0 / 12.0, MachineGun, 0.01, 10.0, "seconds", "Time between automatic bullets.";
+    MgSpeed => mg_speed: f32 = 160.0, MachineGun, 0.1, 1000.0, "units/s", "Speed of new bullets.";
+    MgRadius => mg_radius: f32 = 0.025, MachineGun, 0.001, 1.0, "units", "Machine-gun bullet collision radius.";
+    MgLifetime => mg_lifetime: f32 = 2.0, MachineGun, 0.01, 30.0, "seconds", "Bullet flight lifetime.";
+    MgSpread => mg_spread: f32 = 0.5, MachineGun, 0.0, 60.0, "degrees", "Cold-barrel spread half-angle.";
+    MgMaxSpread => mg_max_spread: f32 = 4.0, MachineGun, 0.0, 60.0, "degrees", "Spread half-angle at full heat.";
+    MgHeating => mg_heating: f32 = 0.4, MachineGun, 0.0, 10.0, "heat/s", "Heat gain per second of firing. Full heat blocks firing.";
+    MgCooling => mg_cooling: f32 = 0.65, MachineGun, 0.01, 10.0, "heat/s", "Cooling while released, holstered or overheated.";
+    RocketDamage => rocket_damage: i64 = 0, RocketLauncher, 0.0, 65535.0, "HP", "Direct-impact damage, added to splash damage.";
+    RocketInterval => rocket_interval: f32 = 0.75, RocketLauncher, 0.01, 30.0, "seconds", "Launch cooldown starts when a rocket is fired. Flight time and explosion do not restart it.";
+    RocketSpeed => rocket_speed: f32 = 28.0, RocketLauncher, 0.1, 1000.0, "units/s", "Rocket flight speed.";
+    RocketRadius => rocket_radius: f32 = 0.16, RocketLauncher, 0.01, 2.0, "units", "Rocket collision radius.";
+    RocketLifetime => rocket_lifetime: f32 = 5.0, RocketLauncher, 0.01, 60.0, "seconds", "Rocket flight lifetime; expiry also explodes.";
+    RocketBlastRadius => rocket_blast_radius: f32 = 4.0, RocketLauncher, 0.1, 50.0, "units", "Splash reach, blocked by level geometry.";
+    RocketBlastDamage => rocket_blast_damage: i64 = 95, RocketLauncher, 0.0, 65535.0, "HP", "Maximum splash damage with linear falloff to the edge.";
+    RocketKnockback => rocket_knockback: f32 = 14.0, RocketLauncher, 0.0, 100.0, "units/s", "Maximum blast impulse; supports rocket jumps.";
+    RocketSelfDamage => rocket_self_damage: f32 = 1.0, RocketLauncher, 0.0, 2.0, "fraction", "Fraction of splash damage applied to the shooter.";
+    LaserDps => laser_dps: f32 = 100.0, Laser, 0.0, 1000.0, "HP/s", "Continuous beam damage; stops at the first target or wall.";
+    LaserRange => laser_range: f32 = 40.0, Laser, 0.1, 1000.0, "units", "Maximum beam length.";
+    LaserRadius => laser_radius: f32 = 0.06, Laser, 0.001, 1.0, "units", "Beam hit radius; the visible beam uses the same diameter.";
+    LaserCharge => laser_charge: f32 = 0.2, Laser, 0.0, 10.0, "seconds", "Hold-to-fire charge time; releasing or switching cancels it.";
+    SniperDamage => sniper_damage: i64 = 80, Sniper, 0.0, 65535.0, "HP", "Damage of a precise instant shot; no separate headshot hitbox.";
+    SniperInterval => sniper_interval: f32 = 0.95, Sniper, 0.01, 30.0, "seconds", "Interval between sniper shots.";
+    SniperRange => sniper_range: f32 = 200.0, Sniper, 0.1, 2000.0, "units", "Maximum instant-shot distance.";
+    SniperRadius => sniper_radius: f32 = 0.015, Sniper, 0.001, 1.0, "units", "Radius of the sniper line hit test.";
+    SniperScope => sniper_scope_zoom: f32 = 4.5, Sniper, 1.0, 30.0, "x", "Magnification relative to the current world FOV while holding right mouse. 1x disables zoom; larger values always narrow the view.";
+    DroneHealth => drone_health: i64 = 30, Drone, 1.0, 65535.0, "HP", "Health of a newly launched drone; destroying it detonates it.";
+    DroneSpeed => drone_speed: f32 = 14.0, Drone, 0.1, 200.0, "units/s", "Pilot movement speed.";
+    DroneAcceleration => drone_acceleration: f32 = 50.0, Drone, 0.1, 1000.0, "units/s²", "Drone flight acceleration.";
+    DroneRadius => drone_radius: f32 = 0.25, Drone, 0.05, 2.0, "units", "Drone collision and shooting-target radius.";
+    DroneLifetime => drone_lifetime: f32 = 15.0, Drone, 0.1, 500.0, "seconds", "Flight lifetime before automatic detonation.";
+    DroneOwnerGrace => drone_owner_grace: f32 = 2.0, Drone, 0.0, 10.0, "seconds", "Owner protection after launch: ignore owner contact and the drone's blast damage and impulse. Other targets and collisions remain active.";
+    DroneDamage => drone_damage: i64 = 100, Drone, 0.0, 65535.0, "HP", "Explosion damage in the inner half-radius. Outer half falls to zero.";
+    DroneBlastRadius => drone_blast_radius: f32 = 3.0, Drone, 0.1, 50.0, "units", "Drone blast radius; walls block damage.";
+    DroneKnockback => drone_knockback: f32 = 12.0, Drone, 0.0, 100.0, "units/s", "Drone blast impulse.";
+    DroneSelfDamage => drone_self_damage: f32 = 0.5, Drone, 0.0, 2.0, "fraction", "Drone blast damage applied to its owner.";
+    DroneCooldown => drone_cooldown: f32 = 5.0, Drone, 0.0, 500.0, "seconds", "Cooldown after a drone is destroyed or detonated.";
+    BallDamage => ball_damage: i64 = 45, Ricochet, 0.0, 65535.0, "HP", "Damage per bouncing ball hit. After a bounce the owner can also be hit.";
+    BallInterval => ball_interval: f32 = 0.4, Ricochet, 0.01, 30.0, "seconds", "Interval between balls.";
+    BallSpeed => ball_speed: f32 = 30.0, Ricochet, 0.1, 1000.0, "units/s", "Initial ball speed.";
+    BallRadius => ball_radius: f32 = 0.18, Ricochet, 0.01, 2.0, "units", "Ball visual and collision radius.";
+    BallLifetime => ball_lifetime: f32 = 4.0, Ricochet, 0.01, 60.0, "seconds", "Maximum ball lifetime.";
+    BallGravity => ball_gravity: f32 = 4.0, Ricochet, 0.0, 100.0, "units/s²", "Ball downward acceleration.";
+    BallBounces => ball_bounces: i64 = 3, Ricochet, 0.0, 20.0, "bounces", "Allowed wall reflections before destruction.";
+    BallRetention => ball_retention: f32 = 0.9, Ricochet, 0.1, 1.0, "fraction", "Speed retained after each bounce.";
+    KarambitDamage => karambit_damage: i64 = 60, Karambit, 0.0, 65535.0, "HP", "Damage per blade strike; walls block the sweep.";
+    KarambitInterval => karambit_interval: f32 = 0.4, Karambit, 0.05, 30.0, "seconds", "Interval between melee strikes.";
+    KarambitRange => karambit_range: f32 = 2.5, Karambit, 0.1, 10.0, "units", "Blade reach from the player's eye.";
+    ArcDamage => arc_damage: i64 = 40, Arc, 0.0, 65535.0, "HP", "Damage to the first lightning target.";
+    ArcInterval => arc_interval: f32 = 0.45, Arc, 0.01, 30.0, "seconds", "Interval between lightning discharges.";
+    ArcRange => arc_range: f32 = 28.0, Arc, 0.1, 1000.0, "units", "Maximum range of the aimed discharge.";
+    ArcRadius => arc_radius: f32 = 0.055, Arc, 0.001, 1.0, "units", "First lightning segment hit radius.";
+    ArcChainRange => arc_chain_range: f32 = 6.0, Arc, 0.0, 50.0, "units", "Maximum distance to each subsequent target; walls block chaining.";
+    ArcChains => arc_chains: i64 = 2, Arc, 0.0, 8.0, "targets", "Additional targets after the first hit. Each target can be hit once per discharge.";
+    ArcRetention => arc_retention: f32 = 0.7, Arc, 0.0, 1.0, "fraction", "Damage retained for each additional lightning target.";
+    GrenadeDamage => grenade_damage: i64 = 20, Grenade, 0.0, 65535.0, "HP", "Direct damage on contact with a player or drone, before blast damage.";
+    GrenadeInterval => grenade_interval: f32 = 0.8, Grenade, 0.01, 30.0, "seconds", "Launch interval; starts at launch rather than detonation.";
+    GrenadeSpeed => grenade_speed: f32 = 24.0, Grenade, 0.1, 1000.0, "units/s", "Initial grenade speed.";
+    GrenadeRadius => grenade_radius: f32 = 0.13, Grenade, 0.01, 2.0, "units", "Visible sphere and collision radius.";
+    GrenadeGravity => grenade_gravity: f32 = 12.0, Grenade, 0.0, 100.0, "units/s²", "Downward acceleration of the grenade.";
+    GrenadeFuse => grenade_fuse: f32 = 2.2, Grenade, 0.01, 30.0, "seconds", "Fuse starts at launch; wall bounces do not reset it.";
+    GrenadeBounces => grenade_bounces: i64 = 12, Grenade, 0.0, 30.0, "bounces", "Maximum wall reflections before detonation.";
+    GrenadeRetention => grenade_retention: f32 = 0.65, Grenade, 0.1, 1.0, "fraction", "Speed retained after a wall bounce.";
+    GrenadeBlastRadius => grenade_blast_radius: f32 = 3.5, Grenade, 0.1, 50.0, "units", "Plasma blast radius; damage decreases with distance and walls block it.";
+    GrenadeBlastDamage => grenade_blast_damage: i64 = 80, Grenade, 0.0, 65535.0, "HP", "Maximum blast damage at the grenade center.";
+    GrenadeKnockback => grenade_knockback: f32 = 16.0, Grenade, 0.0, 100.0, "units/s", "Plasma blast impulse.";
+    GrenadeSelfDamage => grenade_self_damage: f32 = 0.5, Grenade, 0.0, 2.0, "fraction", "Blast damage multiplier for the grenade's owner.";
     TriggerCooldown => trigger_cooldown: f32 = 0.3, Triggers, 0.0, 60.0, "seconds", "Shared delay between jump pads and portals. Hazards always remain active. Existing waits keep their original duration.";
+    ZiplineSpeed => zipline_speed: f32 = 16.0, Triggers, 0.0, 100.0, "units/s", "Travel speed on map-authored ziplines. Zero disables boarding and releases existing riders.";
+    ZiplineReach => zipline_reach: f32 = 1.5, Triggers, 0.1, 5.0, "units", "Maximum distance from an endpoint for E to board. Walls always block boarding.";
     JumpPadMultiplier => jump_pad_multiplier: f32 = 1.0, Triggers, 0.0, 10.0, "multiplier", "Multiplies the map-authored launch velocity of every jump pad.";
     PortalMomentum => portal_momentum_multiplier: f32 = 1.0, Triggers, 0.0, 10.0, "multiplier", "Multiplies preserved horizontal and vertical velocity through teleports and warp portals. An active dash resumes its configured speed on the next tick.";
     KillPlaneHeight => kill_plane_height: f32 = -40.0, World, -1000.0, 1000.0, "units", "Players below this world-space height die immediately. Map-authored hurt volumes remain active.";
@@ -332,13 +545,62 @@ tuning_parameters! {
     ResultsDuration => results_duration: f32 = 10.0, Match, 0.1, 3600.0, "seconds", "Results duration before the next match. Live changes preserve elapsed time.";
     KillFeedTime => kill_feed_time: i64 = 6, KillFeed, 0.0, 3600.0, "seconds", "Lifetime of new kill-feed entries. Zero hides the feed. Shortening this also caps the lifetime of existing entries.";
     KillFeedLimit => kill_feed_limit: i64 = 5, KillFeed, 0.0, 100.0, "entries", "Maximum recent deaths shown in the feed. Zero hides the feed. Lowering this removes the oldest entries immediately.";
+    WeaponSpawnChance => weapon_spawn_chance: f32 = 50.0, PickupSpawning, 0.0, 100.0, "%", "Chance of spawning a non-pistol weapon instead of a powerup at a map-authored pickup point.";
     ActivePickups => active_pickups: i64 = 8, PickupSpawning, 0.0, 24.0, "pickups", "Maximum active pickups. Initial spawns fill this many slots; respawns add one at a time.";
     PickupRespawn => pickup_respawn: f32 = 4.0, PickupSpawning, 0.0, 500.0, "seconds", "Time between attempts to replace a collected pickup. Zero attempts once each simulation tick.";
     PickupSpacing => pickup_spacing: f32 = 5.0, PickupSpawning, 0.0, 100.0, "units", "Minimum distance between active pickup positions.";
     PickupPlayerDistance => pickup_player_distance: f32 = 2.0, PickupSpawning, 0.0, 100.0, "units", "Minimum distance from players when a pickup appears.";
     PickupRadius => pickup_radius: f32 = 1.05, PickupSpawning, 0.0, 10.0, "units", "Player-center distance for collecting a pickup. Walls still block collection.";
  }
+ bots: BotTuning {
+    BotCount => bot_count: i64 = crate::player_color::PALETTE.len() as i64, Bots, 0.0, crate::player_color::PALETTE.len() as f64, "bots", "Requested server-controlled opponents. Defaults to filling every available place, limited by server capacity and free palette colors. Zero disables bots. Humans always take priority over bots for colors and places.";
+    BotReactionTime => bot_reaction_time: f32 = 0.3, BotPerception, 0.0, 5.0, "seconds", "Base visible time before firing, with up to 25% extra per bot. Losing sight requires a fresh reaction delay. Evaluated at the decision interval.";
+    BotDetectionRange => bot_detection_range: f32 = 55.0, BotPerception, 0.0, 500.0, "units", "Maximum distance for detecting visible opponents. Walls always block detection.";
+    BotDetectionFov => bot_detection_fov: f32 = 120.0, BotPerception, 0.0, 360.0, "degrees", "Full field of view centered on the current look direction. 360 detects opponents in every direction.";
+    BotTargetMemory => bot_target_memory: f32 = 3.0, BotPerception, 0.0, 30.0, "seconds", "Time to remember the previous opponent for target priority. Reacquisition still requires reaction time and never reveals hidden positions.";
+    BotAimError => bot_aim_error: f32 = 1.8, BotAim, 0.0, 45.0, "degrees", "Horizontal and vertical aim error, varied between bots. Zero removes deliberate error.";
+    BotTurnSpeed => bot_turn_speed: f32 = 240.0, BotAim, 0.0, 1440.0, "degrees/s", "Maximum yaw and pitch tracking speed; zero stops turning.";
+    BotFireTolerance => bot_fire_tolerance: f32 = 3.0, BotAim, 0.0, 90.0, "degrees", "Maximum remaining yaw and pitch aiming error at which firing is allowed.";
+    BotAimHeight => bot_aim_height: f32 = 0.65, BotAim, 0.0, 1.0, "fraction", "Aim point above target feet as a fraction of target capsule height.";
+    BotLeadFactor => bot_lead_factor: f32 = 0.65, BotAim, 0.0, 2.0, "multiplier", "Fraction of visible target velocity used to lead projectile shots.";
+    BotLeadTime => bot_lead_time: f32 = 0.4, BotAim, 0.0, 3.0, "seconds", "Maximum projectile flight time considered for leading the target.";
+    BotAimYawFrequency => bot_aim_yaw_frequency: f32 = 4.3, BotAim, 0.0, 30.0, "radians/s", "Horizontal oscillation speed of deliberate aiming error.";
+    BotAimPitchFrequency => bot_aim_pitch_frequency: f32 = 3.1, BotAim, 0.0, 30.0, "radians/s", "Vertical oscillation speed of deliberate aiming error.";
+    BotCombatDistance => bot_combat_distance: f32 = 14.0, BotCombat, 0.0, 100.0, "units", "Approach the opponent when farther away than this distance.";
+    BotRetreatDistance => bot_retreat_distance: f32 = 5.0, BotCombat, 0.0, 100.0, "units", "Back away when the opponent is nearer than this distance. Must not exceed combat_distance.";
+    BotStrafeWeight => bot_strafe_weight: f32 = 0.8, BotCombat, 0.0, 5.0, "weight", "Sideways movement weight before normalizing movement direction. Zero disables strafing.";
+    BotApproachWeight => bot_approach_weight: f32 = 0.6, BotCombat, 0.0, 5.0, "weight", "Weight of forward and retreat movement relative to strafing.";
+    BotStrafeInterval => bot_strafe_interval: f32 = 1.5, BotCombat, 0.05, 30.0, "seconds", "Time between alternating strafe directions, staggered between bots.";
+    BotEvasionInterval => bot_evasion_interval: f32 = 3.0, BotCombat, 0.0, 60.0, "seconds", "Minimum time between combat jump/dash attempts. Zero disables both.";
+    BotJumpChance => bot_jump_chance: f32 = 0.5, BotCombat, 0.0, 1.0, "probability", "Fraction of safe combat evasion attempts that jump instead of dashing. Zero always attempts dash; one always jumps.";
+    BotSafetyDistance => bot_safety_distance: f32 = 1.6, BotNavigation, 0.1, 10.0, "units", "Forward ground and obstruction probe length for combat steering. Does not change physical player movement speed.";
+    BotThinkInterval => bot_think_interval: f32 = 0.125, BotNavigation, 0.05, 2.0, "seconds", "Interval between expensive visibility and tactical decisions. Steering remains at 120 Hz. Minimum bounds server work.";
+    BotRepathInterval => bot_repath_interval: f32 = 1.0, BotNavigation, 0.1, 30.0, "seconds", "Minimum interval for refreshing pickup route priorities. Invalidated targets can be replaced immediately.";
+    BotWaypointRadius => bot_waypoint_radius: f32 = 0.75, BotNavigation, 0.05, 1.5, "units", "Distance at which a navigation waypoint counts as reached.";
+    BotLootStopRadius => bot_loot_stop_radius: f32 = 0.3, BotNavigation, 0.01, 2.0, "units", "Distance from a reachable pickup goal at which direct approach stops.";
+    BotStuckInterval => bot_stuck_interval: f32 = 1.0, BotNavigation, 0.1, 10.0, "seconds", "Time between checks for failure to move.";
+    BotStuckDistance => bot_stuck_distance: f32 = 0.3, BotNavigation, 0.01, 3.0, "units", "Minimum displacement during a stuck check interval.";
+    BotStuckJumpAttempts => bot_stuck_jump_attempts: i64 = 2, BotNavigation, 0.0, 10.0, "attempts", "Number of consecutive stuck checks allowed to attempt an escape jump.";
+    BotIdleTurn => bot_idle_turn: f32 = 11.459156, BotNavigation, 0.0, 180.0, "degrees/decision", "Look-around angle per decision when no reachable route or pickup is available.";
+    BotPatrolDistance => bot_patrol_distance: f32 = 3.0, BotNavigation, 0.0, 50.0, "units", "Minimum distance for choosing a patrol destination among reachable navigation nodes.";
+    BotLootRange => bot_loot_range: f32 = 35.0, BotLoot, 0.0, 300.0, "units", "Search radius for reachable powerups and optional equipment offers.";
+    BotCombatPriorityRange => bot_combat_priority_range: f32 = 12.0, BotLoot, 0.0, 100.0, "units", "A visible opponent within this radius takes priority over travelling to any pickup.";
+    BotUrgentHealth => bot_urgent_health: f32 = 0.35, BotLoot, 0.0, 1.0, "fraction", "Health fraction below which emergency pickup reevaluation is requested.";
+    BotUrgentUtility => bot_urgent_utility: f32 = 70.0, BotLoot, 0.0, 1000.0, "utility", "Pickup utility that can justify seeking loot during distant combat.";
+    BotUsefulUtility => bot_useful_utility: f32 = 40.0, BotLoot, 0.0, 1000.0, "utility", "Utility needed for a nearby pickup to justify a short detour during distant combat.";
+    BotNearbyLootRange => bot_nearby_loot_range: f32 = 6.0, BotLoot, 0.0, 50.0, "units", "Distance for a useful pickup to qualify as a short combat detour.";
+    BotImmediateLootRange => bot_immediate_loot_range: f32 = 3.0, BotLoot, 0.0, 50.0, "units", "Distance at which any desired pickup may be approached during distant combat.";
+    BotLootCommitment => bot_loot_commitment: f32 = 1.6, BotLoot, 1.0, 10.0, "multiplier", "Preference for retaining the current pickup goal instead of oscillating between similar goals.";
+    BotLootDistanceScale => bot_loot_distance_scale: f32 = 10.0, BotLoot, 0.1, 100.0, "units", "Distance scale for reducing pickup priority with travel distance. Larger values favor distant valuable loot.";
+    BotHealthMissing => bot_health_missing: f32 = 0.05, BotLoot, 0.0, 1.0, "fraction", "Minimum missing health before a bot deliberately seeks a health pickup.";
+    BotHealthUtility => bot_health_utility: f32 = 20.0, BotLoot, 0.0, 1000.0, "utility", "Base utility of a useful health pickup.";
+    BotMissingHealthUtility => bot_missing_health_utility: f32 = 100.0, BotLoot, 0.0, 1000.0, "utility", "Additional health pickup utility multiplied by missing health fraction.";
+    BotBuffRefreshTime => bot_buff_refresh_time: f32 = 1.0, BotLoot, 0.0, 60.0, "seconds", "Remaining speed/rapid-fire duration below which a bot seeks a refresh.";
+    BotSpeedUtility => bot_speed_utility: f32 = 25.0, BotLoot, 0.0, 1000.0, "utility", "Priority of a speed pickup when a refresh is needed. Zero disables seeking it.";
+    BotRapidFireUtility => bot_rapid_fire_utility: f32 = 30.0, BotLoot, 0.0, 1000.0, "utility", "Priority of a rapid-fire pickup when a refresh is needed. Zero disables seeking it.";
+ }
  presentation: PresentationTuning {
+    DroneBlastViewTime => drone_blast_view_time: f32 = 1.25, Drone, 0.0, 30.0, "seconds", "Duration of the third-person view of your drone's explosion. Zero disables this camera; damage and respawn timing are independent.";
     CameraFov => camera_fov: f32 = 90.0, Camera, 10.0, 160.0, "degrees", "Vertical field of view for the world camera.";
     MouseSensitivity => mouse_sensitivity: f32 = 0.002, Camera, 0.0, 0.1, "radians/pixel", "Mouse turn sensitivity, applied to all players.";
     CameraRadius => camera_collision_radius: f32 = 0.15, Camera, 0.001, 3.0, "units", "Camera collision sphere used for presentation smoothing and the death camera.";
@@ -375,6 +637,15 @@ tuning_parameters! {
     AmbientBrightness => ambient_brightness: f32 = 300.0, Environment, 0.0, 10000.0, "illuminance", "Ambient illumination of dynamic players. Baked map lighting and first-person weapon lighting are independent.";
     WeaponBrightness => weapon_brightness: f32 = 450.0, Viewmodel, 0.0, 10000.0, "illuminance", "Ambient fill of the first-person weapon. Its two accent lights remain fixed.";
  }
+}
+
+impl SimulationTuning {
+    pub fn scoped_fov_degrees(&self, world_fov_degrees: f32) -> f32 {
+        // Optical magnification scales the projection plane, rather than
+        // replacing a user's chosen FOV with a fixed angle.
+        (2.0 * ((world_fov_degrees.to_radians() * 0.5).tan() / self.sniper_scope_zoom).atan())
+            .to_degrees()
+    }
 }
 
 impl Parameter {
@@ -416,12 +687,21 @@ impl FeatureSettings {
             }
             Edit::ResetAll => next = SettingsValues::default(),
         }
+        if next.bots.bot_retreat_distance > next.bots.bot_combat_distance {
+            return Err("bot_retreat_distance must not exceed bot_combat_distance.".into());
+        }
         let sim = next.simulation;
         if sim.player_height < 2.0 * sim.player_radius {
             return Err("player_height must be at least twice player_radius.".into());
         }
         if sim.eye_height > sim.player_height {
             return Err("eye_height must not exceed player_height.".into());
+        }
+        if sim.shotgun_falloff_end <= sim.shotgun_falloff_start {
+            return Err("shotgun_falloff_end must exceed shotgun_falloff_start.".into());
+        }
+        if sim.mg_max_spread < sim.mg_spread {
+            return Err("mg_max_spread must be at least mg_spread.".into());
         }
         if next != self.values {
             self.values = next;

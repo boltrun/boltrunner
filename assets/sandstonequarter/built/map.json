@@ -1,0 +1,314 @@
+{
+  "id": "sandstonequarter",
+  "name": "Sandstone Quarter",
+  "units_per_metre": 40,
+  "spawns": [
+    {
+      "position": [
+        -25.5,
+        0.04999999999999993,
+        -51.5
+      ],
+      "yaw": 1.5707963267948966
+    },
+    {
+      "position": [
+        25.5,
+        0.04999999999999993,
+        -51.5
+      ],
+      "yaw": 1.5707963267948966
+    },
+    {
+      "position": [
+        -26.5,
+        0.04999999999999993,
+        -17.0
+      ],
+      "yaw": -1.5707963267948966
+    },
+    {
+      "position": [
+        26.5,
+        0.04999999999999993,
+        -17.0
+      ],
+      "yaw": -1.5707963267948966
+    },
+    {
+      "position": [
+        -13.5,
+        0.04999999999999993,
+        -41.5
+      ],
+      "yaw": 1.5707963267948966
+    },
+    {
+      "position": [
+        13.5,
+        0.04999999999999993,
+        -41.5
+      ],
+      "yaw": 1.5707963267948966
+    },
+    {
+      "position": [
+        -18.0,
+        0.04999999999999993,
+        49.0
+      ],
+      "yaw": 1.5707963267948966
+    },
+    {
+      "position": [
+        18.0,
+        0.04999999999999993,
+        49.0
+      ],
+      "yaw": 1.5707963267948966
+    },
+    {
+      "position": [
+        -7.0,
+        0.04999999999999993,
+        39.0
+      ],
+      "yaw": 0.0
+    },
+    {
+      "position": [
+        7.0,
+        0.04999999999999993,
+        24.0
+      ],
+      "yaw": 3.141592653589793
+    }
+  ],
+  "pickup_spawns": [
+    [
+      -26.0,
+      0.65,
+      -28.0
+    ],
+    [
+      -14.0,
+      0.65,
+      -40.0
+    ],
+    [
+      -13.0,
+      3.6500000000000004,
+      -42.0
+    ],
+    [
+      0.0,
+      3.6500000000000004,
+      -42.0
+    ],
+    [
+      13.0,
+      3.6500000000000004,
+      -42.0
+    ],
+    [
+      14.0,
+      0.65,
+      -33.0
+    ],
+    [
+      26.0,
+      0.65,
+      -29.0
+    ],
+    [
+      -6.0,
+      0.65,
+      -17.0
+    ],
+    [
+      6.0,
+      0.65,
+      -17.0
+    ],
+    [
+      0.0,
+      0.65,
+      -8.0
+    ],
+    [
+      -17.0,
+      0.65,
+      17.0
+    ],
+    [
+      17.0,
+      0.65,
+      24.0
+    ],
+    [
+      -4.0,
+      0.65,
+      35.0
+    ],
+    [
+      4.0,
+      0.65,
+      50.0
+    ]
+  ],
+  "triggers": [],
+  "lightmaps": [
+    "lm_0000.png"
+  ],
+  "sky": "sky.png",
+  "materials": [
+    {
+      "id": 0,
+      "name": "textures/sandstone/paving",
+      "texture": "textures__sandstone__paving.png",
+      "glow": null,
+      "width": 256,
+      "height": 256,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "id": 1,
+      "name": "textures/sandstone/brick",
+      "texture": "textures__sandstone__brick.png",
+      "glow": null,
+      "width": 256,
+      "height": 256,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "id": 2,
+      "name": "textures/sandstone/plaster",
+      "texture": "textures__sandstone__plaster.png",
+      "glow": null,
+      "width": 1254,
+      "height": 1254,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "id": 3,
+      "name": "textures/sandstone/stone",
+      "texture": "textures__sandstone__stone.png",
+      "glow": null,
+      "width": 256,
+      "height": 256,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "id": 4,
+      "name": "textures/sandstone/window",
+      "texture": "textures__sandstone__window.png",
+      "glow": null,
+      "width": 256,
+      "height": 256,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "id": 5,
+      "name": "textures/sandstone/wood_decor",
+      "texture": "textures__sandstone__wood_decor.png",
+      "glow": null,
+      "width": 256,
+      "height": 256,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "id": 6,
+      "name": "textures/sandstone/teal",
+      "texture": "textures__sandstone__teal.png",
+      "glow": null,
+      "width": 256,
+      "height": 256,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "id": 7,
+      "name": "textures/sandstone/blue",
+      "texture": "textures__sandstone__blue.png",
+      "glow": null,
+      "width": 256,
+      "height": 256,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "id": 8,
+      "name": "textures/sandstone/wood",
+      "texture": "textures__sandstone__wood.png",
+      "glow": null,
+      "width": 256,
+      "height": 256,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "id": 9,
+      "name": "textures/sandstone/tile",
+      "texture": "textures__sandstone__tile.png",
+      "glow": null,
+      "width": 256,
+      "height": 256,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "id": 10,
+      "name": "textures/sandstone/water",
+      "texture": "textures__sandstone__water.png",
+      "glow": null,
+      "width": 256,
+      "height": 256,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "id": 11,
+      "name": "textures/sandstone/cloth_red",
+      "texture": "textures__sandstone__cloth_red.png",
+      "glow": null,
+      "width": 256,
+      "height": 256,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "id": 12,
+      "name": "textures/sandstone/cloth_teal",
+      "texture": "textures__sandstone__cloth_teal.png",
+      "glow": null,
+      "width": 256,
+      "height": 256,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    }
+  ],
+  "counts": {
+    "brushes": 4250
+  },
+  "collision_triangles": 51340,
+  "render_triangles": 38970
+}

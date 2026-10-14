@@ -1,3 +1,4 @@
+pub mod characters;
 pub mod maps;
 mod timing;
 pub mod tuning;
@@ -56,6 +57,7 @@ impl Plugin for GameNetworkingPlugin {
         .add_plugins(timing::TimingPlugin)
         .add_plugins(tuning::TuningPlugin)
         .add_plugins(maps::MapsPlugin)
+        .add_plugins(characters::CharactersPlugin)
         .add_observer(join_game)
         .add_systems(Startup, start_lobby)
         .add_systems(Update, (update_session, send_join, maintain_lobby).chain())
@@ -78,6 +80,7 @@ pub struct Session {
     pub phase: SessionPhase,
     pub nickname: String,
     pub color: u8,
+    pub character: String,
     pub error: Option<String>,
     pub lobby_ready: bool,
     pub map: Option<String>,
@@ -177,6 +180,7 @@ fn send_join(
             map_revision: session.map_revision.expect("server map revision"),
             nickname: session.nickname.clone(),
             color: session.color,
+            character: session.character.clone(),
         });
         session.join_sent = true;
     }
@@ -188,6 +192,9 @@ type SessionReplicas = Or<(
     With<boltrunner_shared::match_state::MatchState>,
     With<boltrunner_shared::tuning::FeatureSettings>,
     With<boltrunner_shared::powerups::Pickup>,
+    With<boltrunner_shared::characters::CharacterCatalog>,
+    With<boltrunner_shared::inventory::GroundWeapon>,
+    With<boltrunner_shared::weapon::ShockField>,
 )>;
 
 pub fn update_session(
@@ -202,8 +209,16 @@ pub fn update_session(
         ),
         With<Client>,
     >,
-    players: Query<(&PlayerName, &boltrunner_shared::player_color::PlayerColor), With<Predicted>>,
+    players: Query<
+        (
+            &PlayerName,
+            &boltrunner_shared::player_color::PlayerColor,
+            &boltrunner_shared::characters::PlayerCharacter,
+        ),
+        With<Predicted>,
+    >,
     rounds: Query<&boltrunner_shared::match_state::MatchState>,
+    catalogs: Query<Entity, With<boltrunner_shared::characters::CharacterCatalog>>,
     replicas: Query<Entity, SessionReplicas>,
 ) {
     let Some(entity) = session.connection else {
@@ -240,7 +255,8 @@ pub fn update_session(
             session.map_ready = false;
         }
     }
-    let lobby_ready = failure.is_none() && session.map.is_some() && !rounds.is_empty();
+    let lobby_ready =
+        failure.is_none() && session.map.is_some() && !rounds.is_empty() && !catalogs.is_empty();
     if session.lobby_ready != lobby_ready {
         session.lobby_ready = lobby_ready;
     }
@@ -254,13 +270,19 @@ pub fn update_session(
         if !session.lobby_ready || session.map_ready {
             session.elapsed += time.delta_secs();
         }
-        if let Some((name, color)) = players.iter().next() {
+        if let Some((name, color, character)) = players.iter().next() {
             session.nickname = name.0.clone();
             session.color = color.0;
+            session.character = character.0.clone();
             session.phase = SessionPhase::Playing;
         } else if session.elapsed >= 15.0 && failure.is_none() {
             failure = Some("Connection timed out. Check the server and try again.".into());
         }
+    }
+    if session.is_playing()
+        && let Some((_, _, character)) = players.iter().next()
+    {
+        session.character = character.0.clone();
     }
     if let Some(error) = failure {
         let show_error = session.phase != SessionPhase::Title;
@@ -350,10 +372,15 @@ fn predict(
             if shots.0.len() >= 256 {
                 shots.0.drain(..128);
             }
-            shots.0.push(PredictedShot {
-                bolt: boltrunner_shared::weapon::Projectile::from_shot(id.0, &state, &input.0),
-                tick: timeline.tick(),
-            });
+            let mut shot_state = state.clone();
+            shot_state.weapon.selected = state.weapon.last_shot_kind;
+            shot_state.weapon.charge_ticks = state.weapon.last_shot_charge;
+            for bolt in boltrunner_shared::weapon::Projectile::volley(id.0, &shot_state, &input.0) {
+                shots.0.push(PredictedShot {
+                    bolt,
+                    tick: timeline.tick(),
+                });
+            }
         }
     }
 }

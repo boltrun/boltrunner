@@ -8,12 +8,17 @@ pub struct PlayerId(pub u64);
 #[derive(Component, Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct PlayerName(pub String);
 
+/// Colors held by server bots remain available to incoming human players.
+#[derive(Component, Serialize, Deserialize, Clone, Debug, PartialEq)]
+pub struct BotPlayer;
+
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct JoinRequest {
     pub map: String,
     pub map_revision: u64,
     pub nickname: String,
     pub color: u8,
+    pub character: String,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
@@ -44,10 +49,16 @@ pub struct PlayerState {
     pub yaw: f32,
     pub dash: DashState,
     pub jump: JumpState,
+    pub zipline: crate::zipline::ZiplineState,
     pub weapon: crate::weapon::WeaponState,
     pub health: crate::health::Health,
     pub speed_ticks: u16,
     pub rapid_fire_ticks: u16,
+    pub drone: Option<crate::arsenal::DroneState>,
+    pub damage_fraction: f32,
+    pub burn_ticks: u16,
+    pub burn_dps: f32,
+    pub burn_owner: Option<u64>,
     pub grounded: bool,
     pub match_paused: bool,
     pub death: Option<DeathState>,
@@ -139,9 +150,27 @@ impl Ease for PlayerState {
                 } else {
                     start.rapid_fire_ticks
                 },
+                drone: match (start.drone, end.drone) {
+                    (Some(a), Some(mut b)) => {
+                        b.position = a.position.lerp(b.position, t);
+                        Some(b)
+                    }
+                    _ => {
+                        if t >= 1.0 {
+                            end.drone
+                        } else {
+                            start.drone
+                        }
+                    }
+                },
+                damage_fraction: end.damage_fraction,
+                burn_ticks: end.burn_ticks,
+                burn_dps: end.burn_dps,
+                burn_owner: end.burn_owner,
                 // Discrete resource/timer state must not be blended between snapshots.
                 dash: if t >= 1.0 { end.dash } else { start.dash },
                 jump: if t >= 1.0 { end.jump } else { start.jump },
+                zipline: if t >= 1.0 { end.zipline } else { start.zipline },
                 death: if t >= 1.0 { end.death } else { start.death },
                 match_paused: if t >= 1.0 {
                     end.match_paused
@@ -183,11 +212,22 @@ pub struct PlayerInput {
     pub right: bool,
     /// One jump attempt per physical press; holding or repeating a packet cannot jump again.
     pub jump_press: u16,
+    /// One endpoint interaction per physical E press.
+    pub interact_press: u16,
     /// Wrapping press counter, sampled each render frame and carried across fixed ticks.
     /// Repeating an input packet must not trigger another dash.
     pub dash_press: u16,
     /// Held left button; fire cadence is enforced by shared simulation.
     pub fire: bool,
+    pub fire_press: u16,
+    pub reload_press: u16,
+    pub alt: bool,
+    pub up: bool,
+    pub down: bool,
+    pub slot: u8,
+    pub slot_press: u16,
+    pub dev_weapon: crate::arsenal::WeaponKind,
+    pub dev_weapon_press: u16,
     pub yaw: u16,
     pub pitch: i16,
 }
@@ -243,6 +283,14 @@ impl Plugin for ProtocolPlugin {
             .add_direction(NetworkDirection::ClientToServer);
         app.register_message::<JoinRejected>()
             .add_direction(NetworkDirection::ServerToClient);
+        app.register_message::<crate::characters::ChangeCharacter>()
+            .add_direction(NetworkDirection::ClientToServer);
+        app.register_message::<crate::characters::CharacterReply>()
+            .add_direction(NetworkDirection::ServerToClient);
+        app.component::<crate::characters::CharacterCatalog>()
+            .replicate();
+        app.component::<crate::characters::PlayerCharacter>()
+            .replicate();
         app.register_message::<crate::tuning::EditRequest>()
             .add_direction(NetworkDirection::ClientToServer);
         app.register_message::<crate::tuning::EditReply>()
@@ -252,13 +300,19 @@ impl Plugin for ProtocolPlugin {
         app.component::<crate::match_state::MatchState>()
             .replicate();
         app.component::<PlayerName>().replicate();
+        app.component::<BotPlayer>().replicate();
         app.component::<crate::player_color::PlayerColor>()
+            .replicate();
+        app.component::<crate::equipment::PlayerEquipment>()
             .replicate();
         app.component::<PlayerId>().replicate();
         app.component::<crate::weapon::Projectile>()
             .replicate()
             .add_linear_interpolation();
         app.component::<crate::powerups::Pickup>().replicate();
+        app.component::<crate::inventory::GroundWeapon>()
+            .replicate();
+        app.component::<crate::weapon::ShockField>().replicate();
         app.component::<PlayerState>()
             .replicate()
             .predict()

@@ -1,0 +1,27 @@
+{
+  "source": "https://www.oto.chat/browse#RLLL",
+  "author": "Jsut a bird · HoYoverse",
+  "license": "Project owner states permission for use in this game; original VRM restrictions retained in source.json",
+  "original_sha256": "aa88c6d8813787f4e36f23a3a56460a3e27b0b7d1fa3b036b438aff8cf261853",
+  "original_vrm_metadata": {
+    "allowedUserName": "Everyone",
+    "author": "Jsut a bird",
+    "commercialUssageName": "Disallow",
+    "contactInformation": "",
+    "licenseName": "Redistribution_Prohibited",
+    "otherLicenseUrl": "",
+    "otherPermissionUrl": "",
+    "reference": "",
+    "sexualUssageName": "Disallow",
+    "title": "Keqingvrm",
+    "version": "1.0",
+    "violentUssageName": "Disallow"
+  },
+  "stripped_morphs": true,
+  "alpha_materials": [
+    "Hairs+"
+  ],
+  "texture_sha256": null,
+  "animation_adaptation": "Six in-place clips with planted-foot gait, knee and ankle articulation, opposing arm swing, idle breathing, jump, dash and death. Authored locally for Boltrunner.",
+  "animation_exporter": "scripts/build-keqing-animations.py"
+}

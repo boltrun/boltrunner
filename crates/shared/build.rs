@@ -87,6 +87,7 @@ fn main() {
         "crates/shared/src",
         "crates/server/src",
         "crates/client/src",
+        "vendor/aeronet_websocket",
     ] {
         hash_path(root, &root.join(path), &mut digest);
     }

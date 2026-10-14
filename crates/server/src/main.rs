@@ -1,6 +1,12 @@
+mod arsenal;
+mod bot_equipment;
+mod bots;
 mod build_check;
+mod characters;
 mod combat;
+mod equipment;
 mod history;
+mod inventory;
 mod loading;
 mod maps;
 mod matches;
@@ -51,9 +57,13 @@ fn main() {
         })
         .add_plugins(ProtocolPlugin)
         .insert_resource(ReplicationMetadata::new(SEND_INTERVAL))
+        .add_plugins(equipment::EquipmentPlugin)
         .add_plugins(tuning::TuningPlugin)
+        .add_plugins(characters::CharactersPlugin)
         .add_plugins(loading::LoadingPlugin)
         .add_plugins(maps::MapsPlugin)
+        .add_plugins(bots::BotsPlugin)
+        .add_plugins(bot_equipment::BotEquipmentPlugin)
         .insert_resource(BindAddress(address))
         .init_resource::<matches::CurrentMatch>()
         .init_resource::<matches::MatchClock>()
@@ -68,17 +78,26 @@ fn main() {
             FixedUpdate,
             (
                 history::capture_before,
+                inventory::collect,
                 simulate,
                 history::capture_after,
                 powerups::collect,
                 powerups::manage,
-                combat::advance_projectiles,
+                arsenal::resolve_shots,
+                arsenal::advance_projectiles,
+                arsenal::advance_effects,
+                arsenal::advance_fields,
+                inventory::settle,
             )
                 .chain(),
         )
         .add_systems(
             PostUpdate,
-            (combat::publish_projectiles, matches::publish).before(ReplicationSystems::Send),
+            (matches::publish, arsenal::publish_equipment).before(ReplicationSystems::Send),
+        )
+        .add_systems(
+            PostUpdate,
+            combat::publish_projectiles.before(ReplicationSystems::Send),
         )
         .run();
 }
@@ -129,14 +148,24 @@ fn spawn_players(
         ),
         (With<ClientOf>, With<Connected>),
     >,
-    players: Query<(&PlayerState, &PlayerColor)>,
+    players: Query<(
+        Entity,
+        &PlayerState,
+        &PlayerColor,
+        Has<boltrunner_shared::protocol::BotPlayer>,
+    )>,
     round: Res<crate::matches::CurrentMatch>,
     settings: Res<crate::tuning::ServerSettings>,
+    catalog: Res<crate::characters::ServerCatalog>,
     mut commands: Commands,
 ) {
     let mut occupied = Vec::new();
     let mut occupied_colors = [false; PALETTE.len()];
-    for (state, color) in &players {
+    let mut replaceable = [None; PALETTE.len()];
+    for (entity, state, color, bot) in &players {
+        if bot {
+            replaceable[color.0 as usize] = Some(entity);
+        }
         occupied.push(state.position);
         occupied_colors[color.0 as usize] = true;
     }
@@ -149,6 +178,12 @@ fn spawn_players(
             if request.map != round.map || request.map_revision != round.map_revision {
                 replies.send::<LobbyChannel>(JoinRejected {
                     reason: "The server map changed. Reconnect before joining.".into(),
+                });
+                continue;
+            }
+            if !catalog.accepts(&request.character) {
+                replies.send::<LobbyChannel>(JoinRejected {
+                    reason: "Choose an available character.".into(),
                 });
                 continue;
             }
@@ -167,17 +202,52 @@ fn spawn_players(
                 });
                 continue;
             };
-            if occupied_colors[color.0 as usize] {
+            let humans = occupied_colors
+                .iter()
+                .enumerate()
+                .filter(|(index, used)| **used && replaceable[*index].is_none())
+                .count();
+            if humans >= arena::MAX_PLAYERS || humans >= PALETTE.len() {
+                replies.send::<LobbyChannel>(JoinRejected {
+                    reason: "The server is full. Please try again later.".into(),
+                });
+                continue;
+            }
+            let color_index = color.0 as usize;
+            if occupied_colors[color_index] && replaceable[color_index].is_none() {
                 replies.send::<LobbyChannel>(JoinRejected {
                     reason: "This color is taken. Choose another.".into(),
                 });
                 continue;
             }
-            if occupied.len() >= arena::MAX_PLAYERS {
+            // Reserve a human's color and capacity before committing any removal.
+            // Prefer the bot of that color; if only capacity is exhausted, yield
+            // another bot instead. Humans are never evicted for a new join.
+            let replacement = if let Some(bot) = replaceable[color_index] {
+                Some((color_index, bot))
+            } else if occupied.len() >= arena::MAX_PLAYERS {
+                replaceable
+                    .iter()
+                    .enumerate()
+                    .find_map(|(index, bot)| bot.map(|bot| (index, bot)))
+            } else {
+                None
+            };
+            if occupied.len() >= arena::MAX_PLAYERS && replacement.is_none() {
                 replies.send::<LobbyChannel>(JoinRejected {
                     reason: "The server is full. Please try again later.".into(),
                 });
                 continue;
+            }
+            if let Some((index, bot)) = replacement {
+                replaceable[index] = None;
+                occupied_colors[index] = false;
+                commands.entity(bot).despawn();
+                if let Ok((_, state, _, _)) = players.get(bot) {
+                    if let Some(index) = occupied.iter().position(|p| *p == state.position) {
+                        occupied.swap_remove(index);
+                    }
+                }
             }
             let spawn_index = arena::choose_spawn(
                 rand::random::<u32>() as usize,
@@ -192,6 +262,8 @@ fn spawn_players(
             commands.spawn((
                 PlayerId(id),
                 PlayerName(name.clone()),
+                boltrunner_shared::equipment::PlayerEquipment::default(),
+                boltrunner_shared::characters::PlayerCharacter(request.character),
                 color,
                 PlayerState {
                     tuning: settings.values.simulation,
@@ -203,6 +275,7 @@ fn spawn_players(
                         ..default()
                     },
                     dash: boltrunner_shared::protocol::DashState::new(settings.values.simulation),
+                    weapon: boltrunner_shared::weapon::WeaponState::new(settings.values.simulation),
                     position,
                     yaw: spawn.yaw,
                     view_yaw_offset: spawn.yaw,
@@ -237,7 +310,7 @@ fn simulate(
         &PlayerId,
         &mut PlayerState,
         &ActionState<PlayerInput>,
-        &ControlledBy,
+        Option<&ControlledBy>,
     )>,
     links: Query<(
         &PingManager,
@@ -255,13 +328,23 @@ fn simulate(
         }
         if state.weapon.shot != previous_shot {
             let lag = links
-                .get(control.owner)
+                .get(control.map_or(Entity::PLACEHOLDER, |c| c.owner))
                 .ok()
                 .map_or(0.0, |(ping, delay)| history::validated_delay(ping, delay));
-            commands.spawn((
-                Projectile::from_shot(id.0, &state, &input.0),
-                history::ProjectileLag(lag),
-            ));
+            let mut shot_state = state.clone();
+            shot_state.weapon.selected = state.weapon.last_shot_kind;
+            shot_state.weapon.charge_ticks = state.weapon.last_shot_charge;
+            if shot_state.weapon.selected.is_projectile() {
+                for bolt in Projectile::volley(id.0, &shot_state, &input.0) {
+                    commands.spawn((bolt, history::ProjectileLag(lag)));
+                }
+            } else if shot_state.weapon.selected != boltrunner_shared::arsenal::WeaponKind::Drone {
+                commands.spawn(arsenal::ShotRequest {
+                    bolt: Projectile::from_shot(id.0, &shot_state, &input.0),
+                    tuning: state.tuning,
+                    lag,
+                });
+            }
         }
     }
 }

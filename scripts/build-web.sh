@@ -47,11 +47,15 @@ asset_directories = {
     **{f"{m['id']}/built/textures": pathlib.Path('assets') / m['id'] / 'built/textures' for m in registry['maps']},
     'shaders': pathlib.Path('assets/shaders'),
     'fonts': pathlib.Path('assets/fonts'),
+    'characters': pathlib.Path('assets/characters'),
     'weapons/starter_pistol/built': pathlib.Path('assets/weapons/starter_pistol/built'),
+    'weapons/arsenal/built': pathlib.Path('assets/weapons/arsenal/built'),
 }
 for name, directory in asset_directories.items():
-    for path in sorted(directory.iterdir()):
-        digest.update(f'{name}/{path.name}'.encode())
+    for path in sorted(directory.rglob('*')):
+        if not path.is_file():
+            continue
+        digest.update(f'{name}/{path.relative_to(directory)}'.encode())
         digest.update(hashlib.sha256(path.read_bytes()).digest())
 version = digest.hexdigest()[:16]
 destination = pathlib.Path('dist/pkg') / version
@@ -81,8 +85,11 @@ with zipfile.ZipFile(destination / 'starter-pistol-source.zip', 'w', zipfile.ZIP
     for path in sorted(pathlib.Path('assets/weapons/starter_pistol').rglob('*')):
         if path.is_file() and 'built' not in path.parts:
             archive.write(path, path)
-    for path in map(pathlib.Path, ['scripts/export-starter-pistol.py', 'LICENSE']):
+    for path in map(pathlib.Path, ['scripts/export-starter-pistol.py', 'scripts/prepare-pistol-reload.py', 'LICENSE']):
         archive.write(path, path)
+    archive.write('scripts/build-arsenal-models.py')
+    for path in sorted(pathlib.Path('assets/weapons/arsenal').rglob('*')):
+        if path.is_file(): archive.write(path,path)
 
 # Publish the page only after both files from the new build are ready.
 page = template.replace('__BOLTRUNNER_WEB_MODULE__', f'./pkg/{version}/boltrunner_web.js')

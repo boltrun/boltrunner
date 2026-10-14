@@ -15,6 +15,7 @@ bevy = { workspace = true, features = [
     "bevy_mesh", "bevy_camera", "bevy_light", "bevy_shader", "bevy_window",
     "bevy_winit", "bevy_log", "bevy_ui", "bevy_ui_render", "bevy_text",
     "default_font", "png", "bevy_gltf", "bevy_scene", "reflect_auto_register",
+    "gltf_animation", "jpeg", "http", "https",
 ] }
 lightyear = { workspace = true, features = ["client"] }
 boltrunner-shared.workspace = true

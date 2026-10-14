@@ -1,0 +1,164 @@
+# Registry source: aeronet_websocket 0.21.0, aecsocket/aeronet cbbaff12df74f9f611619a89f47c75a2f01a5e32.
+# Local fixes: TCP_NODELAY on accepted sockets and filtering WebSocket control frames.
+[package]
+edition = "2024"
+rust-version = "1.95.0"
+name = "aeronet_websocket"
+version = "0.21.0"
+build = false
+autolib = false
+autobins = false
+autoexamples = false
+autotests = false
+autobenches = false
+description = "WebSocket IO layer implementation for `aeronet`"
+readme = false
+keywords = [
+    "bevy",
+    "gamedev",
+    "network",
+]
+categories = [
+    "game-development",
+    "network-programming",
+]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/aecsocket/aeronet"
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg=docsrs_aeronet"]
+targets = [
+    "x86_64-unknown-linux-gnu",
+    "wasm32-unknown-unknown",
+]
+
+[features]
+client = []
+default = ["self-signed"]
+document-features = ["dep:document-features"]
+self-signed = ["dep:rcgen"]
+server = ["dep:tokio-rustls"]
+
+[lib]
+name = "aeronet_websocket"
+path = "src/lib.rs"
+
+[dependencies.aeronet_io]
+version = "0.21.0"
+default-features = false
+
+[dependencies.bevy_app]
+version = "0.19.0"
+default-features = false
+
+[dependencies.bevy_ecs]
+version = "0.19.0"
+default-features = false
+
+[dependencies.bevy_platform]
+version = "0.19.0"
+default-features = false
+
+[dependencies.bytes]
+version = "1.6.1"
+default-features = false
+
+[dependencies.cfg-if]
+version = "1.0.0"
+
+[dependencies.derive_more]
+version = "2.0.1"
+features = [
+    "deref",
+    "deref_mut",
+    "display",
+    "error",
+]
+default-features = false
+
+[dependencies.document-features]
+version = "0.2.11"
+optional = true
+
+[dependencies.futures]
+version = "0.3.30"
+
+[dependencies.tracing]
+version = "0.1.40"
+default-features = false
+
+[target.'cfg(not(target_family = "wasm"))'.dependencies.rcgen]
+version = "0.13.1"
+optional = true
+
+[target.'cfg(not(target_family = "wasm"))'.dependencies.rustls]
+version = "0.23.23"
+
+[target.'cfg(not(target_family = "wasm"))'.dependencies.rustls-native-certs]
+version = "0.8.0"
+
+[target.'cfg(not(target_family = "wasm"))'.dependencies.tokio]
+version = "1.39.2"
+features = ["rt-multi-thread"]
+
+[target.'cfg(not(target_family = "wasm"))'.dependencies.tokio-rustls]
+version = "0.26.2"
+optional = true
+
+[target.'cfg(not(target_family = "wasm"))'.dependencies.tokio-tungstenite]
+version = "0.26.2"
+features = ["rustls-tls-native-roots"]
+
+[target.'cfg(target_family = "wasm")'.dependencies.js-sys]
+version = "0.3.70"
+
+[target.'cfg(target_family = "wasm")'.dependencies.wasm-bindgen]
+version = "0.2.101"
+
+[target.'cfg(target_family = "wasm")'.dependencies.wasm-bindgen-futures]
+version = "0.4.51"
+
+[target.'cfg(target_family = "wasm")'.dependencies.web-sys]
+version = "0.3.70"
+features = [
+    "BinaryType",
+    "CloseEvent",
+    "ErrorEvent",
+    "MessageEvent",
+    "WebSocket",
+]
+
+[lints.clippy]
+alloc_instead_of_core = "warn"
+module_name_repetitions = "allow"
+needless_pass_by_value = "allow"
+similar_names = "allow"
+std_instead_of_alloc = "warn"
+std_instead_of_core = "warn"
+too_many_arguments = "allow"
+type_complexity = "allow"
+unwrap_used = "warn"
+
+[lints.clippy.all]
+level = "warn"
+priority = -1
+
+[lints.clippy.nursery]
+level = "warn"
+priority = -1
+
+[lints.clippy.pedantic]
+level = "warn"
+priority = -1
+
+[lints.rust]
+missing_docs = "warn"
+
+[lints.rust.unexpected_cfgs]
+level = "warn"
+priority = 0
+check-cfg = [
+    "cfg(fuzzing)",
+    "cfg(docsrs_aeronet)",
+]

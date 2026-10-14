@@ -1,0 +1,586 @@
+{
+  "id": "candycourtyard",
+  "name": "Candy Courtyard",
+  "units_per_metre": 40,
+  "spawns": [
+    {
+      "position": [
+        -37.1,
+        0.17999999999999994,
+        -30.8
+      ],
+      "yaw": 3.9269908169872414
+    },
+    {
+      "position": [
+        37.1,
+        0.17999999999999994,
+        -30.8
+      ],
+      "yaw": 2.356194490192345
+    },
+    {
+      "position": [
+        -32.2,
+        0.17999999999999994,
+        -16.52
+      ],
+      "yaw": 3.9269908169872414
+    },
+    {
+      "position": [
+        32.2,
+        0.17999999999999994,
+        -16.52
+      ],
+      "yaw": 2.356194490192345
+    },
+    {
+      "position": [
+        -36.4,
+        0.17999999999999994,
+        15.4
+      ],
+      "yaw": -0.7853981633974483
+    },
+    {
+      "position": [
+        36.4,
+        0.17999999999999994,
+        15.4
+      ],
+      "yaw": 0.7853981633974483
+    },
+    {
+      "position": [
+        -37.1,
+        0.17999999999999994,
+        30.8
+      ],
+      "yaw": -0.7853981633974483
+    },
+    {
+      "position": [
+        37.1,
+        0.17999999999999994,
+        30.8
+      ],
+      "yaw": 0.7853981633974483
+    }
+  ],
+  "pickup_spawns": [
+    [
+      0.0,
+      3.78,
+      -22.540000000000003
+    ],
+    [
+      -20.72,
+      3.78,
+      -22.82
+    ],
+    [
+      20.72,
+      3.78,
+      -22.82
+    ],
+    [
+      -23.8,
+      0.78,
+      -3.3600000000000003
+    ],
+    [
+      23.8,
+      0.78,
+      -3.3600000000000003
+    ],
+    [
+      -10.36,
+      5.460000000000001,
+      -13.3
+    ],
+    [
+      10.5,
+      5.460000000000001,
+      -13.3
+    ],
+    [
+      0.0,
+      7.476000000000001,
+      4.2
+    ],
+    [
+      -6.300000000000001,
+      0.78,
+      11.48
+    ],
+    [
+      6.720000000000001,
+      0.78,
+      11.48
+    ],
+    [
+      -14.980000000000002,
+      0.78,
+      26.74
+    ],
+    [
+      14.840000000000002,
+      0.78,
+      26.74
+    ]
+  ],
+  "triggers": [
+    {
+      "kind": "push",
+      "planes": [
+        [
+          0.0,
+          -1.0,
+          0.0,
+          -0.144
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.8400000000000001
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          10.57
+        ],
+        [
+          1.0,
+          0.0,
+          0.0,
+          -8.190000000000001
+        ],
+        [
+          0.0,
+          0.0,
+          -1.0,
+          -7.91
+        ],
+        [
+          -1.0,
+          0.0,
+          0.0,
+          11.41
+        ]
+      ],
+      "velocity": [
+        4.8756822320289475,
+        24.119701490690137,
+        -5.711513471805375
+      ]
+    },
+    {
+      "kind": "push",
+      "planes": [
+        [
+          0.0,
+          -1.0,
+          0.0,
+          -0.144
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.8400000000000001
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          10.57
+        ],
+        [
+          1.0,
+          0.0,
+          0.0,
+          11.41
+        ],
+        [
+          0.0,
+          0.0,
+          -1.0,
+          -7.91
+        ],
+        [
+          -1.0,
+          0.0,
+          0.0,
+          -8.190000000000001
+        ]
+      ],
+      "velocity": [
+        -4.8756822320289475,
+        24.119701490690137,
+        -5.711513471805375
+      ]
+    },
+    {
+      "kind": "zipline",
+      "planes": [
+        [
+          0.0,
+          -1.0,
+          0.0,
+          -3.0120000000000005
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          5.4
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -20.3
+        ],
+        [
+          1.0,
+          0.0,
+          0.0,
+          -15.540000000000001
+        ],
+        [
+          0.0,
+          0.0,
+          -1.0,
+          23.1
+        ],
+        [
+          -1.0,
+          0.0,
+          0.0,
+          18.34
+        ]
+      ],
+      "start": [
+        -16.94,
+        3.002,
+        -21.700000000000003
+      ],
+      "end": [
+        -26.6,
+        3.002,
+        9.520000000000001
+      ]
+    },
+    {
+      "kind": "zipline",
+      "planes": [
+        [
+          0.0,
+          -1.0,
+          0.0,
+          -3.0120000000000005
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          5.4
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          10.920000000000002
+        ],
+        [
+          1.0,
+          0.0,
+          0.0,
+          -25.200000000000003
+        ],
+        [
+          0.0,
+          0.0,
+          -1.0,
+          -8.120000000000001
+        ],
+        [
+          -1.0,
+          0.0,
+          0.0,
+          28.0
+        ]
+      ],
+      "start": [
+        -26.6,
+        3.002,
+        9.520000000000001
+      ],
+      "end": [
+        -16.94,
+        3.002,
+        -21.700000000000003
+      ]
+    },
+    {
+      "kind": "zipline",
+      "planes": [
+        [
+          0.0,
+          -1.0,
+          0.0,
+          -3.0120000000000005
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          5.4
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          10.920000000000002
+        ],
+        [
+          1.0,
+          0.0,
+          0.0,
+          -19.6
+        ],
+        [
+          0.0,
+          0.0,
+          -1.0,
+          -8.120000000000001
+        ],
+        [
+          -1.0,
+          0.0,
+          0.0,
+          22.400000000000002
+        ]
+      ],
+      "start": [
+        -21.0,
+        3.002,
+        9.520000000000001
+      ],
+      "end": [
+        23.8,
+        3.002,
+        9.520000000000001
+      ]
+    },
+    {
+      "kind": "zipline",
+      "planes": [
+        [
+          0.0,
+          -1.0,
+          0.0,
+          -3.0120000000000005
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          5.4
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          10.920000000000002
+        ],
+        [
+          1.0,
+          0.0,
+          0.0,
+          25.200000000000003
+        ],
+        [
+          0.0,
+          0.0,
+          -1.0,
+          -8.120000000000001
+        ],
+        [
+          -1.0,
+          0.0,
+          0.0,
+          -22.400000000000002
+        ]
+      ],
+      "start": [
+        23.8,
+        3.002,
+        9.520000000000001
+      ],
+      "end": [
+        -21.0,
+        3.002,
+        9.520000000000001
+      ]
+    }
+  ],
+  "lightmaps": [
+    "lm_0000.png",
+    "lm_0002.png"
+  ],
+  "sky": "sky.png",
+  "materials": [
+    {
+      "id": 0,
+      "name": "textures/candy/biscuit",
+      "texture": "textures__candy__biscuit.png",
+      "glow": null,
+      "width": 1254,
+      "height": 1254,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "id": 1,
+      "name": "textures/candy/fondant",
+      "texture": "textures__candy__fondant.png",
+      "glow": null,
+      "width": 1254,
+      "height": 1254,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "id": 2,
+      "name": "textures/candy/white",
+      "texture": "textures__candy__white.png",
+      "glow": null,
+      "width": 64,
+      "height": 64,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "id": 3,
+      "name": "textures/candy/mint",
+      "texture": "textures__candy__mint.png",
+      "glow": null,
+      "width": 64,
+      "height": 64,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "id": 4,
+      "name": "textures/candy/waffle",
+      "texture": "textures__candy__waffle.png",
+      "glow": null,
+      "width": 256,
+      "height": 256,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "id": 5,
+      "name": "textures/candy/cream",
+      "texture": "textures__candy__cream.png",
+      "glow": null,
+      "width": 64,
+      "height": 64,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "id": 6,
+      "name": "textures/candy/peach",
+      "texture": "textures__candy__peach.png",
+      "glow": null,
+      "width": 64,
+      "height": 64,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "id": 7,
+      "name": "textures/candy/rose",
+      "texture": "textures__candy__rose.png",
+      "glow": null,
+      "width": 64,
+      "height": 64,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "id": 8,
+      "name": "textures/candy/blush",
+      "texture": "textures__candy__blush.png",
+      "glow": null,
+      "width": 64,
+      "height": 64,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "id": 9,
+      "name": "textures/candy/cocoa",
+      "texture": "textures__candy__cocoa.png",
+      "glow": null,
+      "width": 64,
+      "height": 64,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "id": 10,
+      "name": "textures/candy/lavender",
+      "texture": "textures__candy__lavender.png",
+      "glow": null,
+      "width": 64,
+      "height": 64,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "id": 11,
+      "name": "textures/candy/gold",
+      "texture": "textures__candy__gold.png",
+      "glow": null,
+      "width": 64,
+      "height": 64,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "id": 12,
+      "name": "textures/candy/ink",
+      "texture": "textures__candy__ink.png",
+      "glow": null,
+      "width": 64,
+      "height": 64,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    }
+  ],
+  "counts": {
+    "brushes": 1203
+  },
+  "collision_triangles": 20280,
+  "render_triangles": 19261
+}
