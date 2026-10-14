@@ -195,7 +195,13 @@ fn edit(
     keys: Res<ButtonInput<KeyCode>>,
     buttons: Query<&Interaction, (Changed<Interaction>, With<PlayButton>)>,
     choices: Query<(&Interaction, &ColorChoice), Changed<Interaction>>,
-    colors: Query<&PlayerColor, With<PlayerId>>,
+    colors: Query<
+        &PlayerColor,
+        (
+            With<PlayerId>,
+            Without<boltrunner_shared::protocol::BotPlayer>,
+        ),
+    >,
 ) {
     if session.phase != SessionPhase::Title || loading.percent != 100 {
         keyboard.clear();
@@ -299,7 +305,15 @@ fn edit(
     }
 }
 
-fn occupied_colors(colors: &Query<&PlayerColor, With<PlayerId>>) -> u16 {
+fn occupied_colors(
+    colors: &Query<
+        &PlayerColor,
+        (
+            With<PlayerId>,
+            Without<boltrunner_shared::protocol::BotPlayer>,
+        ),
+    >,
+) -> u16 {
     colors.iter().fold(0, |mask, color| mask | (1 << color.0))
 }
 
@@ -338,7 +352,13 @@ fn present(
         Has<PlayLabel>,
         Option<&OccupiedMark>,
     )>,
-    colors: Query<&PlayerColor, With<PlayerId>>,
+    colors: Query<
+        &PlayerColor,
+        (
+            With<PlayerId>,
+            Without<boltrunner_shared::protocol::BotPlayer>,
+        ),
+    >,
     mut windows: Query<&mut Window>,
     mut previous_playing: Local<Option<bool>>,
     mut previous_occupied: Local<u16>,
