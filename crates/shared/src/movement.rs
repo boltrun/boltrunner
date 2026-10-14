@@ -27,8 +27,9 @@ pub fn step(state: &mut PlayerState, input: &PlayerInput) {
         }
         return;
     }
+    let previous = state.position;
     step_in_world(level::world(), state, input);
-    apply_map_triggers(state, input);
+    apply_map_triggers(state, input, previous);
     crate::weapon::step(state, input);
 }
 
@@ -193,7 +194,7 @@ fn step_in_world(world: &CollisionWorld, state: &mut PlayerState, input: &Player
     }
 }
 
-fn apply_map_triggers(state: &mut PlayerState, input: &PlayerInput) {
+fn apply_map_triggers(state: &mut PlayerState, input: &PlayerInput, previous: Vec3) {
     state.trigger_cooldown = state.trigger_cooldown.saturating_sub(1);
     let data = level::data();
     let hazard = state.position.y < state.tuning.kill_plane_height
@@ -208,7 +209,16 @@ fn apply_map_triggers(state: &mut PlayerState, input: &PlayerInput) {
         return;
     }
     for trigger in &data.triggers {
-        if !trigger.touches(state.position, &state.tuning) {
+        let crossing = trigger.warp_crossing(
+            previous + Vec3::Y * (state.tuning.player_height / 2.0),
+            state.position - previous,
+            state.tuning.player_radius,
+        );
+        if matches!(trigger.kind, TriggerKind::Warp { .. }) {
+            if crossing.is_none() {
+                continue;
+            }
+        } else if !trigger.touches(state.position, &state.tuning) {
             continue;
         }
         match trigger.kind {
@@ -226,6 +236,7 @@ fn apply_map_triggers(state: &mut PlayerState, input: &PlayerInput) {
             | TriggerKind::Warp {
                 destination,
                 rotation,
+                ..
             } => {
                 let rotation = if matches!(trigger.kind, TriggerKind::Teleport { .. }) {
                     rotation - state.yaw
@@ -237,7 +248,14 @@ fn apply_map_triggers(state: &mut PlayerState, input: &PlayerInput) {
                 state.velocity = velocity.xz() * state.tuning.portal_momentum_multiplier;
                 state.vertical_velocity *= state.tuning.portal_momentum_multiplier;
                 state.dash.direction = Quat::from_rotation_y(rotation) * state.dash.direction;
-                state.position = destination;
+                state.position = if let Some(crossing) = crossing {
+                    crossing.position - Vec3::Y * (state.tuning.player_height / 2.0)
+                        + crossing.rotation
+                            * (state.position - previous)
+                            * (1.0 - crossing.fraction)
+                } else {
+                    destination
+                };
                 state.yaw += rotation;
                 state.view_yaw_offset += rotation;
                 state.relocation = state.relocation.wrapping_add(1);

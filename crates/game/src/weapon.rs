@@ -9,7 +9,7 @@ use bevy::{
 };
 use boltrunner_client::{PredictedShot, PredictedShots};
 use boltrunner_shared::{
-    PlayerId, PlayerState, level,
+    PlayerId, PlayerState,
     weapon::{Projectile, ShotImpact},
 };
 use lightyear::prelude::*;
@@ -319,13 +319,9 @@ fn local_shots(
         }
         let muzzle_offset = geometry.map_or(Vec3::ZERO, |(muzzle, _, _)| muzzle - bolt.origin);
         let advance = bolt.direction * bolt.speed * age;
-        if level::world()
-            .sweep_sphere(bolt.position, advance, bolt.radius)
-            .is_some()
-        {
+        if boltrunner_shared::weapon::advance_map(&mut bolt, advance).is_some() {
             continue;
         }
-        bolt.position += advance;
         commands
             .spawn((
                 LocalBolt {
@@ -435,14 +431,18 @@ fn reconcile_bolts(
         }
         let lead = ((timeline.tick() - tick.tick) as f32).clamp(0.0, 30.0)
             * boltrunner_shared::TICK_DURATION.as_secs_f32();
-        let position = confirmed.0.position + confirmed.0.direction * confirmed.0.speed * lead;
+        let mut predicted = confirmed.0.clone();
+        let delta = predicted.direction * predicted.speed * lead;
+        boltrunner_shared::weapon::advance_map(&mut predicted, delta);
+        let position = predicted.position;
+        let relocated = local.bolt.relocation != predicted.relocation;
         let difference = local.bolt.position - position;
-        local.correction = if difference.length() < 3.0 {
+        local.correction = if !relocated && difference.length() < 3.0 {
             local.correction + difference
         } else {
             Vec3::ZERO
         };
-        local.bolt = confirmed.0.clone();
+        local.bolt = predicted;
         local.bolt.position = position;
         local.age = (local
             .bolt
@@ -464,14 +464,14 @@ fn advance_local_bolts(
         let delta = local.bolt.direction * local.bolt.speed * time.delta_secs();
         // Predicted wall occlusion is cosmetic. Player hits and impact splashes
         // are exclusively confirmed by the server.
-        if level::world()
-            .sweep_sphere(local.bolt.position, delta, local.bolt.radius)
-            .is_some()
-        {
+        let relocation = local.bolt.relocation;
+        if boltrunner_shared::weapon::advance_map(&mut local.bolt, delta).is_some() {
             commands.entity(entity).despawn();
             continue;
         }
-        local.bolt.position += delta;
+        if relocation != local.bolt.relocation {
+            local.correction = Vec3::ZERO;
+        }
         local.age += time.delta_secs();
         local.correction *= (-35.0 * time.delta_secs()).exp();
         if local.age
@@ -480,10 +480,13 @@ fn advance_local_bolts(
             commands.entity(entity).despawn();
             continue;
         }
-        let muzzle_weight = (1.0
-            - local.bolt.position.distance(local.bolt.origin)
+        let muzzle_weight = if local.bolt.relocation == 0 {
+            (1.0 - local.bolt.position.distance(local.bolt.origin)
                 / settings.values().presentation.muzzle_blend_distance)
-            .clamp(0.0, 1.0);
+                .clamp(0.0, 1.0)
+        } else {
+            0.0
+        };
         let offset = local.correction + local.muzzle_offset * muzzle_weight;
         *transform = bolt_transform(&local.bolt, settings.values().presentation);
         transform.translation += offset;
