@@ -245,7 +245,7 @@ class Compiler:
         return not material.startswith(('common/', 'skies/', 'radiant/'))
 
     def solid(self, materials):
-        if any('lava' in m or 'warpzone' in m for m in materials):
+        if any('lava' in m for m in materials):
             return False
         return any(m not in ['common/caulk', 'common/hint', 'common/donotenter', 'common/trigger', 'common/weapclip', 'common/origin']
                    and not m.startswith('skies/') for m in materials) or 'common/clip' in materials or all(m == 'common/caulk' for m in materials)
@@ -357,7 +357,7 @@ class Compiler:
                     self.brush(brush, props)
                 for name, patch in patches:
                     self.patch(name, patch)
-        for data, props, _, normal in self.warps:
+        for data, props, entrance, normal in self.warps:
             if props.get('target'):
                 matches = [w for w in self.warps if w[1].get('targetname') == props['target']]
             else:
@@ -367,7 +367,10 @@ class Compiler:
                 raise ValueError(f'Warpzone must resolve to one other portal: {props}')
             _, _, target, target_n = matches[0]
             data['kind'] = 'warp'
-            data['destination'] = (target + target_n * .65 - np.array([0, .9, 0])).tolist()
+            data['entrance'] = entrance.tolist()
+            data['normal'] = normal.tolist()
+            data['destination'] = target.tolist()
+            data['exit_normal'] = target_n.tolist()
             data['rotation'] = math.atan2(-target_n[0], -target_n[2]) - math.atan2(normal[0], normal[2])
         if not self.spawns:
             raise ValueError('Map must contain at least one info_player_deathmatch')

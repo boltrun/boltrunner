@@ -42,6 +42,7 @@ pub struct Projectile {
     pub speed: f32,
     pub radius: f32,
     pub damage: u16,
+    pub relocation: u16,
 }
 
 impl Projectile {
@@ -59,20 +60,26 @@ impl Projectile {
             speed: state.tuning.projectile_speed,
             radius: state.tuning.projectile_radius,
             damage: state.tuning.projectile_damage as u16,
+            relocation: 0,
         }
     }
 }
 
 impl Ease for Projectile {
     fn interpolating_curve_unbounded(start: Self, end: Self) -> impl Curve<Self> {
-        FunctionCurve::new(Interval::UNIT, move |t: f32| Self {
-            position: start.position.lerp(end.position, t.clamp(0.0, 1.0)),
-            remaining_ticks: if t >= 1.0 {
-                end.remaining_ticks
-            } else {
-                start.remaining_ticks
-            },
-            ..start.clone()
+        FunctionCurve::new(Interval::UNIT, move |t: f32| {
+            if start.relocation != end.relocation {
+                return if t < 1.0 { start.clone() } else { end.clone() };
+            }
+            Self {
+                position: start.position.lerp(end.position, t.clamp(0.0, 1.0)),
+                remaining_ticks: if t >= 1.0 {
+                    end.remaining_ticks
+                } else {
+                    start.remaining_ticks
+                },
+                ..start.clone()
+            }
         })
     }
 }
@@ -163,4 +170,50 @@ pub fn trace_moving(
         }
     }
     first
+}
+
+/// Advance one segment through authored portals, testing each piece in its own
+/// world location. The returned hit position is already stored in the bolt.
+pub fn advance_map_moving(
+    projectile: &mut Projectile,
+    mut delta: Vec3,
+    players: impl IntoIterator<Item = (u64, Vec3, Vec3, f32, f32)>,
+) -> Option<Impact> {
+    let mut players: Vec<_> = players.into_iter().collect();
+    for _ in 0..4 {
+        let crossing = crate::level::warp_crossing(projectile.position, delta, projectile.radius);
+        let fraction = crossing.map_or(1.0, |crossing| crossing.fraction);
+        let segment = delta * fraction;
+        if let Some((hit, impact)) = trace_moving(
+            crate::level::world(),
+            projectile,
+            segment,
+            players
+                .iter()
+                .map(|&(id, position, movement, radius, height)| {
+                    (id, position, movement * fraction, radius, height)
+                }),
+        ) {
+            projectile.position += segment * hit;
+            return Some(impact);
+        }
+        let Some(crossing) = crossing else {
+            projectile.position += delta;
+            return None;
+        };
+        for (_, position, movement, _, _) in &mut players {
+            *position += *movement * fraction;
+            *movement *= 1.0 - fraction;
+        }
+        projectile.position = crossing.position;
+        projectile.origin = crossing.position;
+        projectile.direction = crossing.rotation * projectile.direction;
+        projectile.relocation = projectile.relocation.wrapping_add(1);
+        delta = crossing.rotation * delta * (1.0 - fraction);
+    }
+    None
+}
+
+pub fn advance_map(projectile: &mut Projectile, delta: Vec3) -> Option<Impact> {
+    advance_map_moving(projectile, delta, std::iter::empty())
 }

@@ -46,9 +46,20 @@ pub struct MapMaterial {
 #[derive(Deserialize, Clone, Copy, PartialEq, Debug)]
 #[serde(tag = "kind", rename_all = "snake_case")]
 pub enum TriggerKind {
-    Push { velocity: Vec3 },
-    Teleport { destination: Vec3, rotation: f32 },
-    Warp { destination: Vec3, rotation: f32 },
+    Push {
+        velocity: Vec3,
+    },
+    Teleport {
+        destination: Vec3,
+        rotation: f32,
+    },
+    Warp {
+        entrance: Vec3,
+        normal: Vec3,
+        destination: Vec3,
+        exit_normal: Vec3,
+        rotation: f32,
+    },
     Hurt,
 }
 
@@ -59,7 +70,46 @@ pub struct Trigger {
     pub planes: Vec<[f32; 4]>,
 }
 
+#[derive(Clone, Copy, Debug)]
+pub struct WarpCrossing {
+    pub fraction: f32,
+    pub position: Vec3,
+    pub rotation: Quat,
+}
+
 impl Trigger {
+    /// Cross the authored visible aperture from its front, never the sides/back.
+    pub fn warp_crossing(&self, origin: Vec3, delta: Vec3, radius: f32) -> Option<WarpCrossing> {
+        let TriggerKind::Warp {
+            entrance,
+            normal,
+            destination,
+            exit_normal,
+            rotation,
+        } = self.kind
+        else {
+            return None;
+        };
+        let start = normal.dot(origin - entrance) - radius;
+        let movement = normal.dot(delta);
+        if start < -SKIN || movement >= -1e-8 || start + movement > 0.0 {
+            return None;
+        }
+        let fraction = (start / -movement).clamp(0.0, 1.0);
+        let point = origin + delta * fraction - normal * radius;
+        if self.planes.iter().any(|&[x, y, z, distance]| {
+            let plane = Vec3::new(x, y, z);
+            plane.dot(normal).abs() < 0.99 && plane.dot(point) > distance - radius + SKIN
+        }) {
+            return None;
+        }
+        let rotation = Quat::from_rotation_y(rotation);
+        Some(WarpCrossing {
+            fraction,
+            position: destination + rotation * (point - entrance) + exit_normal * (radius + SKIN),
+            rotation,
+        })
+    }
     pub fn touches(&self, feet: Vec3, tuning: &SimulationTuning) -> bool {
         let center = feet + Vec3::Y * (tuning.player_height / 2.0);
         self.planes.iter().all(|&[x, y, z, distance]| {
@@ -166,6 +216,16 @@ pub fn data() -> &'static MapData {
 }
 pub fn world() -> &'static CollisionWorld {
     active().world()
+}
+
+/// First visible portal crossed by a moving sphere. Collision must be compared
+/// against this fraction before applying the transform.
+pub fn warp_crossing(origin: Vec3, delta: Vec3, radius: f32) -> Option<WarpCrossing> {
+    data()
+        .triggers
+        .iter()
+        .filter_map(|trigger| trigger.warp_crossing(origin, delta, radius))
+        .min_by(|a, b| a.fraction.total_cmp(&b.fraction))
 }
 
 /// Authored pickup locations are optional. Empty maps simply have no pickups.

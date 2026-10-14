@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use boltrunner_shared::{
-    PlayerId, PlayerInput, PlayerState, TICK_DURATION, health, level,
+    PlayerId, PlayerInput, PlayerState, TICK_DURATION, health,
     weapon::{self, Impact, Projectile, ShotImpact},
 };
 use lightyear::prelude::{input::native::ActionState, *};
@@ -34,9 +34,8 @@ pub fn advance_projectiles(
     }
     for (entity, mut bolt, lag) in &mut projectiles {
         let delta = bolt.direction * bolt.speed * TICK_DURATION.as_secs_f32();
-        let hit = weapon::trace_moving(
-            level::world(),
-            &bolt,
+        let hit = weapon::advance_map_moving(
+            &mut bolt,
             delta,
             players.iter().filter_map(|(id, state, _)| {
                 history
@@ -52,7 +51,7 @@ pub fn advance_projectiles(
                     })
             }),
         );
-        if let Some((fraction, impact)) = hit {
+        if let Some(impact) = hit {
             let mut damaged = None;
             if let Impact::Player(victim) = impact {
                 for (id, mut state, input) in &mut players {
@@ -69,7 +68,7 @@ pub fn advance_projectiles(
                 owner: bolt.owner,
                 shot: bolt.shot,
                 tick: timeline.tick().0,
-                position: bolt.position + delta * fraction,
+                position: bolt.position,
                 normal: -bolt.direction,
                 victim: damaged,
             };
@@ -79,7 +78,6 @@ pub fn advance_projectiles(
             commands.entity(entity).despawn();
             continue;
         }
-        bolt.position += delta;
         bolt.remaining_ticks -= 1;
         if bolt.remaining_ticks == 0 {
             commands.entity(entity).despawn();
