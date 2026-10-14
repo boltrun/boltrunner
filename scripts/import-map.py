@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compile a registered editable Quake 3 map into Boltrunner's current runtime assets.
+"""Compile registered map sources into Boltrunner's current runtime assets.
 
 Normal builds are offline. --fetch imports missing, checksum-verified upstream
 sources at the pinned commit. Requires q3map2 (setup-map-tools.sh), numpy and Pillow.
@@ -12,6 +12,7 @@ import json
 import math
 import os
 import re
+import runpy
 import struct
 import urllib.request
 from collections import defaultdict
@@ -26,6 +27,7 @@ from map_bsp import Bsp, skybox
 ROOT = Path(__file__).resolve().parents[1]
 MAP = SOURCE = BUILT = MAP_FILE = None
 MAP_ID = ""
+LIGHTMAP_EXPORT_SCALE = 1.0
 UPSTREAM = ""
 SCALE = 1 / 40  # 40 Quake units per metre; Xonotic's walking speed is comparable.
 ROTATE = np.array([[1, 0, 0], [0, 0, 1], [0, -1, 0]], dtype=float)
@@ -269,7 +271,7 @@ class Compiler:
         center = (low + high) / 2
         if trigger:
             kind = classname.removeprefix('trigger_') if classname.startswith('trigger_') else 'hurt'
-            if kind not in ['push', 'teleport', 'warpzone', 'hurt']:
+            if kind not in ['push', 'teleport', 'warpzone', 'zipline', 'hurt']:
                 return
             data = dict(kind=kind, planes=planes)
             if kind == 'push':
@@ -283,6 +285,13 @@ class Compiler:
                 target = self.targets[props['target']]
                 data['destination'] = (world(vec(target['origin'])) - np.array([0, 24 * SCALE, 0])).tolist()
                 data['rotation'] = math.radians(float(target.get('angle', 0))) - math.pi / 2
+            elif kind == 'zipline':
+                start = world(vec(self.targets[props['start']]['origin'])) + np.array([0, .002, 0])
+                end = world(vec(self.targets[props['target']]['origin'])) + np.array([0, .002, 0])
+                if np.linalg.norm(end - start) < .1:
+                    raise ValueError('Zipline endpoints must be distinct')
+                data['start'] = start.tolist()
+                data['end'] = end.tolist()
             elif kind == 'warpzone':
                 faces = [(face, poly) for face, poly in zip(brush, polys) if face[2].endswith('/wavy') and len(poly) >= 3]
                 if len(faces) != 1:
@@ -352,7 +361,7 @@ class Compiler:
                 self.pickup_spawns.append(world(vec(props['origin'])).tolist())
             elif classname in ['misc_model', 'misc_gamemodel']:
                 self.model(props)
-            if classname in ['worldspawn', 'func_group', 'func_wall', 'func_bobbing', 'trigger_push', 'trigger_teleport', 'trigger_warpzone', 'trigger_hurt']:
+            if classname in ['worldspawn', 'func_group', 'func_wall', 'func_bobbing', 'trigger_push', 'trigger_teleport', 'trigger_warpzone', 'trigger_hurt', 'trigger_zipline']:
                 for brush in brushes:
                     self.brush(brush, props)
                 for name, patch in patches:
@@ -397,7 +406,7 @@ class Compiler:
             f.write(struct.pack('<2I', len(vertices), len(indices)))
             f.write(np.asarray(vertices, dtype='<f4').tobytes())
             f.write(np.asarray(indices, dtype='<u4').tobytes())
-        lightmaps, render_triangles = bsp.render(self, BUILT, ROTATE, SCALE)
+        lightmaps, render_triangles = bsp.render(self, BUILT, ROTATE, SCALE, LIGHTMAP_EXPORT_SCALE)
         metadata = dict(id=MAP_ID, name=self.entities[0][0].get('message', MAP_ID), units_per_metre=40, spawns=self.spawns, pickup_spawns=self.pickup_spawns, triggers=self.triggers,
                         lightmaps=lightmaps, sky=skybox(SOURCE, BUILT, prefix) if prefix else None, materials=list(self.materials.values()), counts=dict(self.counts),
                         collision_triangles=len(indices), render_triangles=render_triangles)
@@ -423,11 +432,14 @@ class Compiler:
 
 
 def configure(map_id):
-    global MAP, SOURCE, BUILT, MAP_FILE, MAP_ID, USED
+    global MAP, SOURCE, BUILT, MAP_FILE, MAP_ID, USED, LIGHTMAP_EXPORT_SCALE
     registry = json.loads((ROOT / 'assets/maps.json').read_text())
     entry = next((m for m in registry['maps'] if m['id'] == map_id), None)
     if entry is None:
         raise ValueError(f'Unknown map: {map_id}')
+    LIGHTMAP_EXPORT_SCALE = float(entry.get('lightmap_export_scale', 1.0))
+    if not math.isfinite(LIGHTMAP_EXPORT_SCALE) or LIGHTMAP_EXPORT_SCALE <= 0:
+        raise ValueError('lightmap_export_scale must be finite and positive')
     MAP_ID = map_id
     MAP = ROOT / 'assets' / map_id
     SOURCE = ROOT / 'assets' / entry['source']
@@ -445,6 +457,15 @@ def main():
     parser.add_argument('--q3map2', default=os.environ.get('Q3MAP2', str(ROOT / '.tools/q3map2/q3map2')))
     args = parser.parse_args()
     configure(args.map)
+    entry = next(m for m in registry["maps"] if m["id"] == args.map)
+    if importer := entry.get("importer"):
+        if args.fetch:
+            parser.error("Custom map importers use checked-in offline sources")
+        path = (SOURCE / importer).resolve()
+        if not path.is_relative_to(SOURCE.resolve()):
+            parser.error("Map importer must be inside its source directory")
+        runpy.run_path(str(path), run_name="__main__")
+        return
     FETCH = args.fetch
     if FETCH:
         manifest = MAP / 'upstream.json'

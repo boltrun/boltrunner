@@ -1,0 +1,10 @@
+{
+  "source": "https://github.com/alecjacobson/common-3d-test-models/blob/master/data/cheburashka.zip",
+  "mesh_credit": "Ilya Baran (as attributed by the source collection)",
+  "source_terms": "Public research mesh; no explicit asset license supplied by the collection",
+  "changes": "Textured, colored, rigged and animated for Boltrunner; original mesh retained in source.off",
+  "texture_tool": "Built-in imagegen",
+  "texture_prompt": "Use case: stylized-concept. Asset type: seamless tiling albedo texture for a small 3D plush Cheburashka character. Generate a square flat orthographic macro surface of very fine short plush fur, near-white neutral ivory grayscale, extremely subtle directional fibers and soft fine variation. The texture will be multiplied by brown, cream and black vertex colors, so keep it mostly bright white / light neutral gray with no brown tint. Even diffuse lighting, no shadows, no highlights, no perspective, no objects, no seams, no vignette, no text or watermark. Fibers only, fine smooth plush, suitable for seamless repetition on a game mesh. Opaque background.",
+  "animation_adaptation": "Six in-place clips with planted-foot gait, knee and ankle articulation, opposing arm swing, idle breathing, jump, dash and death. Authored locally for Boltrunner.",
+  "animation_exporter": "scripts/build-cheburashka.py"
+}

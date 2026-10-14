@@ -1,9 +1,6 @@
 use bevy::prelude::*;
-use boltrunner_shared::{
-    PlayerId, PlayerInput, PlayerState, TICK_DURATION, health,
-    weapon::{self, Impact, Projectile, ShotImpact},
-};
-use lightyear::prelude::{input::native::ActionState, *};
+use boltrunner_shared::weapon::Projectile;
+use lightyear::prelude::*;
 
 /// Publish only bolts that survived this frame’s collision steps. An immediate
 /// wall hit must not enqueue a network despawn for a never-published entity.
@@ -15,72 +12,23 @@ pub fn publish_projectiles(
         commands.entity(entity).insert((
             Replicate::to_clients(NetworkTarget::All),
             InterpolationTarget::to_clients(NetworkTarget::All),
+            NetworkVisibility,
         ));
     }
 }
 
-pub fn advance_projectiles(
-    mut commands: Commands,
-    mut projectiles: Query<(Entity, &mut Projectile, &crate::history::ProjectileLag)>,
-    timeline: Res<LocalTimeline>,
-    history: Res<crate::history::PlayerHistory>,
-    mut clients: Query<&mut MessageSender<ShotImpact>, With<Connected>>,
-    mut round: ResMut<boltrunner_shared::match_state::MatchState>,
-    settings: Res<boltrunner_shared::tuning::FeatureSettings>,
-    mut players: Query<(&PlayerId, &mut PlayerState, &ActionState<PlayerInput>)>,
+/// A peer becomes a projectile recipient only when its spawn can be buffered.
+/// Otherwise a short-lived bolt can disappear between that peer's send ticks,
+/// and Lightyear would send a despawn without ever sending the spawn.
+pub fn expose_projectiles(
+    mut bolts: Query<&mut ReplicationState, With<Projectile>>,
+    senders: Query<(Entity, &ReplicationSender), With<Connected>>,
 ) {
-    if round.results {
-        return;
-    }
-    for (entity, mut bolt, lag) in &mut projectiles {
-        let delta = bolt.direction * bolt.speed * TICK_DURATION.as_secs_f32();
-        let hit = weapon::advance_map_moving(
-            &mut bolt,
-            delta,
-            players.iter().filter_map(|(id, state, _)| {
-                history
-                    .sweep(id.0, timeline.tick(), lag.0, state)
-                    .map(|(position, movement)| {
-                        (
-                            id.0,
-                            position,
-                            movement,
-                            state.tuning.player_radius,
-                            state.tuning.player_height,
-                        )
-                    })
-            }),
-        );
-        if let Some(impact) = hit {
-            let mut damaged = None;
-            if let Impact::Player(victim) = impact {
-                for (id, mut state, input) in &mut players {
-                    if id.0 == victim && state.death.is_none() && !state.match_paused {
-                        damaged = Some(victim);
-                        if health::apply_damage(&mut state, bolt.damage, input.0.pitch_radians()) {
-                            round.record_death(victim, Some(bolt.owner), settings.values.rules);
-                        }
-                        break;
-                    }
-                }
+    for (entity, sender) in &senders {
+        if sender.send_timer.is_finished() {
+            for mut state in &mut bolts {
+                state.gain_visibility(entity);
             }
-            let event = ShotImpact {
-                owner: bolt.owner,
-                shot: bolt.shot,
-                tick: timeline.tick().0,
-                position: bolt.position,
-                normal: -bolt.direction,
-                victim: damaged,
-            };
-            for mut sender in &mut clients {
-                sender.send::<boltrunner_shared::protocol::LobbyChannel>(event.clone());
-            }
-            commands.entity(entity).despawn();
-            continue;
-        }
-        bolt.remaining_ticks -= 1;
-        if bolt.remaining_ticks == 0 {
-            commands.entity(entity).despawn();
         }
     }
 }

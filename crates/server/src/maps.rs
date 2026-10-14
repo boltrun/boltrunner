@@ -27,7 +27,13 @@ type MapConnections = (
     &'static mut MessageSender<MapChangeReply>,
     Has<crate::Joined>,
 );
-type MapEntities = Or<(With<PlayerId>, With<Projectile>, With<Pickup>)>;
+type MapEntities = Or<(
+    With<PlayerId>,
+    With<Projectile>,
+    With<Pickup>,
+    With<boltrunner_shared::inventory::GroundWeapon>,
+    With<boltrunner_shared::weapon::ShockField>,
+)>;
 
 fn change(
     mut commands: Commands,

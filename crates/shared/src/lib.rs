@@ -1,6 +1,10 @@
 //! Gameplay data and fixed-step movement shared by the server and predicted client.
 pub mod arena;
+pub mod arsenal;
+pub mod characters;
+pub mod equipment;
 pub mod health;
+pub mod inventory;
 pub mod level;
 pub mod match_state;
 pub mod movement;
@@ -10,6 +14,7 @@ pub mod powerups;
 pub mod protocol;
 pub mod tuning;
 pub mod weapon;
+pub mod zipline;
 
 pub use protocol::{PlayerId, PlayerInput, PlayerState, ProtocolPlugin};
 

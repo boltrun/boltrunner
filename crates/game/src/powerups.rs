@@ -5,8 +5,12 @@ pub struct PowerupVisualsPlugin;
 
 impl Plugin for PowerupVisualsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, setup)
-            .add_systems(Update, (attach, animate).chain());
+        app.add_systems(Startup, setup).add_systems(
+            Update,
+            (attach, animate)
+                .chain()
+                .after(boltrunner_client::update_session),
+        );
     }
 }
 

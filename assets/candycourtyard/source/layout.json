@@ -1,0 +1,18 @@
+{
+  "bounds": [
+    78.4,
+    67.2
+  ],
+  "xy_scale": 1.4,
+  "z_scale": 1.2,
+  "routes": [
+    "shops and plaza",
+    "mint outer circuit",
+    "gallery and pavilion"
+  ],
+  "shops": 8,
+  "stairs": 4,
+  "ramps": 2,
+  "ziplines": 2,
+  "jump_pads": 2
+}

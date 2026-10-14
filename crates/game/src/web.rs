@@ -16,6 +16,9 @@ pub fn configure(app: &mut App) {
     });
     app.insert_resource(ServerUrl(server)).add_plugins(
         DefaultPlugins
+            .set(bevy::asset::io::web::WebAssetPlugin {
+                silence_startup_warning: true,
+            })
             .set(AssetPlugin {
                 file_path: window
                     .document()
@@ -60,6 +63,12 @@ pub fn set_debug_menu(open: bool) {
     );
     if open && let Some(document) = web_sys::window().and_then(|window| window.document()) {
         document.exit_pointer_lock();
+    } else if !open && let Some(document) = web_sys::window().and_then(|window| window.document()) {
+        if let Some(canvas) = document.get_element_by_id("game") {
+            if canvas.get_attribute("data-playing").as_deref() == Some("true") {
+                canvas.request_pointer_lock();
+            }
+        }
     }
 }
 
