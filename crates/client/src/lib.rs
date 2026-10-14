@@ -1,3 +1,4 @@
+pub mod maps;
 mod timing;
 pub mod tuning;
 use bevy::prelude::*;
@@ -32,9 +33,10 @@ impl Plugin for GameNetworkingPlugin {
         .init_resource::<PredictedShots>()
         .add_plugins(timing::TimingPlugin)
         .add_plugins(tuning::TuningPlugin)
+        .add_plugins(maps::MapsPlugin)
         .add_observer(join_game)
         .add_systems(Startup, start_lobby)
-        .add_systems(Update, (send_join, update_session, maintain_lobby).chain())
+        .add_systems(Update, (update_session, send_join, maintain_lobby).chain())
         .add_systems(PreUpdate, attach_input)
         .add_systems(FixedUpdate, predict)
         .add_systems(Update, update_network_stats);
@@ -56,6 +58,9 @@ pub struct Session {
     pub color: u8,
     pub error: Option<String>,
     pub lobby_ready: bool,
+    pub map: Option<String>,
+    pub map_ready: bool,
+    pub map_revision: Option<u64>,
     connection: Option<Entity>,
     join_sent: bool,
     elapsed: f32,
@@ -158,7 +163,7 @@ fn send_join(
     mut session: ResMut<Session>,
     mut connections: Query<&mut MessageSender<JoinRequest>, (With<Client>, With<Connected>)>,
 ) {
-    if session.phase != SessionPhase::Connecting || session.join_sent {
+    if session.phase != SessionPhase::Connecting || session.join_sent || !session.map_ready {
         return;
     }
     if let Some(mut sender) = session
@@ -166,6 +171,8 @@ fn send_join(
         .and_then(|entity| connections.get_mut(entity).ok())
     {
         sender.send::<LobbyChannel>(JoinRequest {
+            map: session.map.clone().expect("loaded server map"),
+            map_revision: session.map_revision.expect("server map revision"),
             nickname: session.nickname.clone(),
             color: session.color,
         });
@@ -178,23 +185,26 @@ type SessionReplicas = Or<(
     With<boltrunner_shared::weapon::Projectile>,
     With<boltrunner_shared::match_state::MatchState>,
     With<boltrunner_shared::tuning::FeatureSettings>,
+    With<boltrunner_shared::powerups::Pickup>,
 )>;
 
 pub fn update_session(
     mut commands: Commands,
     time: Res<Time<Real>>,
     mut session: ResMut<Session>,
+    mut shots: ResMut<PredictedShots>,
     mut connections: Query<
         (Option<&Disconnected>, &mut MessageReceiver<JoinRejected>),
         With<Client>,
     >,
     players: Query<(&PlayerName, &boltrunner_shared::player_color::PlayerColor), With<Predicted>>,
-    rounds: Query<Entity, With<boltrunner_shared::match_state::MatchState>>,
+    rounds: Query<&boltrunner_shared::match_state::MatchState>,
     replicas: Query<Entity, SessionReplicas>,
 ) {
     let Some(entity) = session.connection else {
         return;
     };
+    let mut changing = None;
     let mut rejection = None;
     let mut failure = None;
     if let Ok((disconnected, mut replies)) = connections.get_mut(entity) {
@@ -207,7 +217,23 @@ pub fn update_session(
     } else {
         failure = Some("Connection lost. Please try again.".into());
     }
-    let lobby_ready = failure.is_none() && !rounds.is_empty();
+    if failure.is_none()
+        && let Ok(round) = rounds.single()
+        && session.map_revision != Some(round.map_revision)
+    {
+        if session.map_revision.is_some() {
+            // Recreate the connection to discard old replication and prediction timelines.
+            changing = Some(session.phase != SessionPhase::Title);
+            failure = Some(String::new());
+        } else if let Err(error) = boltrunner_shared::level::select(&round.map) {
+            failure = Some(error);
+        } else {
+            session.map = Some(round.map.clone());
+            session.map_revision = Some(round.map_revision);
+            session.map_ready = false;
+        }
+    }
+    let lobby_ready = failure.is_none() && session.map.is_some() && !rounds.is_empty();
     if session.lobby_ready != lobby_ready {
         session.lobby_ready = lobby_ready;
     }
@@ -217,8 +243,10 @@ pub fn update_session(
         session.elapsed = 0.0;
         session.error = Some(reason);
     }
-    if session.phase == SessionPhase::Connecting {
-        session.elapsed += time.delta_secs();
+    if session.phase == SessionPhase::Connecting && failure.is_none() {
+        if !session.lobby_ready || session.map_ready {
+            session.elapsed += time.delta_secs();
+        }
         if let Some((name, color)) = players.iter().next() {
             session.nickname = name.0.clone();
             session.color = color.0;
@@ -234,11 +262,24 @@ pub fn update_session(
         for replica in &replicas {
             commands.entity(replica).try_despawn();
         }
+        shots.0.clear();
         session.connection = None;
+        session.map = None;
+        session.map_revision = None;
+        session.map_ready = false;
         session.phase = SessionPhase::Title;
         session.join_sent = false;
         session.lobby_ready = false;
-        if show_error {
+        if let Some(resume) = changing {
+            session.phase = if resume {
+                SessionPhase::Connecting
+            } else {
+                SessionPhase::Title
+            };
+            session.elapsed = 0.0;
+            session.retry_elapsed = 2.0;
+            session.error = None;
+        } else if show_error {
             session.error = Some(error);
         }
     }
@@ -250,7 +291,7 @@ fn maintain_lobby(
     time: Res<Time<Real>>,
     mut session: ResMut<Session>,
 ) {
-    if session.connection.is_some() || session.phase != SessionPhase::Title {
+    if session.connection.is_some() || session.is_playing() {
         return;
     }
     session.retry_elapsed += time.delta_secs();
@@ -282,10 +323,14 @@ pub struct PredictedShot {
 }
 
 fn predict(
+    session: Res<Session>,
     timeline: Res<LocalTimeline>,
     mut shots: ResMut<PredictedShots>,
     mut players: Query<(&PlayerId, &mut PlayerState, &ActionState<PlayerInput>), With<Predicted>>,
 ) {
+    if !session.map_ready {
+        return;
+    }
     for (id, mut state, input) in &mut players {
         let previous = state.weapon.shot;
         movement::step(&mut state, &input.0);

@@ -30,6 +30,9 @@
     __BOLTRUNNER_LOADING__
     const canvas = document.querySelector('#game');
     canvas.addEventListener('contextmenu', event => event.preventDefault());
+    canvas.addEventListener('keydown', event => {
+      if (event.code === 'F3') event.preventDefault();
+    });
     canvas.addEventListener('click', () => {
       canvas.focus();
       if (canvas.dataset.playing !== 'true' || canvas.dataset.debugMenu === 'true') return;

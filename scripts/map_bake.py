@@ -21,7 +21,7 @@ STAGES = [
     ['-vis'],
     ['-light', '-lightmapsize', '1024', '-lightmapsearchpower', '4',
      '-fastallocate', '-deluxe', '-patchshadows', '-samples', '4',
-     '-randomsamples', '-bounce', '8', '-fastbounce', '-bouncegrid',
+     '-randomsamples', '-bounce', '8', '-fastbounce', '-nogrid',
      '-nobouncestore', '-dirty', '-dirtdepth', '64', '-dirtscale', '0.8',
      '-fill', '-backsplash', '0', '0', '-sRGBtex', '-sRGBcolor', '-sRGBlight'],
 ]
@@ -72,20 +72,19 @@ def compiler_map(text, compiler):
     return text.replace('"classname" "misc_gamemodel"', '"classname" "misc_model"') + '\n'
 
 
-def bake(compiler, executable):
+def bake(compiler, executable, map_file, source, built):
     root = Path(__file__).resolve().parents[1]
-    assets = root / 'assets/stormkeep'
-    directory = assets / 'built/q3map2'
+    directory = built / 'q3map2'
+    name = map_file.stem
     directory.mkdir(parents=True, exist_ok=True)
-    source = assets / 'source'
-    input_text = compiler_map((assets / 'stormkeep.map').read_text(), compiler)
+    input_text = compiler_map(map_file.read_text(), compiler)
     digest = hashlib.sha256(input_text.encode() + json.dumps(STAGES).encode())
     for path in sorted(source.rglob('*')):
         if path.is_file():
             digest.update(str(path.relative_to(source)).encode()); digest.update(path.read_bytes())
     fingerprint = digest.hexdigest()
     manifest = directory / 'bake.json'
-    bsp = directory / 'stormkeep.bsp'
+    bsp = directory / f'{name}.bsp'
     if manifest.exists() and bsp.exists():
         saved = json.loads(manifest.read_text())
         if saved['input_sha256'] == fingerprint and all(
@@ -99,20 +98,23 @@ def bake(compiler, executable):
         raise RuntimeError('Run scripts/setup-map-tools.sh to install q3map2, or set Q3MAP2 to its executable')
     manifest.unlink(missing_ok=True)
     bsp.unlink(missing_ok=True)
-    for previous in (directory / 'stormkeep').glob('lm_*.tga'):
+    (directory / f'{name}.lin').unlink(missing_ok=True)
+    for previous in (directory / name).glob('lm_*.tga'):
         previous.unlink()
-    (directory / 'stormkeep.map').write_text(input_text)
+    (directory / f'{name}.map').write_text(input_text)
     command = [executable, '-game', 'xonotic', '-fs_nohomepath', '-fs_nobasepath',
-               '-fs_pakpath', str(source), '-threads', str(os.cpu_count())]
+               '-fs_pakpath', str(source), '-threads', str(min(os.cpu_count() or 1, 8))]
     for stage in STAGES:
         log = directory / (stage[0][1:] + '.log')
         print(f'Baking {stage[0][1:]} (log: {log.relative_to(root)})', flush=True)
         with log.open('w') as output:
-            subprocess.run(command + stage + [str(directory / 'stormkeep.map')],
+            subprocess.run(command + stage + [str(directory / f'{name}.map')],
                            stdout=output, stderr=subprocess.STDOUT, check=True)
+        if stage[0] == '-bsp' and (directory / f'{name}.lin').exists():
+            raise RuntimeError(f'Map enclosure leaks: {directory / name}.lin')
         if '************ ERROR ************' in log.read_text():
             raise RuntimeError(f'q3map2 failed: {log}')
-    outputs = [bsp, *sorted((directory / 'stormkeep').glob('lm_*.tga'))]
+    outputs = [bsp, *sorted((directory / name).glob('lm_*.tga'))]
     manifest.write_text(json.dumps(dict(compiler_revision='0c813a34', input_sha256=fingerprint,
                                        outputs={str(p.relative_to(directory)): hashlib.sha256(p.read_bytes()).hexdigest() for p in outputs}), indent=2) + '\n')
     return bsp

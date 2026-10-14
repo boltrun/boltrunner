@@ -1,4 +1,4 @@
-//! Stormkeep's compiled geometry. The same immutable world runs on server and client.
+//! Registered map assets and cached worlds, selected by the authoritative server.
 use bevy::prelude::*;
 use parry3d::{
     na::{Isometry3, Point3, Vector3},
@@ -6,7 +6,10 @@ use parry3d::{
     shape::{Ball, Capsule, TriMesh, TriMeshFlags},
 };
 use serde::Deserialize;
-use std::sync::OnceLock;
+use std::sync::{
+    OnceLock,
+    atomic::{AtomicUsize, Ordering},
+};
 
 use crate::tuning::SimulationTuning;
 
@@ -14,12 +17,13 @@ pub const SKIN: f32 = 0.002;
 
 #[derive(Deserialize)]
 pub struct MapData {
+    pub id: String,
     pub name: String,
     pub spawns: Vec<Spawn>,
     pub pickup_spawns: Vec<Vec3>,
     pub triggers: Vec<Trigger>,
     pub lightmaps: Vec<String>,
-    pub sky: String,
+    pub sky: Option<String>,
     pub materials: Vec<MapMaterial>,
 }
 
@@ -39,23 +43,20 @@ pub struct MapMaterial {
     pub blend: bool,
 }
 
-#[derive(Deserialize, PartialEq, Eq, Debug)]
-#[serde(rename_all = "snake_case")]
+#[derive(Deserialize, Clone, Copy, PartialEq, Debug)]
+#[serde(tag = "kind", rename_all = "snake_case")]
 pub enum TriggerKind {
-    Push,
-    Teleport,
-    Warp,
+    Push { velocity: Vec3 },
+    Teleport { destination: Vec3, rotation: f32 },
+    Warp { destination: Vec3, rotation: f32 },
     Hurt,
 }
 
 #[derive(Deserialize)]
 pub struct Trigger {
+    #[serde(flatten)]
     pub kind: TriggerKind,
     pub planes: Vec<[f32; 4]>,
-    pub center: Vec3,
-    pub destination: Vec3,
-    pub rotation: f32,
-    pub velocity: Vec3,
 }
 
 impl Trigger {
@@ -86,40 +87,95 @@ pub struct Motion {
     pub landed: bool,
 }
 
+pub struct MapAsset {
+    pub id: &'static str,
+    metadata: &'static str,
+    collision: &'static [u8],
+    pub render: &'static [u8],
+    data: OnceLock<MapData>,
+    world: OnceLock<CollisionWorld>,
+    pickups: OnceLock<Vec<Vec3>>,
+}
+
+impl MapAsset {
+    const fn new(
+        id: &'static str,
+        metadata: &'static str,
+        collision: &'static [u8],
+        render: &'static [u8],
+    ) -> Self {
+        Self {
+            id,
+            metadata,
+            collision,
+            render,
+            data: OnceLock::new(),
+            world: OnceLock::new(),
+            pickups: OnceLock::new(),
+        }
+    }
+
+    pub fn data(&self) -> &MapData {
+        self.data.get_or_init(|| {
+            let data: MapData =
+                serde_json::from_str(self.metadata).expect("compiled map metadata must be valid");
+            assert_eq!(data.id, self.id, "map id must match its registry entry");
+            assert!(!data.spawns.is_empty(), "map must have player spawns");
+            data
+        })
+    }
+
+    pub fn world(&self) -> &CollisionWorld {
+        self.world.get_or_init(|| {
+            let mut reader = BinaryReader::new(self.collision);
+            let vertices = reader.u32() as usize;
+            let triangles = reader.u32() as usize;
+            let vertices = (0..vertices)
+                .map(|_| Point3::new(reader.f32(), reader.f32(), reader.f32()))
+                .collect();
+            let indices = (0..triangles)
+                .map(|_| [reader.u32(), reader.u32(), reader.u32()])
+                .collect();
+            reader.finish();
+            CollisionWorld::new(vertices, indices)
+        })
+    }
+}
+
+include!(concat!(env!("OUT_DIR"), "/map_assets.rs"));
+static ACTIVE: AtomicUsize = AtomicUsize::new(DEFAULT_MAP_INDEX);
+
+pub fn active() -> &'static MapAsset {
+    &MAPS[ACTIVE.load(Ordering::Relaxed)]
+}
+
+/// Called before joining/starting simulation, never during a simulation tick.
+pub fn select(id: &str) -> Result<(), String> {
+    let index = MAPS
+        .iter()
+        .position(|map| map.id == id)
+        .ok_or_else(|| format!("Unknown map: {id}"))?;
+    let _ = MAPS[index].data();
+    let _ = MAPS[index].world();
+    ACTIVE.store(index, Ordering::Relaxed);
+    Ok(())
+}
+
 pub fn data() -> &'static MapData {
-    static DATA: OnceLock<MapData> = OnceLock::new();
-    DATA.get_or_init(|| {
-        serde_json::from_str(include_str!("../../../assets/stormkeep/built/map.json"))
-            .expect("compiled Stormkeep metadata must be valid")
-    })
+    active().data()
 }
-
 pub fn world() -> &'static CollisionWorld {
-    static WORLD: OnceLock<CollisionWorld> = OnceLock::new();
-    WORLD.get_or_init(|| {
-        let bytes = include_bytes!("../../../assets/stormkeep/built/collision.bin");
-        let mut reader = BinaryReader::new(bytes);
-        let vertices = reader.u32() as usize;
-        let triangles = reader.u32() as usize;
-        let vertices = (0..vertices)
-            .map(|_| Point3::new(reader.f32(), reader.f32(), reader.f32()))
-            .collect();
-        let indices = (0..triangles)
-            .map(|_| [reader.u32(), reader.u32(), reader.u32()])
-            .collect();
-        reader.finish();
-        CollisionWorld::new(vertices, indices)
-    })
+    active().world()
 }
 
-/// Keep a small, stable set of map-authored item locations for pickups.
-/// Nearby Quake item entities count as one location.
+/// Authored pickup locations are optional. Empty maps simply have no pickups.
 pub fn pickup_slots() -> &'static [Vec3] {
-    static SLOTS: OnceLock<Vec<Vec3>> = OnceLock::new();
-    SLOTS.get_or_init(|| {
+    let map = active();
+    map.pickups.get_or_init(|| {
         let mut slots: Vec<Vec3> = Vec::new();
-        for &raw in &data().pickup_spawns {
-            let Some(feet) = world()
+        for &raw in &map.data().pickup_spawns {
+            let Some(feet) = map
+                .world()
                 .character(SimulationTuning::default())
                 .ground(raw + Vec3::Y, 3.0)
             else {
@@ -127,7 +183,7 @@ pub fn pickup_slots() -> &'static [Vec3] {
             };
             if slots
                 .iter()
-                .all(|other| other.distance_squared(feet) >= 5.0 * 5.0)
+                .all(|other| other.distance_squared(feet) >= 25.0)
             {
                 slots.push(feet);
             }

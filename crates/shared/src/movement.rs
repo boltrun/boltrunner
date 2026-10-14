@@ -212,25 +212,32 @@ fn apply_map_triggers(state: &mut PlayerState, input: &PlayerInput) {
             continue;
         }
         match trigger.kind {
-            TriggerKind::Push => {
-                state.velocity = trigger.velocity.xz() * state.tuning.jump_pad_multiplier;
-                state.vertical_velocity = trigger.velocity.y * state.tuning.jump_pad_multiplier;
+            TriggerKind::Push { velocity } => {
+                state.velocity = velocity.xz() * state.tuning.jump_pad_multiplier;
+                state.vertical_velocity = velocity.y * state.tuning.jump_pad_multiplier;
                 state.grounded = false;
                 state.dash.remaining_ticks = 0;
                 state.jump.air_jumps_remaining = state.tuning.air_jumps as u8;
             }
-            TriggerKind::Teleport | TriggerKind::Warp => {
-                let rotation = if trigger.kind == TriggerKind::Teleport {
-                    trigger.rotation - state.yaw
+            TriggerKind::Teleport {
+                destination,
+                rotation,
+            }
+            | TriggerKind::Warp {
+                destination,
+                rotation,
+            } => {
+                let rotation = if matches!(trigger.kind, TriggerKind::Teleport { .. }) {
+                    rotation - state.yaw
                 } else {
-                    trigger.rotation
+                    rotation
                 };
                 let velocity = Quat::from_rotation_y(rotation)
                     * Vec3::new(state.velocity.x, state.vertical_velocity, state.velocity.y);
                 state.velocity = velocity.xz() * state.tuning.portal_momentum_multiplier;
                 state.vertical_velocity *= state.tuning.portal_momentum_multiplier;
                 state.dash.direction = Quat::from_rotation_y(rotation) * state.dash.direction;
-                state.position = trigger.destination;
+                state.position = destination;
                 state.yaw += rotation;
                 state.view_yaw_offset += rotation;
                 state.relocation = state.relocation.wrapping_add(1);

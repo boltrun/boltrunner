@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compile the editable Quake 3 map into Boltrunner's current runtime assets.
+"""Compile a registered editable Quake 3 map into Boltrunner's current runtime assets.
 
 Normal builds are offline. --fetch imports missing, checksum-verified upstream
 sources at the pinned commit. Requires q3map2 (setup-map-tools.sh), numpy and Pillow.
@@ -24,11 +24,9 @@ from map_bake import bake
 from map_bsp import Bsp, skybox
 
 ROOT = Path(__file__).resolve().parents[1]
-MAP = ROOT / "assets/stormkeep"
-SOURCE = MAP / "source"
-BUILT = MAP / "built"
-COMMIT = "a7e7fe7a5022d13d806560b88d57b70d6af99fd6"
-UPSTREAM = f"https://raw.githubusercontent.com/xonotic/xonotic-maps.pk3dir/{COMMIT}/"
+MAP = SOURCE = BUILT = MAP_FILE = None
+MAP_ID = ""
+UPSTREAM = ""
 SCALE = 1 / 40  # 40 Quake units per metre; Xonotic's walking speed is comparable.
 ROTATE = np.array([[1, 0, 0], [0, 0, 1], [0, -1, 0]], dtype=float)
 FETCH = False
@@ -172,8 +170,8 @@ class Compiler:
     def __init__(self, entities):
         self.entities = entities
         self.shaders = {}
-        for name in ['exx', 'map_stormkeep', 'trak4x', 'trak5x', 'liquids_lava', 'effects_warpzone', 'model_xonotic_jumppad01']:
-            self.shaders.update(shader_blocks(source(f'scripts/{name}.shader').read_text()))
+        for path in sorted((SOURCE / 'scripts').glob('*.shader')):
+            self.shaders.update(shader_blocks(source(str(path.relative_to(SOURCE))).read_text()))
         self.materials = {}
         self.collision = []
         self.triggers = []
@@ -190,6 +188,25 @@ class Compiler:
             if (SOURCE / candidate).exists() or candidate in TREE:
                 return source(candidate)
         raise ValueError(f"Texture source not found: {name}")
+
+    def sky_prefix(self):
+        names = {face[2].removeprefix('textures/')
+                 for _, brushes, _ in self.entities for brush in brushes for face in brush
+                 if face[2].removeprefix('textures/').startswith('skies/')}
+        shaders = {}
+        for path in sorted((SOURCE / 'scripts').glob('*.shader')):
+            shaders.update(shader_blocks(source(str(path.relative_to(SOURCE))).read_text()))
+        prefixes = set()
+        for name in names:
+            match = re.search(r'(?im)^\s*skyparms\s+(\S+)', shaders.get('textures/' + name, ''))
+            if not match or match[1] == '-':
+                raise ValueError(f'Sky material has no cubemap: {name}')
+            prefixes.add(match[1])
+        if not prefixes:
+            return None
+        if len(prefixes) != 1:
+            raise ValueError('Map must use exactly one sky cubemap')
+        return prefixes.pop()
 
     def material(self, name):
         if not name.startswith(('models/', 'textures/')):
@@ -254,7 +271,7 @@ class Compiler:
             kind = classname.removeprefix('trigger_') if classname.startswith('trigger_') else 'hurt'
             if kind not in ['push', 'teleport', 'warpzone', 'hurt']:
                 return
-            data = dict(kind=kind, planes=planes, center=center.tolist(), destination=[0, 0, 0], rotation=0.0, velocity=[0, 0, 0])
+            data = dict(kind=kind, planes=planes)
             if kind == 'push':
                 target = world(vec(self.targets[props['target']]['origin']))
                 rise = max(target[1] - high[1], .5)
@@ -322,11 +339,10 @@ class Compiler:
                 self.triangle([vertices[j] for j in indices])
             offset += surface[11]
 
-    def compile(self, q3map2):
-        bsp = Bsp(bake(self, q3map2))
+    def collect(self):
         for props, brushes, patches in self.entities:
             classname = props['classname']
-            # Stormkeep contains alternate race-only barriers. Port deathmatch.
+            # Import only deathmatch geometry when the author specifies mode filters.
             if props.get('gametypefilter', '').startswith('+') and 'dm' not in props['gametypefilter']:
                 continue
             if classname == 'info_player_deathmatch':
@@ -341,14 +357,27 @@ class Compiler:
                     self.brush(brush, props)
                 for name, patch in patches:
                     self.patch(name, patch)
-        if len(self.warps) != 2:
-            raise ValueError('Expected Stormkeep\'s paired warpzones')
-        for (data, _, _, n), (_, _, target, target_n) in [self.warps, self.warps[::-1]]:
+        for data, props, _, normal in self.warps:
+            if props.get('target'):
+                matches = [w for w in self.warps if w[1].get('targetname') == props['target']]
+            else:
+                matches = [w for w in self.warps if props.get('targetname')
+                           and w[1].get('target') == props['targetname']]
+            if len(matches) != 1 or matches[0][0] is data:
+                raise ValueError(f'Warpzone must resolve to one other portal: {props}')
+            _, _, target, target_n = matches[0]
             data['kind'] = 'warp'
             data['destination'] = (target + target_n * .65 - np.array([0, .9, 0])).tolist()
-            source_angle = math.atan2(n[0], n[2])
-            target_angle = math.atan2(-target_n[0], -target_n[2])
-            data['rotation'] = target_angle - source_angle
+            data['rotation'] = math.atan2(-target_n[0], -target_n[2]) - math.atan2(normal[0], normal[2])
+        if not self.spawns:
+            raise ValueError('Map must contain at least one info_player_deathmatch')
+        if not self.collision:
+            raise ValueError('Map must contain solid collision geometry')
+
+    def compile(self, q3map2):
+        self.collect()
+        prefix = self.sky_prefix()
+        bsp = Bsp(bake(self, q3map2, MAP_FILE, SOURCE, BUILT))
         BUILT.mkdir(parents=True, exist_ok=True)
         vertices, indices, lookup = [], [], {}
         for triangle in self.collision:
@@ -366,10 +395,12 @@ class Compiler:
             f.write(np.asarray(vertices, dtype='<f4').tobytes())
             f.write(np.asarray(indices, dtype='<u4').tobytes())
         lightmaps, render_triangles = bsp.render(self, BUILT, ROTATE, SCALE)
-        metadata = dict(name='Stormkeep', units_per_metre=40, spawns=self.spawns, pickup_spawns=self.pickup_spawns, triggers=self.triggers,
-                        lightmaps=lightmaps, sky=skybox(SOURCE, BUILT), materials=list(self.materials.values()), counts=dict(self.counts),
+        metadata = dict(id=MAP_ID, name=self.entities[0][0].get('message', MAP_ID), units_per_metre=40, spawns=self.spawns, pickup_spawns=self.pickup_spawns, triggers=self.triggers,
+                        lightmaps=lightmaps, sky=skybox(SOURCE, BUILT, prefix) if prefix else None, materials=list(self.materials.values()), counts=dict(self.counts),
                         collision_triangles=len(indices), render_triangles=render_triangles)
-        used_textures = {metadata['sky'], *lightmaps}
+        used_textures = {*lightmaps}
+        if metadata['sky']:
+            used_textures.add(metadata['sky'])
         for material in self.materials.values():
             used_textures.add(material['texture'])
             if material['glow']:
@@ -388,22 +419,43 @@ class Compiler:
         print(f"Compiled {len(self.spawns)} spawns, {len(self.triggers)} triggers, {len(self.materials)} materials")
 
 
+def configure(map_id):
+    global MAP, SOURCE, BUILT, MAP_FILE, MAP_ID, USED
+    registry = json.loads((ROOT / 'assets/maps.json').read_text())
+    entry = next((m for m in registry['maps'] if m['id'] == map_id), None)
+    if entry is None:
+        raise ValueError(f'Unknown map: {map_id}')
+    MAP_ID = map_id
+    MAP = ROOT / 'assets' / map_id
+    SOURCE = ROOT / 'assets' / entry['source']
+    BUILT = MAP / 'built'
+    MAP_FILE = MAP / f'{map_id}.map'
+    USED = set()
+
+
 def main():
-    global FETCH, TREE
+    global FETCH, TREE, UPSTREAM
+    registry = json.loads((ROOT / 'assets/maps.json').read_text())
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--fetch', action='store_true', help='Download missing upstream sources at the pinned commit')
-    parser.add_argument('--q3map2', default=os.environ.get('Q3MAP2', str(ROOT / '.tools/q3map2/q3map2')), help='NetRadiant q3map2 executable')
+    parser.add_argument('map', choices=[m['id'] for m in registry['maps']])
+    parser.add_argument('--fetch', action='store_true', help='Fetch this map resource root from its pinned upstream manifest')
+    parser.add_argument('--q3map2', default=os.environ.get('Q3MAP2', str(ROOT / '.tools/q3map2/q3map2')))
     args = parser.parse_args()
+    configure(args.map)
     FETCH = args.fetch
     if FETCH:
-        tree = json.loads(urllib.request.urlopen(f'https://api.github.com/repos/xonotic/xonotic-maps.pk3dir/git/trees/{COMMIT}?recursive=1').read())
+        manifest = MAP / 'upstream.json'
+        if not manifest.exists():
+            parser.error('This map has no upstream manifest; its sources must already be present')
+        provenance = json.loads(manifest.read_text())
+        repository = provenance['repository'].removeprefix('https://github.com/')
+        commit = provenance['commit']
+        UPSTREAM = f'https://raw.githubusercontent.com/{repository}/{commit}/'
+        tree = json.loads(urllib.request.urlopen(f'https://api.github.com/repos/{repository}/git/trees/{commit}?recursive=1').read())
         TREE = {entry['path']: entry for entry in tree['tree']}
-        for path in json.loads((MAP / 'upstream.json').read_text())['files']:
+        for path in provenance['files']:
             source(path)
-    source('maps/stormkeep.mapinfo')
-    # Upstream stays pristine for attribution; the editable Valve map is authoritative.
-    source('maps/stormkeep.map')
-    entities = MapParser((MAP / 'stormkeep.map').read_text()).parse()
+    entities = MapParser(MAP_FILE.read_text()).parse()
     Compiler(entities).compile(args.q3map2)
 
 

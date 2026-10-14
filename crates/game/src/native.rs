@@ -111,12 +111,14 @@ pub fn configure(app: &mut App) {
 fn capture_pointer(
     session: Res<boltrunner_client::Session>,
     settings: Res<crate::debug_menu::DebugMenu>,
+    maps: Res<crate::map_menu::MapMenu>,
     buttons: Res<ButtonInput<MouseButton>>,
     keys: Res<ButtonInput<KeyCode>>,
     mut window: Single<(&Window, &mut CursorOptions), With<PrimaryWindow>>,
 ) {
     if !session.is_playing()
         || settings.open
+        || maps.open
         || !window.0.focused
         || keys.just_pressed(KeyCode::Escape)
     {
@@ -133,7 +135,7 @@ pub fn pointer_locked(cursor: &CursorOptions) -> bool {
 }
 
 pub fn finished_loading() {
-    info!("Stormkeep loaded.");
+    info!("{} loaded.", boltrunner_shared::level::data().name);
 }
 
 // The shared Bevy loading screen presents progress on native platforms.

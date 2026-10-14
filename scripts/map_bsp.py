@@ -12,7 +12,7 @@ def srgb_to_linear(color):
     return np.where(color <= 0.04045, color / 12.92, ((color + .055) / 1.055) ** 2.4)
 
 
-def skybox(source, built):
+def skybox(source, built, prefix):
     """Convert Quake's six environment images into Bevy's cube-map convention."""
     # DarkPlaces' cube vertices/UV convention, before the Quake suffix transforms.
     corners = np.array([
@@ -27,7 +27,7 @@ def skybox(source, built):
     for name, flipx, flipy, transpose in [('rt',False,False,True), ('lf',True,True,True),
                                         ('bk',False,True,False), ('ft',True,False,False),
                                         ('up',False,False,True), ('dn',False,False,True)]:
-        pixels = np.asarray(Image.open(source / f'env/extragalactic/asteroids_{name}.tga').convert('RGB'))
+        pixels = np.asarray(Image.open(source / f'{prefix}_{name}.tga').convert('RGB'))
         if flipx: pixels = pixels[:, ::-1]
         if flipy: pixels = pixels[::-1]
         if transpose: pixels = pixels.transpose(1, 0, 2)

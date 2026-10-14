@@ -13,22 +13,54 @@ use boltrunner_shared::level::{self, BinaryReader};
 pub struct MapTextures {
     images: Vec<Handle<Image>>,
     mipmapped: Vec<Handle<Image>>,
-    sky: Handle<Image>,
+    sky: Option<Handle<Image>>,
+    map: &'static str,
+    prepared: usize,
+    ready: bool,
 }
 
+#[derive(Component)]
+pub struct MapGeometry;
+
 pub fn build_map(
+    mut session: ResMut<boltrunner_client::Session>,
+    previous: Option<Res<MapTextures>>,
+    old_geometry: Query<Entity, With<MapGeometry>>,
+    mut camera: Single<(Entity, &mut Transform), With<crate::view::PlayerCamera>>,
+    mut progress: ResMut<crate::loading::LoadingProgress>,
     mut commands: Commands,
     assets: Res<AssetServer>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<BakedMaterial>>,
     mut images: ResMut<Assets<Image>>,
 ) {
+    let Some(id) = session.map.as_deref() else {
+        if session.phase == boltrunner_client::SessionPhase::Connecting && progress.percent == 100 {
+            *progress = default();
+        }
+        return;
+    };
+    if let Some(previous) = previous
+        && previous.map == id
+    {
+        session.map_ready = previous.ready;
+        return;
+    }
+    for entity in &old_geometry {
+        commands.entity(entity).despawn();
+    }
+    commands.entity(camera.0).remove::<Skybox>();
+    *progress = crate::loading::LoadingProgress::default();
     let _ = level::world();
+    let spawn = boltrunner_shared::arena::spawn(0, default());
+    camera.1.translation = spawn.position
+        + Vec3::Y * boltrunner_shared::tuning::SimulationTuning::default().eye_height;
+    camera.1.rotation = Quat::from_rotation_y(spawn.yaw);
     let mut textures = Vec::new();
     let mut mipmapped = Vec::new();
     let mut texture = |name: &str, repeat: bool, mipmaps: bool| {
         let handle = assets.load_with_settings(
-            format!("stormkeep/built/textures/{name}"),
+            format!("{}/built/textures/{name}", level::active().id),
             move |settings: &mut ImageLoaderSettings| {
                 let mode = if repeat {
                     ImageAddressMode::Repeat
@@ -100,8 +132,7 @@ pub fn build_map(
                 .collect()
         })
         .collect();
-    let mut reader =
-        BinaryReader::new(include_bytes!("../../../assets/stormkeep/built/render.bin"));
+    let mut reader = BinaryReader::new(level::active().render);
     for _ in 0..reader.u32() {
         let material = reader.u32() as usize;
         let lightmap = reader.u32() as i32;
@@ -131,17 +162,24 @@ pub fn build_map(
         .with_inserted_attribute(Mesh::ATTRIBUTE_COLOR, colors)
         .with_inserted_indices(Indices::U32(indices));
         commands.spawn((
+            MapGeometry,
             Name::new(level::data().materials[material].name.clone()),
             Mesh3d(meshes.add(mesh)),
             MeshMaterial3d(material_handles[material][(lightmap + 1) as usize].clone()),
         ));
     }
     reader.finish();
-    let sky = texture(&level::data().sky, false, false);
+    let sky = level::data()
+        .sky
+        .as_ref()
+        .map(|name| texture(name, false, false));
     commands.insert_resource(MapTextures {
         images: textures,
         mipmapped,
         sky,
+        map: level::active().id,
+        prepared: 0,
+        ready: false,
     });
     // Static surfaces use baked lighting; dynamic players use ambient light.
     commands.insert_resource(GlobalAmbientLight {
@@ -155,18 +193,21 @@ pub fn finish_loading(
     mut commands: Commands,
     assets: Res<AssetServer>,
     mut images: ResMut<Assets<Image>>,
-    textures: Option<Res<MapTextures>>,
+    textures: Option<ResMut<MapTextures>>,
     weapon: Option<Res<crate::weapon::WeaponAssets>>,
     camera: Single<(Entity, &bevy::camera::Exposure), With<crate::view::PlayerCamera>>,
     mut progress: ResMut<crate::loading::LoadingProgress>,
-    mut prepared: Local<usize>,
+    mut session: ResMut<boltrunner_client::Session>,
 ) {
     if progress.percent == 100 || progress.error.is_some() {
         return;
     }
-    let (Some(textures), Some(weapon)) = (textures, weapon) else {
+    let (Some(mut textures), Some(weapon)) = (textures, weapon) else {
         return;
     };
+    if session.map.as_deref() != Some(textures.map) {
+        return;
+    }
     let mut ids: Vec<_> = textures
         .images
         .iter()
@@ -203,7 +244,7 @@ pub fn finish_loading(
     // Process a batch, yielding between textures when about one 60 Hz frame is spent.
     let started = bevy::platform::time::Instant::now();
     let budget = std::time::Duration::from_micros(16_667);
-    while let Some(handle) = textures.mipmapped.get(*prepared) {
+    while let Some(handle) = textures.mipmapped.get(textures.prepared) {
         let image = images.get_mut(handle).expect("loaded map image");
         assert_eq!(
             image.texture_descriptor.format,
@@ -211,46 +252,58 @@ pub fn finish_loading(
         );
         let width = image.width() as usize;
         let height = image.height() as usize;
-        image.texture_descriptor.mip_level_count = crate::mipmaps::append_srgb_mips(
-            image.data.as_mut().expect("decoded map pixels"),
-            width,
-            height,
-        );
-        *prepared += 1;
-        progress.advance((100 * (ids.len() + *prepared) / total_tasks) as u8);
+        if image.texture_descriptor.mip_level_count == 1 {
+            image.texture_descriptor.mip_level_count = crate::mipmaps::append_srgb_mips(
+                image.data.as_mut().expect("decoded map pixels"),
+                width,
+                height,
+            );
+        }
+        textures.prepared += 1;
+        progress.advance((100 * (ids.len() + textures.prepared) / total_tasks) as u8);
         if started.elapsed() >= budget {
             return;
         }
     }
-    let sky = &textures.sky;
-    let image = images.get_mut(sky).expect("loaded sky image");
-    image
-        .reinterpret_stacked_2d_as_array(6)
-        .expect("six square sky faces");
-    image.texture_view_descriptor = Some(TextureViewDescriptor {
-        dimension: Some(TextureViewDimension::Cube),
-        ..default()
-    });
-    commands.entity(camera.0).insert(Skybox {
-        image: sky.clone(),
-        brightness: camera.1.exposure().recip(),
-        ..default()
-    });
+    if let Some(sky) = &textures.sky {
+        let image = images.get_mut(sky).expect("loaded sky image");
+        if image.texture_descriptor.size.depth_or_array_layers == 1 {
+            image
+                .reinterpret_stacked_2d_as_array(6)
+                .expect("six square sky faces");
+        }
+        image.texture_view_descriptor = Some(TextureViewDescriptor {
+            dimension: Some(TextureViewDimension::Cube),
+            ..default()
+        });
+        commands.entity(camera.0).insert(Skybox {
+            image: sky.clone(),
+            brightness: camera.1.exposure().recip(),
+            ..default()
+        });
+    }
+    textures.ready = true;
+    session.map_ready = true;
     progress.advance(100);
 }
 
 pub fn tune_lighting(
     settings: Res<boltrunner_client::tuning::TuningClient>,
-    mut previous: Local<Option<boltrunner_shared::tuning::PresentationTuning>>,
+    textures: Option<Res<MapTextures>>,
+    mut previous: Local<Option<(boltrunner_shared::tuning::PresentationTuning, &'static str)>>,
     mut materials: ResMut<Assets<BakedMaterial>>,
     mut ambient: ResMut<GlobalAmbientLight>,
 ) {
+    let Some(textures) = textures else { return };
     let tuning = settings.values().presentation;
-    if previous.is_some_and(|p| {
-        p.lightmap_brightness == tuning.lightmap_brightness
-            && p.glow_brightness == tuning.glow_brightness
-            && p.ambient_brightness == tuning.ambient_brightness
-    }) {
+    if !textures.is_added()
+        && previous.is_some_and(|(p, map)| {
+            map == level::active().id
+                && p.lightmap_brightness == tuning.lightmap_brightness
+                && p.glow_brightness == tuning.glow_brightness
+                && p.ambient_brightness == tuning.ambient_brightness
+        })
+    {
         return;
     }
     for (_, material) in materials.iter_mut() {
@@ -258,5 +311,5 @@ pub fn tune_lighting(
         material.settings.y = material.base_lighting.y * tuning.glow_brightness;
     }
     ambient.brightness = tuning.ambient_brightness;
-    *previous = Some(tuning);
+    *previous = Some((tuning, level::active().id));
 }
