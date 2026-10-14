@@ -12,6 +12,8 @@ pub fn step(state: &mut PlayerState, input: &PlayerInput) {
         .air_jumps_remaining
         .min(state.tuning.air_jumps as u8);
     if state.match_paused {
+        state.zipline.last_press = input.interact_press;
+        state.weapon.last_reload_press = input.reload_press;
         state.jump.last_press = input.jump_press;
         state.dash.last_press = input.dash_press;
         return;
@@ -19,6 +21,7 @@ pub fn step(state: &mut PlayerState, input: &PlayerInput) {
     if let Some(death) = &mut state.death {
         // Consume presses throughout death, including the respawn tick. They
         // must never become queued jumps/dashes when control returns.
+        state.zipline.last_press = input.interact_press;
         state.jump.last_press = input.jump_press;
         state.dash.last_press = input.dash_press;
         death.remaining_ticks -= 1;
@@ -28,7 +31,30 @@ pub fn step(state: &mut PlayerState, input: &PlayerInput) {
         return;
     }
     let previous = state.position;
-    step_in_world(level::world(), state, input);
+    if state.drone.is_some_and(|drone| drone.controlling) {
+        // Flight controls must not also trigger jumps or dashes on the exposed body.
+        state.zipline.last_press = input.interact_press;
+        state.jump.last_press = input.jump_press;
+        state.dash.last_press = input.dash_press;
+        let body_input = PlayerInput {
+            yaw: PlayerInput::encode_yaw(state.yaw - state.view_yaw_offset),
+            jump_press: input.jump_press,
+            interact_press: input.interact_press,
+            dash_press: input.dash_press,
+            ..default()
+        };
+        if !crate::zipline::step_in_world(
+            level::world(),
+            &level::data().triggers,
+            state,
+            &body_input,
+        ) {
+            step_in_world(level::world(), state, &body_input);
+        }
+    } else if !crate::zipline::step_in_world(level::world(), &level::data().triggers, state, input)
+    {
+        step_in_world(level::world(), state, input);
+    }
     apply_map_triggers(state, input, previous);
     crate::weapon::step(state, input);
 }
@@ -48,8 +74,22 @@ pub fn kill(state: &mut PlayerState, pitch: f32) {
     state.velocity = Vec2::ZERO;
     state.vertical_velocity = 0.0;
     state.dash.remaining_ticks = 0;
+    state.zipline.ride = None;
     state.speed_ticks = 0;
     state.rapid_fire_ticks = 0;
+    if let Some(drone) = &mut state.drone {
+        drone.controlling = false;
+        drone.velocity = Vec3::ZERO;
+        drone.previous_position = drone.position;
+        drone.detonate = true;
+    }
+    state.weapon.slots = [None; 2];
+    state.weapon.reload_ticks = 0;
+    state.weapon.reload_total_ticks = 0;
+    state.weapon.firing = false;
+    state.weapon.charge_ticks = 0;
+    state.burn_ticks = 0;
+    state.burn_owner = None;
 }
 
 pub fn respawn(state: &mut PlayerState, input: &PlayerInput) {
@@ -67,13 +107,21 @@ pub fn respawn(state: &mut PlayerState, input: &PlayerInput) {
             last_press: input.dash_press,
             ..crate::protocol::DashState::new(state.tuning)
         },
+        zipline: crate::zipline::ZiplineState {
+            last_press: input.interact_press,
+            ..default()
+        },
         jump: crate::protocol::JumpState {
             last_press: input.jump_press,
             air_jumps_remaining: state.tuning.air_jumps as u8,
         },
         weapon: crate::weapon::WeaponState {
             shot: state.weapon.shot,
-            ..default()
+            last_slot_press: input.slot_press,
+            last_dev_press: input.dev_weapon_press,
+            last_fire_press: input.fire_press,
+            last_reload_press: input.reload_press,
+            ..crate::weapon::WeaponState::new(state.tuning)
         },
         grounded: true,
         ..default()
@@ -100,25 +148,8 @@ fn step_in_world(world: &CollisionWorld, state: &mut PlayerState, input: &Player
     .normalize_or_zero();
     let (sin, cos) = state.yaw.sin_cos();
     let wish = Vec2::new(cos * axes.x + sin * axes.y, -sin * axes.x + cos * axes.y);
-    let max_charges = state.tuning.dash_charges as u8;
+    recharge_dash(state);
     let recharge = crate::tuning::seconds_to_ticks(state.tuning.dash_recharge_time);
-    state.dash.charges = state.dash.charges.min(max_charges);
-    // Restore charges sequentially, including while airborne or dashing.
-    if recharge == 0 || state.dash.charges == max_charges {
-        state.dash.recharge_ticks = 0;
-        state.dash.charges = max_charges;
-    } else if state.dash.recharge_ticks > 0 {
-        state.dash.recharge_ticks -= 1;
-        if state.dash.recharge_ticks == 0 {
-            state.dash.charges += 1;
-            if state.dash.charges < max_charges {
-                state.dash.recharge_ticks = recharge;
-            }
-        }
-    } else {
-        // A live capacity increase leaves new slots to recharge normally.
-        state.dash.recharge_ticks = recharge;
-    }
     let dash_pressed = input.dash_press != state.dash.last_press;
     state.dash.last_press = input.dash_press;
     let duration = crate::tuning::seconds_to_ticks(state.tuning.dash_time);
@@ -194,6 +225,28 @@ fn step_in_world(world: &CollisionWorld, state: &mut PlayerState, input: &Player
     }
 }
 
+pub(crate) fn recharge_dash(state: &mut PlayerState) {
+    let max_charges = state.tuning.dash_charges as u8;
+    let recharge = crate::tuning::seconds_to_ticks(state.tuning.dash_recharge_time);
+    state.dash.charges = state.dash.charges.min(max_charges);
+    // Restore charges sequentially, including while airborne or dashing.
+    if recharge == 0 || state.dash.charges == max_charges {
+        state.dash.recharge_ticks = 0;
+        state.dash.charges = max_charges;
+    } else if state.dash.recharge_ticks > 0 {
+        state.dash.recharge_ticks -= 1;
+        if state.dash.recharge_ticks == 0 {
+            state.dash.charges += 1;
+            if state.dash.charges < max_charges {
+                state.dash.recharge_ticks = recharge;
+            }
+        }
+    } else {
+        // A live capacity increase leaves new slots to recharge normally.
+        state.dash.recharge_ticks = recharge;
+    }
+}
+
 fn apply_map_triggers(state: &mut PlayerState, input: &PlayerInput, previous: Vec3) {
     state.trigger_cooldown = state.trigger_cooldown.saturating_sub(1);
     let data = level::data();
@@ -223,6 +276,7 @@ fn apply_map_triggers(state: &mut PlayerState, input: &PlayerInput, previous: Ve
         }
         match trigger.kind {
             TriggerKind::Push { velocity } => {
+                state.zipline.ride = None;
                 state.velocity = velocity.xz() * state.tuning.jump_pad_multiplier;
                 state.vertical_velocity = velocity.y * state.tuning.jump_pad_multiplier;
                 state.grounded = false;
@@ -238,6 +292,7 @@ fn apply_map_triggers(state: &mut PlayerState, input: &PlayerInput, previous: Ve
                 rotation,
                 ..
             } => {
+                state.zipline.ride = None;
                 let rotation = if matches!(trigger.kind, TriggerKind::Teleport { .. }) {
                     rotation - state.yaw
                 } else {
@@ -261,6 +316,7 @@ fn apply_map_triggers(state: &mut PlayerState, input: &PlayerInput, previous: Ve
                 state.relocation = state.relocation.wrapping_add(1);
                 state.grounded = false;
             }
+            TriggerKind::Zipline { .. } => continue,
             TriggerKind::Hurt => unreachable!(),
         }
         state.trigger_cooldown = crate::tuning::seconds_to_ticks(state.tuning.trigger_cooldown);

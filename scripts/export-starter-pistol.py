@@ -50,6 +50,8 @@ def export():
         use_selection=True, export_yup=True, export_animations=False,
         export_cameras=False, export_lights=False, export_extras=True,
     )
+    import runpy
+    runpy.run_path(str(ROOT / 'scripts/prepare-pistol-reload.py'))['prepare'](OUT / 'built/starter_pistol.glb')
     bpy.data.objects.remove(mesh, do_unlink=True)
     print(f'Exported starter_pistol.glb: {triangles} triangles', flush=True)
 

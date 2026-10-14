@@ -1,0 +1,6 @@
+{
+  "author": "Takuya Ueda · design Renée French",
+  "source": "https://github.com/golang-samples/gopher-3d",
+  "license": "CC BY 3.0",
+  "adaptation": "Normalized height, simplified game rig, in-place locomotion clips, weapon grip"
+}

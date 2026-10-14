@@ -1,7 +1,26 @@
 {
   "default": "stormkeep",
   "maps": [
-    { "id": "stormkeep", "source": "stormkeep/source" },
-    { "id": "skyfracture", "source": "stormkeep/source" }
+    {
+      "id": "stormkeep",
+      "source": "stormkeep/source"
+    },
+    {
+      "id": "skyfracture",
+      "source": "stormkeep/source"
+    },
+    {
+      "id": "mondstadt",
+      "source": "mondstadt/source",
+      "importer": "import_city.py"
+    },
+    {
+      "id": "candycourtyard",
+      "source": "candycourtyard/source"
+    },
+    {
+      "id": "sandstonequarter",
+      "source": "sandstonequarter/source"
+    }
   ]
 }

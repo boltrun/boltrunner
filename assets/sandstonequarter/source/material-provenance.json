@@ -1,0 +1,5 @@
+{
+  "asset": "textures/sandstone/plaster.png",
+  "method": "Built-in imagegen",
+  "prompt": "Create a single square seamless repeating albedo texture for a serious first-person shooter level inspired by historic Pakistani courtyard houses. Aged warm sand beige lime plaster over brick, fine chalky grains, subtle irregular trowel marks and a few thin hairline weather cracks, restrained sunbaked ochre variation. No large damage holes, no exposed distinct bricks, no graffiti, no letters, no logos, no objects, no borders. Orthographic flat texture straight-on, even neutral illumination, no cast shadows, no baked directional light, no perspective, no vignette. Edges tile seamlessly. Realistic detailed material suitable for large walls; rough matte texture, midtone beige rather than bright cream. Entire image occupied by surface."
+}

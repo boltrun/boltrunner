@@ -80,6 +80,9 @@ pub fn configure(app: &mut App) {
     app.insert_resource(ServerUrl(options.server))
         .add_plugins(
             DefaultPlugins
+                .set(bevy::asset::io::web::WebAssetPlugin {
+                    silence_startup_warning: true,
+                })
                 .set(AssetPlugin {
                     file_path: concat!(env!("CARGO_MANIFEST_DIR"), "/../../assets").into(),
                     ..default()
@@ -104,6 +107,7 @@ pub fn configure(app: &mut App) {
             capture_pointer
                 .after(bevy::input::InputSystems)
                 .after(crate::debug_menu::MenuInput)
+                .after(crate::character_menu::hotkeys)
                 .before(crate::view::look_input),
         );
 }
@@ -112,22 +116,28 @@ fn capture_pointer(
     session: Res<boltrunner_client::Session>,
     settings: Res<crate::debug_menu::DebugMenu>,
     maps: Res<crate::map_menu::MapMenu>,
+    weapons: Res<crate::weapon_menu::WeaponMenu>,
+    characters: Res<crate::character_menu::CharacterMenu>,
     buttons: Res<ButtonInput<MouseButton>>,
     keys: Res<ButtonInput<KeyCode>>,
+    mut was_open: Local<bool>,
     mut window: Single<(&Window, &mut CursorOptions), With<PrimaryWindow>>,
 ) {
     if !session.is_playing()
         || settings.open
         || maps.open
+        || weapons.open
+        || characters.open
         || !window.0.focused
         || keys.just_pressed(KeyCode::Escape)
     {
         window.1.grab_mode = CursorGrabMode::None;
         window.1.visible = true;
-    } else if buttons.just_pressed(MouseButton::Left) {
+    } else if !*was_open && buttons.just_pressed(MouseButton::Left) {
         window.1.grab_mode = CursorGrabMode::Locked;
         window.1.visible = false;
     }
+    *was_open = settings.open || weapons.open || characters.open;
 }
 
 pub fn pointer_locked(cursor: &CursorOptions) -> bool {

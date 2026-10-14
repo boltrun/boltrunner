@@ -11,7 +11,7 @@ impl Plugin for TuningPlugin {
         app.init_resource::<FeatureSettings>()
             .add_systems(Startup, setup)
             .add_systems(PreUpdate, edit.after(MessageSystems::Receive))
-            .add_systems(PostUpdate, publish.before(ReplicationSystems::Send));
+            .add_systems(PostUpdate, publish.before(ReplicationBufferSystems::Buffer));
     }
 }
 fn setup(mut commands: Commands, settings: Res<FeatureSettings>) {

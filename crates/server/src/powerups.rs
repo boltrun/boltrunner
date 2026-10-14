@@ -3,7 +3,7 @@ use boltrunner_shared::{
     PlayerId, PlayerState, level,
     match_state::MatchState,
     powerups::{Pickup, PickupKind},
-    tuning::{FeatureSettings, MatchTuning, seconds_to_ticks},
+    tuning::{FeatureSettings, seconds_to_ticks},
 };
 use lightyear::prelude::*;
 
@@ -53,60 +53,71 @@ pub fn manage(
     round: Res<MatchState>,
     settings: Res<FeatureSettings>,
     pickups: Query<(Entity, &Pickup)>,
+    weapons: Query<(Entity, &boltrunner_shared::inventory::GroundWeapon)>,
+    fields: Query<Entity, With<boltrunner_shared::weapon::ShockField>>,
     players: Query<&PlayerState>,
 ) {
     if round.results {
         for (entity, _) in &pickups {
             commands.entity(entity).despawn();
         }
+        for (entity, _) in &weapons {
+            commands.entity(entity).despawn();
+        }
+        for entity in &fields {
+            commands.entity(entity).despawn();
+        }
         director.initialized = false;
         director.remaining_ticks = 0;
         return;
     }
-
     let rules = settings.values.rules;
     let limit = rules.active_pickups as usize;
-    let mut occupied: Vec<Vec3> = pickups.iter().map(|(_, pickup)| pickup.position).collect();
-    if occupied.len() > limit {
-        for (entity, _) in pickups.iter().skip(limit) {
-            commands.entity(entity).despawn();
-        }
-        occupied.truncate(limit);
+    let managed: Vec<_> = pickups
+        .iter()
+        .map(|(e, p)| (e, p.position))
+        .chain(
+            weapons
+                .iter()
+                .filter(|(_, w)| w.map_spawn)
+                .map(|(e, w)| (e, w.position)),
+        )
+        .collect();
+    for (entity, _) in managed.iter().skip(limit) {
+        commands.entity(*entity).despawn();
     }
+    let mut current = managed.len().min(limit);
+    let mut occupied: Vec<Vec3> = managed
+        .iter()
+        .take(limit)
+        .map(|(_, p)| *p)
+        .chain(
+            weapons
+                .iter()
+                .filter(|(_, w)| !w.map_spawn)
+                .map(|(_, w)| w.position),
+        )
+        .collect();
     if !director.initialized {
-        let initial = [
-            PickupKind::Health,
-            PickupKind::Speed,
-            PickupKind::RapidFire,
-            PickupKind::Health,
-            PickupKind::Speed,
-            PickupKind::RapidFire,
-        ];
-        for index in 0..limit {
-            spawn_random(
-                &mut commands,
-                initial[index % initial.len()],
-                &mut occupied,
-                &players,
-                rules,
-            );
+        for index in current..limit {
+            let kind = [PickupKind::Health, PickupKind::Speed, PickupKind::RapidFire][index % 3];
+            if spawn_random(&mut commands, kind, &mut occupied, &players, &settings) {
+                current += 1;
+            }
         }
-        info!("Spawned {} map powerups", occupied.len());
+        info!("Spawned {} map pickups (powerups and weapons)", current);
         director.initialized = true;
         director.remaining_ticks = seconds_to_ticks(rules.pickup_respawn);
-        return;
-    }
-    director.remaining_ticks = director.remaining_ticks.saturating_sub(1);
-    if director.remaining_ticks == 0 {
-        if occupied.len() < limit {
-            let kind = match rand::random::<u8>() % 3 {
-                0 => PickupKind::Health,
-                1 => PickupKind::Speed,
-                _ => PickupKind::RapidFire,
-            };
-            spawn_random(&mut commands, kind, &mut occupied, &players, rules);
+    } else {
+        director.remaining_ticks = director.remaining_ticks.saturating_sub(1);
+        if director.remaining_ticks == 0 {
+            if current < limit {
+                let kind = [PickupKind::Health, PickupKind::Speed, PickupKind::RapidFire]
+                    [rand::random::<u32>() as usize % 3];
+                spawn_random(&mut commands, kind, &mut occupied, &players, &settings);
+            }
+            director.remaining_ticks = seconds_to_ticks(rules.pickup_respawn);
         }
-        director.remaining_ticks = seconds_to_ticks(rules.pickup_respawn);
     }
 }
 
@@ -115,30 +126,50 @@ fn spawn_random(
     kind: PickupKind,
     occupied: &mut Vec<Vec3>,
     players: &Query<&PlayerState>,
-    rules: MatchTuning,
-) {
+    settings: &FeatureSettings,
+) -> bool {
+    let rules = settings.values.rules;
     let candidates = level::pickup_slots();
     if candidates.is_empty() {
-        return;
+        return false;
     }
     let start = rand::random::<u32>() as usize % candidates.len();
     for offset in 0..candidates.len() {
-        let feet = candidates[(start + offset) % candidates.len()];
-        let position = feet + Vec3::Y * 0.65;
+        let position = candidates[(start + offset) % candidates.len()] + Vec3::Y * 0.65;
         if occupied
             .iter()
             .any(|other| other.distance_squared(position) < rules.pickup_spacing.max(0.01).powi(2))
-            || players.iter().any(|player| {
-                player.position.distance_squared(feet) < rules.pickup_player_distance.powi(2)
+            || players.iter().any(|p| {
+                p.death.is_none()
+                    && p.position.distance_squared(position - Vec3::Y * 0.65)
+                        < rules.pickup_player_distance.powi(2)
             })
         {
             continue;
         }
-        commands.spawn((
-            Pickup { kind, position },
-            Replicate::to_clients(NetworkTarget::All),
-        ));
+        if rand::random::<f32>() * 100.0 < rules.weapon_spawn_chance {
+            use boltrunner_shared::{
+                arsenal::WeaponKind,
+                inventory::{GroundWeapon, HeldWeapon},
+            };
+            let kind =
+                WeaponKind::ALL[1 + rand::random::<u32>() as usize % (WeaponKind::ALL.len() - 1)];
+            commands.spawn((
+                GroundWeapon {
+                    weapon: HeldWeapon::full(kind, settings.values.simulation),
+                    position,
+                    map_spawn: true,
+                },
+                Replicate::to_clients(NetworkTarget::All),
+            ));
+        } else {
+            commands.spawn((
+                Pickup { kind, position },
+                Replicate::to_clients(NetworkTarget::All),
+            ));
+        }
         occupied.push(position);
-        return;
+        return true;
     }
+    false
 }

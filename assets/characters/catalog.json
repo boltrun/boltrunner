@@ -1,0 +1,295 @@
+{
+  "characters": [
+    {
+      "id": "keqing-opulent",
+      "name": "Кэ Цин · Яркая лёгкость",
+      "model": "characters/keqing-opulent/model.glb",
+      "author": "Jsut a bird · HoYoverse",
+      "source": "https://www.oto.chat/browse#RLLL",
+      "license": "Project owner states permission for use in this game; original VRM restrictions retained in source.json",
+      "scale": 1.1471525898916957,
+      "offset": [
+        0,
+        0.00023190393689643225,
+        0
+      ],
+      "yaw": 0.0,
+      "animations": {
+        "idle": "Idle",
+        "walk": "Walk",
+        "run": "Run",
+        "jump": "Jump",
+        "dash": "Dash",
+        "death": "Death",
+        "walk_speed": 4.0,
+        "run_speed": 8.0
+      },
+      "arms": {
+        "right_upper": "Right arm",
+        "right_lower": "Right elbow",
+        "right_hand": "Right wrist",
+        "left_upper": "Left arm",
+        "left_lower": "Left elbow",
+        "left_hand": "Left wrist",
+        "height": 0.7,
+        "forward": 0.18,
+        "side": 0.27,
+        "right_rotation": [
+          0,
+          1.5707963,
+          0
+        ],
+        "left_rotation": [
+          0,
+          -1.5707963,
+          0
+        ],
+        "two_handed": true,
+        "hanging": [
+          "Sleeve_0_1_L",
+          "Sleeve_0_1_R"
+        ]
+      }
+    },
+    {
+      "id": "sonic",
+      "name": "Sonic",
+      "model": "characters/sonic/model.glb",
+      "author": "davidkbd · Sonic © SEGA",
+      "source": "https://github.com/davidkbd/RelightedEngine/tree/29920b24e4268175dad77f66bba63466ec96eef0/Engine/Characters/Sonic",
+      "license": "MIT repository; character belongs to SEGA",
+      "scale": 0.4631696648710713,
+      "offset": [
+        0,
+        -0.019734709081233443,
+        0
+      ],
+      "yaw": 3.141592653589793,
+      "animations": {
+        "idle": "Idle-loop",
+        "walk": "Walk-loop",
+        "run": "Run-loop",
+        "jump": "FallUp-loop",
+        "dash": "Roll-loop",
+        "death": "Death"
+      },
+      "arms": {
+        "right_upper": "BrazoUp",
+        "right_lower": "BrazoDown",
+        "right_hand": "ManoCorazon1",
+        "left_upper": "BrazoUp.001",
+        "left_lower": "BrazoDown.001",
+        "left_hand": "ManoCorazon1.001",
+        "height": 0.61,
+        "forward": 0.18,
+        "side": 0.27,
+        "two_handed": true
+      }
+    },
+    {
+      "id": "cheburashka",
+      "name": "Чебурашка",
+      "model": "characters/cheburashka/model.glb",
+      "author": "Ilya Baran · Boltrunner adaptation",
+      "source": "https://github.com/alecjacobson/common-3d-test-models",
+      "license": "Public research mesh; original source and attribution retained",
+      "scale": 1.0,
+      "offset": [
+        0,
+        0,
+        0
+      ],
+      "yaw": 3.141592653589793,
+      "animations": {
+        "idle": "Idle",
+        "walk": "Walk",
+        "run": "Run",
+        "jump": "Jump",
+        "dash": "Dash",
+        "death": "Death",
+        "walk_speed": 4.0,
+        "run_speed": 8.0
+      },
+      "arms": {
+        "right_upper": "Left arm",
+        "right_lower": "Left elbow",
+        "right_hand": "Left hand",
+        "left_upper": "Right arm",
+        "left_lower": "Right elbow",
+        "left_hand": "Right hand",
+        "height": 0.5,
+        "forward": 0.3,
+        "side": 0.27,
+        "two_handed": false
+      }
+    },
+    {
+      "id": "konqi",
+      "name": "Konqi",
+      "model": "characters/konqi/model.glb",
+      "author": "ZAQraven · KDE mascot",
+      "source": "https://svn.code.sf.net/p/supertuxkart/code/media/trunk/karts/konqi/",
+      "license": "CC BY-SA 3.0",
+      "scale": 1.0,
+      "offset": [
+        0,
+        0,
+        0
+      ],
+      "yaw": 0.0,
+      "animations": {
+        "idle": "Idle",
+        "walk": "Walk",
+        "run": "Run",
+        "jump": "Jump",
+        "dash": "Dash",
+        "death": "Death",
+        "walk_speed": 4.0,
+        "run_speed": 8.0
+      },
+      "arms": {
+        "right_upper": "DEF-ARM.R",
+        "right_lower": "DEF-FOREARM01.R",
+        "right_hand": "DEF-HAND.R",
+        "left_upper": "DEF-ARM.L",
+        "left_lower": "DEF-FOREARM01.L",
+        "left_hand": "DEF-HAND.L",
+        "height": 0.55,
+        "forward": 0.18,
+        "side": 0.27,
+        "two_handed": true
+      }
+    },
+    {
+      "id": "miku",
+      "name": "Hatsune Miku · V4X",
+      "model": "characters/miku/model.glb",
+      "author": "Tda · © Crypton Future Media",
+      "source": "https://github.com/outrine/HatsuneMiku_VRM_Model",
+      "license": "Piapro Character License and Tda V4X model terms; retained in License.txt",
+      "scale": 1.0,
+      "offset": [
+        0,
+        0,
+        0
+      ],
+      "yaw": 0.0,
+      "animations": {
+        "idle": "Idle",
+        "walk": "Walk",
+        "run": "Run",
+        "jump": "Jump",
+        "dash": "Dash",
+        "death": "Death",
+        "walk_speed": 4.0,
+        "run_speed": 8.0
+      },
+      "arms": {
+        "right_upper": "右腕",
+        "right_lower": "右ひじ",
+        "right_hand": "右手首",
+        "left_upper": "左腕",
+        "left_lower": "左ひじ",
+        "left_hand": "左手首",
+        "height": 0.7,
+        "forward": 0.18,
+        "side": 0.27,
+        "two_handed": true
+      }
+    },
+    {
+      "id": "gopher",
+      "name": "Go Gopher",
+      "model": "characters/gopher/model.glb",
+      "author": "Takuya Ueda · design Renée French",
+      "source": "https://github.com/golang-samples/gopher-3d",
+      "license": "CC BY 3.0",
+      "scale": 1.0,
+      "offset": [
+        0,
+        0,
+        0
+      ],
+      "yaw": 0.0,
+      "animations": {
+        "idle": "Idle",
+        "walk": "Walk",
+        "run": "Run",
+        "jump": "Jump",
+        "dash": "Dash",
+        "death": "Death",
+        "walk_speed": 4.0,
+        "run_speed": 8.0
+      },
+      "arms": {
+        "right_upper": "upperR",
+        "right_lower": "lowerR",
+        "right_hand": "handR",
+        "left_upper": "upperL",
+        "left_lower": "lowerL",
+        "left_hand": "handL",
+        "height": 0.51,
+        "forward": 0.68,
+        "side": 0.18,
+        "right_rotation": [
+          -1.5707963,
+          0,
+          0
+        ],
+        "left_rotation": [
+          -1.5707963,
+          0,
+          0
+        ],
+        "two_handed": false
+      }
+    },
+    {
+      "id": "sahur",
+      "name": "Тун Тун Тун Сахур",
+      "model": "characters/sahur/model.glb",
+      "scale": 1.0,
+      "offset": [
+        0,
+        0,
+        0
+      ],
+      "yaw": 0.0,
+      "animations": {
+        "idle": "Idle",
+        "walk": "Walk",
+        "run": "Run",
+        "jump": "Jump",
+        "dash": "Dash",
+        "death": "Death",
+        "walk_speed": 4.0,
+        "run_speed": 8.0
+      },
+      "arms": {
+        "right_upper": "upperR",
+        "right_lower": "lowerR",
+        "right_hand": "handR",
+        "left_upper": "upperL",
+        "left_lower": "lowerL",
+        "left_hand": "handL",
+        "height": 0.65,
+        "forward": 0.32,
+        "side": 0.27,
+        "two_handed": true,
+        "right_rotation": [
+          -1.5707963267948966,
+          0,
+          0
+        ],
+        "left_rotation": [
+          -1.5707963267948966,
+          0,
+          0
+        ]
+      },
+      "author": "Foorleague2City",
+      "source": "https://sketchfab.com/3d-models/tung-tung-tung-sahur-brainrot-italian-e73bef48b374447b8a282f06d69b00df",
+      "license": "CC BY 4.0"
+    }
+  ]
+}

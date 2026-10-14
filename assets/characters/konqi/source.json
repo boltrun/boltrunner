@@ -1,0 +1,6 @@
+{
+  "author": "ZAQraven · KDE mascot",
+  "source": "https://svn.code.sf.net/p/supertuxkart/code/media/trunk/karts/konqi/",
+  "license": "CC BY-SA 3.0",
+  "adaptation": "Normalized height, simplified game rig, in-place locomotion clips, weapon grip"
+}
