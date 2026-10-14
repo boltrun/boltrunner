@@ -2,6 +2,7 @@ mod build_check;
 mod combat;
 mod history;
 mod loading;
+mod maps;
 mod matches;
 mod powerups;
 mod tuning;
@@ -22,6 +23,19 @@ fn main() {
         println!("{}", boltrunner_shared::SIMULATION_BUILD);
         return;
     }
+    let map = std::env::var("BOLTRUNNER_MAP")
+        .unwrap_or_else(|_| boltrunner_shared::level::active().id.into());
+    if let Err(error) = boltrunner_shared::level::select(&map) {
+        eprintln!(
+            "{error}. Available maps: {}",
+            boltrunner_shared::level::MAPS
+                .iter()
+                .map(|m| m.id)
+                .collect::<Vec<_>>()
+                .join(", ")
+        );
+        std::process::exit(2);
+    }
     let address: SocketAddr = std::env::var("BOLTRUNNER_BIND")
         .unwrap_or_else(|_| "0.0.0.0:5000".into())
         .parse()
@@ -37,6 +51,7 @@ fn main() {
         .add_plugins(ProtocolPlugin)
         .add_plugins(tuning::TuningPlugin)
         .add_plugins(loading::LoadingPlugin)
+        .add_plugins(maps::MapsPlugin)
         .insert_resource(BindAddress(address))
         .init_resource::<boltrunner_shared::match_state::MatchState>()
         .init_resource::<matches::MatchClock>()
@@ -131,6 +146,12 @@ fn spawn_players(
         let mut joined = already_joined;
         for request in requests.receive() {
             if joined {
+                continue;
+            }
+            if request.map != round.map || request.map_revision != round.map_revision {
+                replies.send::<LobbyChannel>(JoinRejected {
+                    reason: "The server map changed. Reconnect before joining.".into(),
+                });
                 continue;
             }
             let name = match boltrunner_shared::nickname::validate(&request.nickname) {

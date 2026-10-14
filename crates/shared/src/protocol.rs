@@ -10,6 +10,8 @@ pub struct PlayerName(pub String);
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct JoinRequest {
+    pub map: String,
+    pub map_revision: u64,
     pub nickname: String,
     pub color: u8,
 }
@@ -17,6 +19,17 @@ pub struct JoinRequest {
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct JoinRejected {
     pub reason: String,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
+pub struct ChangeMap {
+    pub map: String,
+    pub revision: u64,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
+pub struct MapChangeReply {
+    pub error: Option<String>,
 }
 
 pub struct LobbyChannel;
@@ -221,6 +234,10 @@ impl Plugin for ProtocolPlugin {
         })
         .add_direction(NetworkDirection::Bidirectional);
         app.register_message::<crate::weapon::ShotImpact>()
+            .add_direction(NetworkDirection::ServerToClient);
+        app.register_message::<ChangeMap>()
+            .add_direction(NetworkDirection::ClientToServer);
+        app.register_message::<MapChangeReply>()
             .add_direction(NetworkDirection::ServerToClient);
         app.register_message::<JoinRequest>()
             .add_direction(NetworkDirection::ClientToServer);

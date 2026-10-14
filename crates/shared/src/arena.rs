@@ -3,7 +3,7 @@ use bevy::prelude::*;
 
 pub const MAX_PLAYERS: usize = 16;
 
-/// The authored deathmatch spawns, settled onto Stormkeep's actual floors.
+/// The authored deathmatch spawns, settled onto the selected map's floors.
 pub fn spawn(index: usize, tuning: crate::tuning::SimulationTuning) -> Spawn {
     level::world()
         .character(tuning)

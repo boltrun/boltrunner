@@ -94,9 +94,8 @@ fn setup(mut commands: Commands) {
 }
 
 fn present(
-    mut commands: Commands,
     progress: Res<LoadingProgress>,
-    screen: Query<Entity, With<LoadingScreen>>,
+    mut screen: Query<&mut Visibility, With<LoadingScreen>>,
     mut labels: Query<&mut Text, With<LoadingLabel>>,
     mut bars: Query<&mut Node, With<LoadingBar>>,
 ) {
@@ -115,10 +114,15 @@ fn present(
     for mut bar in &mut bars {
         bar.width = percent(progress.percent as f32);
     }
-    if progress.percent == 100 && progress.error.is_none() {
-        for entity in &screen {
-            commands.entity(entity).despawn();
-        }
+    let complete = progress.percent == 100 && progress.error.is_none();
+    for mut visibility in &mut screen {
+        *visibility = if complete {
+            Visibility::Hidden
+        } else {
+            Visibility::Visible
+        };
+    }
+    if complete {
         crate::platform::finished_loading();
     }
 }

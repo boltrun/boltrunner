@@ -131,7 +131,7 @@ pub(crate) enum Action {
     Close,
 }
 
-fn menu_font() -> TextFont {
+pub(crate) fn menu_font() -> TextFont {
     TextFont {
         font_size: 14.0,
         ..default()
@@ -357,7 +357,11 @@ fn setup(mut commands: Commands) {
         });
 }
 
-fn hotkeys(keys: Res<ButtonInput<KeyCode>>, session: Res<Session>, mut menu: ResMut<DebugMenu>) {
+pub(crate) fn hotkeys(
+    keys: Res<ButtonInput<KeyCode>>,
+    session: Res<Session>,
+    mut menu: ResMut<DebugMenu>,
+) {
     let previous = menu.open;
     if !session.is_playing() {
         menu.open = false;

@@ -5,7 +5,7 @@
 __pycache__/
 *.py[cod]
 *.blend[0-9]*
-/assets/stormkeep/built/q3map2/
+/assets/*/built/q3map2/
 /local/
 /.agents/
 /.codex/

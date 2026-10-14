@@ -1,0 +1,247 @@
+{
+  "id": "skyfracture",
+  "name": "Skyfracture",
+  "units_per_metre": 40,
+  "spawns": [
+    {
+      "position": [
+        -48.0,
+        4.800000000000001,
+        15.600000000000001
+      ],
+      "yaw": 0.0
+    },
+    {
+      "position": [
+        48.0,
+        4.800000000000001,
+        -15.600000000000001
+      ],
+      "yaw": 3.141592653589793
+    },
+    {
+      "position": [
+        -56.0,
+        4.800000000000001,
+        50.400000000000006
+      ],
+      "yaw": -1.5707963267948966
+    },
+    {
+      "position": [
+        56.0,
+        4.800000000000001,
+        50.400000000000006
+      ],
+      "yaw": 1.5707963267948966
+    },
+    {
+      "position": [
+        -17.6,
+        -4.800000000000001,
+        62.400000000000006
+      ],
+      "yaw": 0.0
+    },
+    {
+      "position": [
+        17.6,
+        -4.800000000000001,
+        62.400000000000006
+      ],
+      "yaw": 0.0
+    },
+    {
+      "position": [
+        -54.400000000000006,
+        9.600000000000001,
+        -67.2
+      ],
+      "yaw": 3.141592653589793
+    },
+    {
+      "position": [
+        54.400000000000006,
+        9.600000000000001,
+        -67.2
+      ],
+      "yaw": 3.141592653589793
+    },
+    {
+      "position": [
+        -27.200000000000003,
+        9.600000000000001,
+        -60.0
+      ],
+      "yaw": -1.5707963267948966
+    },
+    {
+      "position": [
+        27.200000000000003,
+        9.600000000000001,
+        -60.0
+      ],
+      "yaw": 1.5707963267948966
+    },
+    {
+      "position": [
+        -16.0,
+        0.0,
+        -6.4
+      ],
+      "yaw": -1.5707963267948966
+    },
+    {
+      "position": [
+        16.0,
+        0.0,
+        6.4
+      ],
+      "yaw": 1.5707963267948966
+    }
+  ],
+  "pickup_spawns": [],
+  "triggers": [
+    {
+      "kind": "hurt",
+      "planes": [
+        [
+          0.0,
+          -1.0,
+          0.0,
+          51.2
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -16.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          192.0
+        ],
+        [
+          1.0,
+          0.0,
+          0.0,
+          192.0
+        ],
+        [
+          0.0,
+          0.0,
+          -1.0,
+          192.0
+        ],
+        [
+          -1.0,
+          0.0,
+          0.0,
+          192.0
+        ]
+      ]
+    }
+  ],
+  "lightmaps": [
+    "lm_0000.png",
+    "lm_0002.png"
+  ],
+  "sky": "sky.png",
+  "materials": [
+    {
+      "id": 0,
+      "name": "textures/exx/base/base_metal01",
+      "texture": "textures__exx__base__base_metal01.png",
+      "glow": null,
+      "width": 512,
+      "height": 512,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "id": 1,
+      "name": "textures/exx/trim/trim_psimple04",
+      "texture": "textures__exx__trim__trim_psimple04.png",
+      "glow": null,
+      "width": 128,
+      "height": 512,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "id": 2,
+      "name": "textures/exx/floor/floor_crete01",
+      "texture": "textures__exx__floor__floor_crete01.png",
+      "glow": null,
+      "width": 512,
+      "height": 512,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "id": 3,
+      "name": "textures/exx/floor/floor_wrn01",
+      "texture": "textures__exx__floor__floor_wrn01.png",
+      "glow": null,
+      "width": 512,
+      "height": 512,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "id": 4,
+      "name": "textures/exx/light/light_u201",
+      "texture": "textures__exx__light__light_u201.png",
+      "glow": "textures__exx__light__light_u201__glow.png",
+      "width": 512,
+      "height": 128,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "id": 5,
+      "name": "textures/exx/floor/floor_wrn01-blue",
+      "texture": "textures__exx__floor__floor_wrn01-blue.png",
+      "glow": null,
+      "width": 512,
+      "height": 512,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "id": 6,
+      "name": "textures/exx/floor/floor_tread01",
+      "texture": "textures__exx__floor__floor_tread01.png",
+      "glow": null,
+      "width": 512,
+      "height": 512,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "id": 7,
+      "name": "textures/exx/floor-grate01",
+      "texture": "textures__exx__floor-grate01.png",
+      "glow": null,
+      "width": 512,
+      "height": 512,
+      "emissive": false,
+      "alpha": true,
+      "blend": false
+    }
+  ],
+  "counts": {
+    "brushes": 786
+  },
+  "collision_triangles": 9604,
+  "render_triangles": 11968
+}

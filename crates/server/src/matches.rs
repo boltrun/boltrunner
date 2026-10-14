@@ -16,6 +16,13 @@ pub struct MatchClock {
     feed_fraction: Duration,
     phase_duration: Duration,
 }
+impl MatchClock {
+    pub fn restart(&mut self, seconds: f32) {
+        self.remaining = Duration::from_secs_f32(seconds);
+        self.phase_duration = self.remaining;
+        self.feed_fraction = Duration::ZERO;
+    }
+}
 impl Default for MatchClock {
     fn default() -> Self {
         Self {

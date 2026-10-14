@@ -1,0 +1,7 @@
+{
+  "default": "stormkeep",
+  "maps": [
+    { "id": "stormkeep", "source": "stormkeep/source" },
+    { "id": "skyfracture", "source": "stormkeep/source" }
+  ]
+}

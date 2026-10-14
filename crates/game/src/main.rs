@@ -3,6 +3,7 @@ mod debug_menu;
 mod kill_feed;
 mod loading;
 mod map;
+mod map_menu;
 mod mipmaps;
 mod nameplates;
 mod powerups;
@@ -45,6 +46,7 @@ fn main() -> AppExit {
             MaterialPlugin::<baked_material::BakedMaterial>::default(),
             view::ViewPlugin,
             debug_menu::DebugMenuPlugin,
+            map_menu::MapMenuPlugin,
             nameplates::NameplatesPlugin,
             powerups::PowerupVisualsPlugin,
             weapon::WeaponPlugin,

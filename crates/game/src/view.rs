@@ -6,9 +6,7 @@ use bevy::{
     window::{CursorOptions, PrimaryWindow},
 };
 use boltrunner_client::{NetworkPresentation, NetworkStats, PresentationPosition, Session};
-use boltrunner_shared::{
-    PlayerId, PlayerInput, PlayerState, arena, level, player_color::PlayerColor,
-};
+use boltrunner_shared::{PlayerId, PlayerInput, PlayerState, level, player_color::PlayerColor};
 use lightyear::prelude::{client::input::InputSystems, input::native::*, *};
 
 #[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
@@ -21,10 +19,15 @@ impl Plugin for ViewPlugin {
         app.init_resource::<Look>()
             .insert_resource(ClearColor(Color::srgb(0.055, 0.07, 0.095)))
             .add_systems(Startup, build_scene)
-            .add_systems(Startup, crate::map::build_map)
             .add_systems(
                 Update,
-                (crate::map::finish_loading, crate::map::tune_lighting),
+                (
+                    crate::map::build_map,
+                    crate::map::finish_loading,
+                    crate::map::tune_lighting,
+                )
+                    .chain()
+                    .after(boltrunner_client::update_session),
             )
             .add_systems(
                 PreUpdate,
@@ -92,11 +95,7 @@ fn build_scene(mut commands: Commands) {
             fov: 90.0_f32.to_radians(),
             ..default()
         }),
-        Transform::from_translation(
-            arena::spawn(0, default()).position
-                + Vec3::Y * boltrunner_shared::tuning::SimulationTuning::default().eye_height,
-        )
-        .with_rotation(Quat::from_rotation_y(arena::spawn(0, default()).yaw)),
+        Transform::from_xyz(0.0, 5.0, 0.0),
         PlayerCamera,
         Msaa::Sample4,
     ));
@@ -186,6 +185,7 @@ pub(crate) fn look_input(
     mut look: ResMut<Look>,
     settings: Res<boltrunner_client::tuning::TuningClient>,
     menu: Res<crate::debug_menu::DebugMenu>,
+    maps: Res<crate::map_menu::MapMenu>,
     session: Res<Session>,
     motion: Res<AccumulatedMouseMotion>,
     keys: Res<ButtonInput<KeyCode>>,
@@ -194,6 +194,7 @@ pub(crate) fn look_input(
 ) {
     look.locked = session.is_playing()
         && !menu.open
+        && !maps.open
         && !local.iter().any(|p| p.match_paused)
         && window.0.focused
         && crate::platform::pointer_locked(window.1);

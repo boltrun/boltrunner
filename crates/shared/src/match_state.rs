@@ -24,6 +24,8 @@ pub struct ScoreRow {
 
 #[derive(Component, Resource, Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct MatchState {
+    pub map: String,
+    pub map_revision: u64,
     pub number: u64,
     pub results: bool,
     pub remaining_seconds: u32,
@@ -33,6 +35,8 @@ pub struct MatchState {
 impl Default for MatchState {
     fn default() -> Self {
         Self {
+            map: crate::level::active().id.into(),
+            map_revision: 0,
             number: 1,
             results: false,
             remaining_seconds: crate::tuning::MatchTuning::default().match_duration.ceil() as u32,

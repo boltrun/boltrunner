@@ -252,18 +252,29 @@ impl MuzzleView<'_, '_> {
 }
 
 fn detect_shots(
+    mut commands: Commands,
+    session: Res<boltrunner_client::Session>,
+    effects: Query<Entity, Or<(With<LocalBolt>, With<ImpactFlash>)>>,
     settings: Res<boltrunner_client::tuning::TuningClient>,
     mut feedback: ResMut<Feedback>,
     mut shots: ResMut<PredictedShots>,
     time: Res<Time<Real>>,
     players: Query<(&PlayerId, &PlayerState), With<Predicted>>,
 ) {
+    if !session.is_playing() {
+        for entity in &effects {
+            commands.entity(entity).despawn();
+        }
+        *feedback = default();
+        shots.0.clear();
+        return;
+    }
     feedback.pending_shots.clear();
     let now = time.elapsed_secs_f64();
     feedback.seen.retain(|(_, _, at)| now - at < 4.0);
     feedback.finished.retain(|(_, _, at)| now - at < 4.0);
     let Ok((id, state)) = players.single() else {
-        feedback.player = None;
+        *feedback = default();
         shots.0.clear();
         return;
     };

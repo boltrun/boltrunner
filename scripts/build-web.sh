@@ -42,8 +42,9 @@ for path in files:
     digest.update(path.name.encode())
     with path.open('rb') as source:
         digest.update(hashlib.file_digest(source, 'sha256').digest())
+registry = json.loads(pathlib.Path('assets/maps.json').read_text())
 asset_directories = {
-    'stormkeep/built/textures': pathlib.Path('assets/stormkeep/built/textures'),
+    **{f"{m['id']}/built/textures": pathlib.Path('assets') / m['id'] / 'built/textures' for m in registry['maps']},
     'shaders': pathlib.Path('assets/shaders'),
     'fonts': pathlib.Path('assets/fonts'),
     'weapons/starter_pistol/built': pathlib.Path('assets/weapons/starter_pistol/built'),
@@ -62,13 +63,15 @@ for name, directory in asset_directories.items():
 
 # Ship editable corresponding map sources, importer, and attribution with the build.
 import zipfile
-with zipfile.ZipFile(destination / 'stormkeep-source.zip', 'w', zipfile.ZIP_DEFLATED) as archive:
-    for path in sorted(pathlib.Path('assets/stormkeep').rglob('*')):
-        if path.is_file() and 'built' not in path.parts:
-            archive.write(path, path)
-    for path in map(pathlib.Path, ['scripts/import-stormkeep.py', 'scripts/map_bake.py',
+with zipfile.ZipFile(destination / 'maps-source.zip', 'w', zipfile.ZIP_DEFLATED) as archive:
+    archive.write('assets/maps.json')
+    roots = {pathlib.Path('assets') / m['id'] for m in registry['maps']} | {pathlib.Path('assets') / m['source'] for m in registry['maps']}
+    paths = {p for folder in roots for p in folder.rglob('*') if p.is_file() and 'built' not in p.parts}
+    for path in sorted(paths):
+        archive.write(path, path)
+    for path in map(pathlib.Path, ['scripts/import-map.py', 'scripts/map_bake.py',
                                   'scripts/map_bsp.py', 'scripts/setup-map-tools.sh',
-                                  'scripts/requirements-maps.txt']):
+                                  'scripts/requirements-maps.txt', 'scripts/export-skyfracture-sky.py', 'LICENSE']):
         archive.write(path, path)
     for path in sorted(pathlib.Path('editor/Boltrunner').iterdir()):
         archive.write(path, path)
