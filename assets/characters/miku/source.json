@@ -1,0 +1,21 @@
+{
+  "author": "Tda · © Crypton Future Media",
+  "source": "https://github.com/outrine/HatsuneMiku_VRM_Model",
+  "license": "Piapro Character License and Tda V4X model terms; retained in License.txt",
+  "terms_source": "https://mmd.gg/db/model/hatsune-miku-v4x/",
+  "original_model": "Type Tda Hatsune Miku V4X Ver1.00",
+  "editor": "Boltrunner adaptation",
+  "adaptation": "VRM diffuse materials, removed facial morphs, normalized height, game rig and six locomotion clips",
+  "original_vrm_metadata": {
+    "title": "Tda式初音ミクV4X",
+    "version": "",
+    "author": "",
+    "reference": "ver.1.0\r\n\r\nモデリング ：Tda\r\nCopyright　：CRYPTON FUTURE MEDIA, INC\r\n\r\nAutoLuminous対応モデル\r\nAutoLuminousを使用しない場合はモーフ「AL未使用」「LightOff」を１にしてください\r\n（ALに対応するため材質の色がAL用になっているので）",
+    "allowedUserName": "Everyone",
+    "violentUssageName": "Allow",
+    "sexualUssageName": "Allow",
+    "commercialUssageName": "Allow",
+    "licenseName": "CC0"
+  },
+  "license_note": "The conversion metadata differs from the original Tda/Piapro terms. License.txt contains the effective original model terms."
+}
