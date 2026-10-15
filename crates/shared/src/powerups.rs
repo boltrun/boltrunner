@@ -39,9 +39,11 @@ impl Pickup {
             }
             PickupKind::RapidFire => {
                 player.rapid_fire_ticks = seconds_to_ticks(player.tuning.rapid_fire_duration);
-                player.weapon.cooldown_ticks = player.weapon.cooldown_ticks.min(seconds_to_ticks(
-                    player.tuning.fire_interval / player.tuning.rapid_fire_multiplier,
-                ));
+                let kind = player.weapon.selected;
+                player.weapon.cooldowns[kind.index()] =
+                    player.weapon.cooldowns[kind.index()].min(seconds_to_ticks(
+                        kind.stats(player.tuning).interval / player.tuning.rapid_fire_multiplier,
+                    ));
                 true
             }
         }

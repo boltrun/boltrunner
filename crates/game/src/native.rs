@@ -112,22 +112,26 @@ fn capture_pointer(
     session: Res<boltrunner_client::Session>,
     settings: Res<crate::debug_menu::DebugMenu>,
     maps: Res<crate::map_menu::MapMenu>,
+    weapons: Res<crate::weapon_menu::WeaponMenu>,
     buttons: Res<ButtonInput<MouseButton>>,
     keys: Res<ButtonInput<KeyCode>>,
     mut window: Single<(&Window, &mut CursorOptions), With<PrimaryWindow>>,
+    mut was_open: Local<bool>,
 ) {
     if !session.is_playing()
         || settings.open
         || maps.open
+        || weapons.open
         || !window.0.focused
         || keys.just_pressed(KeyCode::Escape)
     {
         window.1.grab_mode = CursorGrabMode::None;
         window.1.visible = true;
-    } else if buttons.just_pressed(MouseButton::Left) {
+    } else if buttons.just_pressed(MouseButton::Left) || *was_open {
         window.1.grab_mode = CursorGrabMode::Locked;
         window.1.visible = false;
     }
+    *was_open = settings.open || weapons.open;
 }
 
 pub fn pointer_locked(cursor: &CursorOptions) -> bool {

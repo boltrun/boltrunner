@@ -186,6 +186,8 @@ type SessionReplicas = Or<(
     With<boltrunner_shared::match_state::MatchState>,
     With<boltrunner_shared::tuning::FeatureSettings>,
     With<boltrunner_shared::powerups::Pickup>,
+    With<boltrunner_shared::inventory::GroundWeapon>,
+    With<boltrunner_shared::weapon::ShockField>,
 )>;
 
 pub fn update_session(
@@ -338,10 +340,15 @@ fn predict(
             if shots.0.len() >= 256 {
                 shots.0.drain(..128);
             }
-            shots.0.push(PredictedShot {
-                bolt: boltrunner_shared::weapon::Projectile::from_shot(id.0, &state, &input.0),
-                tick: timeline.tick(),
-            });
+            let mut shot_state = state.clone();
+            shot_state.weapon.selected = state.weapon.last_shot_kind;
+            shot_state.weapon.charge_ticks = state.weapon.last_shot_charge;
+            for bolt in boltrunner_shared::weapon::Projectile::volley(id.0, &shot_state, &input.0) {
+                shots.0.push(PredictedShot {
+                    bolt,
+                    tick: timeline.tick(),
+                });
+            }
         }
     }
 }

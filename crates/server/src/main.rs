@@ -1,6 +1,9 @@
+mod arsenal;
 mod build_check;
 mod combat;
+mod equipment;
 mod history;
+mod inventory;
 mod loading;
 mod maps;
 mod matches;
@@ -49,6 +52,7 @@ fn main() {
             tick_duration: TICK_DURATION,
         })
         .add_plugins(ProtocolPlugin)
+        .add_plugins(equipment::EquipmentPlugin)
         .add_plugins(tuning::TuningPlugin)
         .add_plugins(loading::LoadingPlugin)
         .add_plugins(maps::MapsPlugin)
@@ -66,17 +70,27 @@ fn main() {
             FixedUpdate,
             (
                 history::capture_before,
+                inventory::collect,
                 simulate,
                 history::capture_after,
                 powerups::collect,
                 powerups::manage,
-                combat::advance_projectiles,
+                arsenal::resolve_shots,
+                arsenal::advance_projectiles,
+                arsenal::advance_effects,
+                arsenal::advance_fields,
+                inventory::settle,
             )
                 .chain(),
         )
         .add_systems(
             PostUpdate,
-            (combat::publish_projectiles, matches::publish).before(ReplicationSystems::Send),
+            (
+                combat::publish_projectiles,
+                matches::publish,
+                arsenal::publish_equipment,
+            )
+                .before(ReplicationSystems::Send),
         )
         .run();
 }
@@ -194,6 +208,7 @@ fn spawn_players(
             commands.spawn((
                 PlayerId(id),
                 PlayerName(name.clone()),
+                boltrunner_shared::equipment::PlayerEquipment::default(),
                 color,
                 PlayerState {
                     tuning: settings.values.simulation,
@@ -205,6 +220,7 @@ fn spawn_players(
                         ..default()
                     },
                     dash: boltrunner_shared::protocol::DashState::new(settings.values.simulation),
+                    weapon: boltrunner_shared::weapon::WeaponState::new(settings.values.simulation),
                     position,
                     yaw: spawn.yaw,
                     view_yaw_offset: spawn.yaw,
@@ -260,10 +276,20 @@ fn simulate(
                 .get(control.owner)
                 .ok()
                 .map_or(0.0, |(ping, delay)| history::validated_delay(ping, delay));
-            commands.spawn((
-                Projectile::from_shot(id.0, &state, &input.0),
-                history::ProjectileLag(lag),
-            ));
+            let mut shot_state = state.clone();
+            shot_state.weapon.selected = state.weapon.last_shot_kind;
+            shot_state.weapon.charge_ticks = state.weapon.last_shot_charge;
+            if shot_state.weapon.selected.is_projectile() {
+                for bolt in Projectile::volley(id.0, &shot_state, &input.0) {
+                    commands.spawn((bolt, history::ProjectileLag(lag)));
+                }
+            } else if shot_state.weapon.selected != boltrunner_shared::arsenal::WeaponKind::Drone {
+                commands.spawn(arsenal::ShotRequest {
+                    bolt: Projectile::from_shot(id.0, &shot_state, &input.0),
+                    tuning: state.tuning,
+                    lag,
+                });
+            }
         }
     }
 }

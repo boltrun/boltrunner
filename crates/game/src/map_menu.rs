@@ -172,9 +172,13 @@ pub(crate) fn hotkeys(
     session: Res<Session>,
     mut menu: ResMut<MapMenu>,
     mut debug: ResMut<crate::debug_menu::DebugMenu>,
+    weapons: Res<crate::weapon_menu::WeaponMenu>,
     mut previous: Local<bool>,
 ) {
-    if !session.is_playing() || keys.just_pressed(KeyCode::F2) || keys.just_pressed(KeyCode::Escape)
+    if !session.is_playing()
+        || keys.just_pressed(KeyCode::F2)
+        || keys.just_pressed(KeyCode::F4)
+        || keys.just_pressed(KeyCode::Escape)
     {
         menu.open = false;
     } else if keys.just_pressed(KeyCode::F3) {
@@ -183,7 +187,7 @@ pub(crate) fn hotkeys(
             debug.open = false;
         }
     }
-    let open = menu.open || debug.open;
+    let open = menu.open || debug.open || weapons.open;
     if open != *previous {
         crate::platform::set_debug_menu(open);
         *previous = open;

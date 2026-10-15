@@ -48,6 +48,11 @@ pub struct PlayerState {
     pub health: crate::health::Health,
     pub speed_ticks: u16,
     pub rapid_fire_ticks: u16,
+    pub drone: Option<crate::arsenal::DroneState>,
+    pub damage_fraction: f32,
+    pub burn_ticks: u16,
+    pub burn_dps: f32,
+    pub burn_owner: Option<u64>,
     pub grounded: bool,
     pub match_paused: bool,
     pub death: Option<DeathState>,
@@ -139,6 +144,23 @@ impl Ease for PlayerState {
                 } else {
                     start.rapid_fire_ticks
                 },
+                drone: match (start.drone, end.drone) {
+                    (Some(a), Some(mut b)) => {
+                        b.position = a.position.lerp(b.position, t);
+                        Some(b)
+                    }
+                    _ => {
+                        if t >= 1.0 {
+                            end.drone
+                        } else {
+                            start.drone
+                        }
+                    }
+                },
+                damage_fraction: end.damage_fraction,
+                burn_ticks: end.burn_ticks,
+                burn_dps: end.burn_dps,
+                burn_owner: end.burn_owner,
                 // Discrete resource/timer state must not be blended between snapshots.
                 dash: if t >= 1.0 { end.dash } else { start.dash },
                 jump: if t >= 1.0 { end.jump } else { start.jump },
@@ -188,6 +210,15 @@ pub struct PlayerInput {
     pub dash_press: u16,
     /// Held left button; fire cadence is enforced by shared simulation.
     pub fire: bool,
+    pub fire_press: u16,
+    pub reload_press: u16,
+    pub alt: bool,
+    pub up: bool,
+    pub down: bool,
+    pub slot: u8,
+    pub slot_press: u16,
+    pub dev_weapon: crate::arsenal::WeaponKind,
+    pub dev_weapon_press: u16,
     pub yaw: u16,
     pub pitch: i16,
 }
@@ -251,10 +282,13 @@ impl Plugin for ProtocolPlugin {
         app.register_component::<crate::match_state::MatchState>();
         app.register_component::<PlayerName>();
         app.register_component::<crate::player_color::PlayerColor>();
+        app.register_component::<crate::equipment::PlayerEquipment>();
         app.register_component::<PlayerId>();
         app.register_component::<crate::weapon::Projectile>()
             .add_linear_interpolation();
         app.register_component::<crate::powerups::Pickup>();
+        app.register_component::<crate::inventory::GroundWeapon>();
+        app.register_component::<crate::weapon::ShockField>();
         app.register_component::<PlayerState>()
             .add_prediction()
             .add_should_rollback(PlayerState::should_rollback)
