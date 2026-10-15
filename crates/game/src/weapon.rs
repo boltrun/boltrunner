@@ -41,7 +41,7 @@ impl Plugin for WeaponPlugin {
                 )
                     .chain()
                     .after(InterpolationSystems::Interpolate)
-                    .after(crate::view::CameraUpdated),
+                    .after(crate::world_weapon::WorldWeaponsUpdated),
             );
     }
 }
@@ -507,6 +507,7 @@ fn hit_feedback(
 }
 
 fn sync_bolts(
+    world_muzzles: Res<crate::world_weapon::WorldMuzzles>,
     settings: Res<boltrunner_client::tuning::TuningClient>,
     feedback: Res<Feedback>,
     mut bolts: Query<(&Projectile, &mut Transform, &mut Visibility), With<BoltVisual>>,
@@ -527,6 +528,20 @@ fn sync_bolts(
             Visibility::Inherited
         };
         *transform = bolt_transform(bolt, settings.values().presentation);
+        if feedback.player != Some(bolt.owner) {
+            if let Some(muzzle) = world_muzzles.0.get(&bolt.owner) {
+                let distance = bolt.position.distance(bolt.origin);
+                let weight = (1.0
+                    - distance
+                        / settings
+                            .values()
+                            .presentation
+                            .muzzle_blend_distance
+                            .max(0.01))
+                .clamp(0.0, 1.0);
+                transform.translation += (*muzzle - bolt.origin) * weight;
+            }
+        }
     }
 }
 

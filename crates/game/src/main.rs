@@ -1,4 +1,6 @@
 mod baked_material;
+mod character_menu;
+mod characters;
 mod debug_menu;
 mod kill_feed;
 mod loading;
@@ -11,6 +13,7 @@ mod scoreboard;
 mod title;
 mod view;
 mod weapon;
+mod world_weapon;
 
 #[cfg(not(target_arch = "wasm32"))]
 #[path = "native.rs"]
@@ -37,8 +40,12 @@ fn main() -> AppExit {
         )
         .unwrap();
     app.insert_resource(WinitSettings::continuous())
+        .add_plugins(world_weapon::WorldWeaponsPlugin)
+        .add_plugins(map_menu::MapMenuPlugin)
         .add_plugins((
             GameNetworkingPlugin,
+            characters::CharactersPlugin,
+            character_menu::CharacterMenuPlugin,
             loading::LoadingPlugin,
             title::TitlePlugin,
             scoreboard::ScoreboardPlugin,
@@ -46,7 +53,6 @@ fn main() -> AppExit {
             MaterialPlugin::<baked_material::BakedMaterial>::default(),
             view::ViewPlugin,
             debug_menu::DebugMenuPlugin,
-            map_menu::MapMenuPlugin,
             nameplates::NameplatesPlugin,
             powerups::PowerupVisualsPlugin,
             weapon::WeaponPlugin,
