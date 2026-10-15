@@ -8,6 +8,10 @@ pub struct PlayerId(pub u64);
 #[derive(Component, Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct PlayerName(pub String);
 
+/// Replicated so the lobby can offer colors held by replaceable server bots.
+#[derive(Component, Serialize, Deserialize, Clone, Debug, PartialEq)]
+pub struct BotPlayer;
+
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct JoinRequest {
     pub map: String,
@@ -250,6 +254,7 @@ impl Plugin for ProtocolPlugin {
         app.register_component::<crate::tuning::FeatureSettings>();
         app.register_component::<crate::match_state::MatchState>();
         app.register_component::<PlayerName>();
+        app.register_component::<BotPlayer>();
         app.register_component::<crate::player_color::PlayerColor>();
         app.register_component::<PlayerId>();
         app.register_component::<crate::weapon::Projectile>()
