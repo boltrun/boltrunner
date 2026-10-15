@@ -62,6 +62,8 @@ pub fn build_map(
         let handle = assets.load_with_settings(
             format!("{}/built/textures/{name}", level::active().id),
             move |settings: &mut ImageLoaderSettings| {
+                // Bind only the final GPU texture, after mipmaps/cubemap setup.
+                settings.asset_usage = RenderAssetUsages::MAIN_WORLD;
                 let mode = if repeat {
                     ImageAddressMode::Repeat
                 } else {
@@ -119,6 +121,12 @@ pub fn build_map(
                         diffuse: diffuse.clone(),
                         lightmap: lightmap.clone(),
                         glow: glow.clone().unwrap_or_else(|| white.clone()),
+                        flow: Vec4::new(
+                            material.uv_scroll.x,
+                            material.uv_scroll.y,
+                            if material.water { 1.0 } else { 0.0 },
+                            0.0,
+                        ),
                         alpha: if material.blend {
                             AlphaMode::Blend
                         } else if material.alpha {
@@ -281,6 +289,12 @@ pub fn finish_loading(
             brightness: camera.1.exposure().recip(),
             ..default()
         });
+    }
+    for handle in &textures.images {
+        images
+            .get_mut(handle)
+            .expect("prepared map image")
+            .asset_usage = RenderAssetUsages::default();
     }
     textures.ready = true;
     session.map_ready = true;

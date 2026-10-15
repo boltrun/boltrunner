@@ -1,0 +1,645 @@
+{
+  "id": "spillway",
+  "name": "Spillway",
+  "units_per_metre": 40,
+  "spawns": [
+    {
+      "position": [
+        -32.0,
+        3.2,
+        51.2
+      ],
+      "yaw": -1.5707963267948966
+    },
+    {
+      "position": [
+        32.0,
+        3.2,
+        51.2
+      ],
+      "yaw": 1.5707963267948966
+    },
+    {
+      "position": [
+        -32.0,
+        3.2,
+        -1.6
+      ],
+      "yaw": -1.5707963267948966
+    },
+    {
+      "position": [
+        32.0,
+        3.2,
+        -1.6
+      ],
+      "yaw": 1.5707963267948966
+    },
+    {
+      "position": [
+        -32.0,
+        11.200000000000001,
+        14.4
+      ],
+      "yaw": 0.0
+    },
+    {
+      "position": [
+        32.0,
+        11.200000000000001,
+        14.4
+      ],
+      "yaw": 0.0
+    },
+    {
+      "position": [
+        -32.0,
+        19.2,
+        -43.2
+      ],
+      "yaw": 3.141592653589793
+    },
+    {
+      "position": [
+        32.0,
+        19.2,
+        -43.2
+      ],
+      "yaw": 3.141592653589793
+    },
+    {
+      "position": [
+        -12.8,
+        0.0,
+        24.0
+      ],
+      "yaw": 0.0
+    },
+    {
+      "position": [
+        12.8,
+        0.0,
+        24.0
+      ],
+      "yaw": 0.0
+    },
+    {
+      "position": [
+        -20.8,
+        11.200000000000001,
+        -32.0
+      ],
+      "yaw": 3.141592653589793
+    },
+    {
+      "position": [
+        20.8,
+        11.200000000000001,
+        -32.0
+      ],
+      "yaw": 3.141592653589793
+    }
+  ],
+  "pickup_spawns": [
+    [
+      0.0,
+      12.0,
+      13.600000000000001
+    ],
+    [
+      -32.0,
+      4.0,
+      27.200000000000003
+    ],
+    [
+      32.0,
+      4.0,
+      27.200000000000003
+    ],
+    [
+      -10.0,
+      0.8,
+      28.8
+    ],
+    [
+      10.0,
+      0.8,
+      28.8
+    ],
+    [
+      -32.0,
+      20.0,
+      -35.2
+    ],
+    [
+      32.0,
+      20.0,
+      -35.2
+    ],
+    [
+      -32.0,
+      12.0,
+      -1.6
+    ],
+    [
+      32.0,
+      12.0,
+      -1.6
+    ],
+    [
+      0.0,
+      20.0,
+      -52.0
+    ]
+  ],
+  "triggers": [
+    {
+      "kind": "push",
+      "planes": [
+        [
+          0.0,
+          -1.0,
+          0.0,
+          -0.2
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.8
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          30.0
+        ],
+        [
+          1.0,
+          0.0,
+          0.0,
+          -12.8
+        ],
+        [
+          0.0,
+          0.0,
+          -1.0,
+          -27.6
+        ],
+        [
+          -1.0,
+          0.0,
+          0.0,
+          15.200000000000001
+        ]
+      ],
+      "velocity": [
+        -7.56378283736457,
+        26.653329998332293,
+        -7.923962972477167
+      ]
+    },
+    {
+      "kind": "push",
+      "planes": [
+        [
+          0.0,
+          -1.0,
+          0.0,
+          -0.2
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.8
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          30.0
+        ],
+        [
+          1.0,
+          0.0,
+          0.0,
+          15.200000000000001
+        ],
+        [
+          0.0,
+          0.0,
+          -1.0,
+          -27.6
+        ],
+        [
+          -1.0,
+          0.0,
+          0.0,
+          -12.8
+        ]
+      ],
+      "velocity": [
+        7.56378283736457,
+        26.653329998332293,
+        -7.923962972477167
+      ]
+    }
+  ],
+  "lightmaps": [
+    "lm_0000.png",
+    "lm_0002.png"
+  ],
+  "sky": "sky.png",
+  "materials": [
+    {
+      "id": 0,
+      "name": "textures/spillway/concrete",
+      "texture": "textures__spillway__concrete.png",
+      "glow": null,
+      "width": 1254,
+      "height": 1254,
+      "emissive": false,
+      "alpha": false,
+      "blend": false,
+      "uv_scroll": [
+        0.0,
+        0.0
+      ],
+      "water": false
+    },
+    {
+      "id": 1,
+      "name": "textures/spillway/floor",
+      "texture": "textures__spillway__floor.png",
+      "glow": null,
+      "width": 1254,
+      "height": 1254,
+      "emissive": false,
+      "alpha": false,
+      "blend": false,
+      "uv_scroll": [
+        0.0,
+        0.0
+      ],
+      "water": false
+    },
+    {
+      "id": 2,
+      "name": "textures/spillway/dark",
+      "texture": "textures__spillway__dark.png",
+      "glow": null,
+      "width": 512,
+      "height": 512,
+      "emissive": false,
+      "alpha": false,
+      "blend": false,
+      "uv_scroll": [
+        0.0,
+        0.0
+      ],
+      "water": false
+    },
+    {
+      "id": 3,
+      "name": "textures/spillway/water",
+      "texture": "textures__spillway__water.png",
+      "glow": null,
+      "width": 1254,
+      "height": 1254,
+      "emissive": false,
+      "alpha": false,
+      "blend": false,
+      "uv_scroll": [
+        0.0,
+        -0.04
+      ],
+      "water": true
+    },
+    {
+      "id": 4,
+      "name": "textures/spillway/ivory",
+      "texture": "textures__spillway__ivory.png",
+      "glow": null,
+      "width": 64,
+      "height": 64,
+      "emissive": false,
+      "alpha": false,
+      "blend": false,
+      "uv_scroll": [
+        0.0,
+        0.0
+      ],
+      "water": false
+    },
+    {
+      "id": 5,
+      "name": "textures/spillway/orange",
+      "texture": "textures__spillway__orange.png",
+      "glow": null,
+      "width": 64,
+      "height": 64,
+      "emissive": false,
+      "alpha": false,
+      "blend": false,
+      "uv_scroll": [
+        0.0,
+        0.0
+      ],
+      "water": false
+    },
+    {
+      "id": 6,
+      "name": "textures/spillway/teal",
+      "texture": "textures__spillway__teal.png",
+      "glow": null,
+      "width": 1254,
+      "height": 1254,
+      "emissive": false,
+      "alpha": false,
+      "blend": false,
+      "uv_scroll": [
+        0.0,
+        0.0
+      ],
+      "water": false
+    },
+    {
+      "id": 7,
+      "name": "textures/spillway/lamp",
+      "texture": "textures__spillway__lamp.png",
+      "glow": "textures__spillway__lamp__glow.png",
+      "width": 64,
+      "height": 64,
+      "emissive": false,
+      "alpha": false,
+      "blend": false,
+      "uv_scroll": [
+        0.0,
+        0.0
+      ],
+      "water": false
+    },
+    {
+      "id": 8,
+      "name": "textures/spillway/a1",
+      "texture": "textures__spillway__a1.png",
+      "glow": null,
+      "width": 1024,
+      "height": 384,
+      "emissive": false,
+      "alpha": false,
+      "blend": false,
+      "uv_scroll": [
+        0.0,
+        0.0
+      ],
+      "water": false
+    },
+    {
+      "id": 9,
+      "name": "textures/spillway/vent",
+      "texture": "textures__spillway__vent.png",
+      "glow": null,
+      "width": 512,
+      "height": 512,
+      "emissive": false,
+      "alpha": false,
+      "blend": false,
+      "uv_scroll": [
+        0.0,
+        0.0
+      ],
+      "water": false
+    },
+    {
+      "id": 10,
+      "name": "textures/spillway/coollamp",
+      "texture": "textures__spillway__coollamp.png",
+      "glow": null,
+      "width": 64,
+      "height": 64,
+      "emissive": false,
+      "alpha": false,
+      "blend": false,
+      "uv_scroll": [
+        0.0,
+        0.0
+      ],
+      "water": false
+    },
+    {
+      "id": 11,
+      "name": "textures/spillway/a2",
+      "texture": "textures__spillway__a2.png",
+      "glow": null,
+      "width": 1024,
+      "height": 384,
+      "emissive": false,
+      "alpha": false,
+      "blend": false,
+      "uv_scroll": [
+        0.0,
+        0.0
+      ],
+      "water": false
+    },
+    {
+      "id": 12,
+      "name": "textures/spillway/a3",
+      "texture": "textures__spillway__a3.png",
+      "glow": null,
+      "width": 1024,
+      "height": 384,
+      "emissive": false,
+      "alpha": false,
+      "blend": false,
+      "uv_scroll": [
+        0.0,
+        0.0
+      ],
+      "water": false
+    },
+    {
+      "id": 13,
+      "name": "textures/spillway/title",
+      "texture": "textures__spillway__title.png",
+      "glow": null,
+      "width": 1024,
+      "height": 384,
+      "emissive": false,
+      "alpha": false,
+      "blend": false,
+      "uv_scroll": [
+        0.0,
+        0.0
+      ],
+      "water": false
+    },
+    {
+      "id": 14,
+      "name": "textures/spillway/spillflow",
+      "texture": "textures__spillway__spillflow.png",
+      "glow": null,
+      "width": 1254,
+      "height": 1254,
+      "emissive": false,
+      "alpha": false,
+      "blend": false,
+      "uv_scroll": [
+        0.0,
+        -0.42
+      ],
+      "water": true
+    },
+    {
+      "id": 15,
+      "name": "textures/spillway/turbine",
+      "texture": "textures__spillway__turbine.png",
+      "glow": null,
+      "width": 1024,
+      "height": 384,
+      "emissive": false,
+      "alpha": false,
+      "blend": false,
+      "uv_scroll": [
+        0.0,
+        0.0
+      ],
+      "water": false
+    },
+    {
+      "id": 16,
+      "name": "textures/spillway/jumpglow",
+      "texture": "textures__spillway__jumpglow.png",
+      "glow": "textures__spillway__jumpglow__glow.png",
+      "width": 64,
+      "height": 64,
+      "emissive": true,
+      "alpha": false,
+      "blend": true,
+      "uv_scroll": [
+        0.0,
+        0.0
+      ],
+      "water": false
+    },
+    {
+      "id": 17,
+      "name": "textures/spillway/banner",
+      "texture": "textures__spillway__banner.png",
+      "glow": null,
+      "width": 724,
+      "height": 2172,
+      "emissive": false,
+      "alpha": false,
+      "blend": false,
+      "uv_scroll": [
+        0.0,
+        0.0
+      ],
+      "water": false
+    },
+    {
+      "id": 18,
+      "name": "textures/spillway/screen",
+      "texture": "textures__spillway__screen.png",
+      "glow": "textures__spillway__screen__glow.png",
+      "width": 512,
+      "height": 384,
+      "emissive": false,
+      "alpha": false,
+      "blend": false,
+      "uv_scroll": [
+        0.0,
+        0.0
+      ],
+      "water": false
+    },
+    {
+      "id": 19,
+      "name": "textures/spillway/exit",
+      "texture": "textures__spillway__exit.png",
+      "glow": null,
+      "width": 1024,
+      "height": 384,
+      "emissive": false,
+      "alpha": false,
+      "blend": false,
+      "uv_scroll": [
+        0.0,
+        0.0
+      ],
+      "water": false
+    },
+    {
+      "id": 20,
+      "name": "textures/spillway/hazard",
+      "texture": "textures__spillway__hazard.png",
+      "glow": null,
+      "width": 512,
+      "height": 128,
+      "emissive": false,
+      "alpha": false,
+      "blend": false,
+      "uv_scroll": [
+        0.0,
+        0.0
+      ],
+      "water": false
+    },
+    {
+      "id": 21,
+      "name": "textures/spillway/warning",
+      "texture": "textures__spillway__warning.png",
+      "glow": null,
+      "width": 1024,
+      "height": 384,
+      "emissive": false,
+      "alpha": false,
+      "blend": false,
+      "uv_scroll": [
+        0.0,
+        0.0
+      ],
+      "water": false
+    },
+    {
+      "id": 22,
+      "name": "textures/spillway/west",
+      "texture": "textures__spillway__west.png",
+      "glow": null,
+      "width": 1024,
+      "height": 384,
+      "emissive": false,
+      "alpha": false,
+      "blend": false,
+      "uv_scroll": [
+        0.0,
+        0.0
+      ],
+      "water": false
+    },
+    {
+      "id": 23,
+      "name": "textures/spillway/east",
+      "texture": "textures__spillway__east.png",
+      "glow": null,
+      "width": 1024,
+      "height": 384,
+      "emissive": false,
+      "alpha": false,
+      "blend": false,
+      "uv_scroll": [
+        0.0,
+        0.0
+      ],
+      "water": false
+    }
+  ],
+  "counts": {
+    "brushes": 4342
+  },
+  "collision_triangles": 96892,
+  "render_triangles": 85815
+}
