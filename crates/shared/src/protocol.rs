@@ -42,6 +42,7 @@ pub struct LobbyChannel;
 /// Feet position, planar/vertical velocity and body yaw. Presentation never writes this state.
 #[derive(Component, Serialize, Deserialize, Clone, Debug, PartialEq, Reflect, Default)]
 pub struct PlayerState {
+    #[serde(with = "crate::tuning::simulation_wire")]
     pub tuning: crate::tuning::SimulationTuning,
     pub position: Vec3,
     pub velocity: Vec2,
