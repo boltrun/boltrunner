@@ -5,160 +5,187 @@
   "spawns": [
     {
       "position": [
-        -25.5,
+        -20.8,
         0.04999999999999993,
-        -51.5
+        52.0
       ],
-      "yaw": 1.5707963267948966
+      "yaw": -0.7853981633974483
     },
     {
       "position": [
-        25.5,
+        -24.0,
         0.04999999999999993,
-        -51.5
-      ],
-      "yaw": 1.5707963267948966
-    },
-    {
-      "position": [
-        -26.5,
-        0.04999999999999993,
-        -17.0
+        -40.5
       ],
       "yaw": -1.5707963267948966
     },
     {
       "position": [
-        26.5,
+        25.6,
         0.04999999999999993,
-        -17.0
-      ],
-      "yaw": -1.5707963267948966
-    },
-    {
-      "position": [
-        -13.5,
-        0.04999999999999993,
-        -41.5
+        44.0
       ],
       "yaw": 1.5707963267948966
     },
     {
       "position": [
-        13.5,
+        -21.0,
         0.04999999999999993,
-        -41.5
-      ],
-      "yaw": 1.5707963267948966
-    },
-    {
-      "position": [
-        -18.0,
-        0.04999999999999993,
-        49.0
-      ],
-      "yaw": 1.5707963267948966
-    },
-    {
-      "position": [
-        18.0,
-        0.04999999999999993,
-        49.0
-      ],
-      "yaw": 1.5707963267948966
-    },
-    {
-      "position": [
-        -7.0,
-        0.04999999999999993,
-        39.0
+        -23.0
       ],
       "yaw": 0.0
     },
     {
       "position": [
-        7.0,
+        14.0,
         0.04999999999999993,
-        24.0
+        -47.2
       ],
       "yaw": 3.141592653589793
+    },
+    {
+      "position": [
+        16.0,
+        0.04999999999999993,
+        51.5
+      ],
+      "yaw": 0.0
+    },
+    {
+      "position": [
+        32.0,
+        -2.35,
+        12.0
+      ],
+      "yaw": 0.0
+    },
+    {
+      "position": [
+        -14.0,
+        0.04999999999999993,
+        -47.2
+      ],
+      "yaw": 3.141592653589793
+    },
+    {
+      "position": [
+        -12.0,
+        0.04999999999999993,
+        11.5
+      ],
+      "yaw": -1.5707963267948966
+    },
+    {
+      "position": [
+        30.0,
+        0.04999999999999993,
+        -35.0
+      ],
+      "yaw": 3.141592653589793
+    },
+    {
+      "position": [
+        0.0,
+        0.04999999999999993,
+        17.5
+      ],
+      "yaw": 0.0
+    },
+    {
+      "position": [
+        4.0,
+        0.04999999999999993,
+        3.2
+      ],
+      "yaw": 1.5707963267948966
     }
   ],
   "pickup_spawns": [
     [
-      -26.0,
+      0.0,
       0.65,
-      -28.0
+      33.0
     ],
     [
-      -14.0,
+      14.5,
+      1.75,
+      39.400000000000006
+    ],
+    [
+      -20.0,
+      0.65,
+      47.0
+    ],
+    [
+      -31.5,
+      0.65,
+      13.0
+    ],
+    [
+      -24.0,
+      0.65,
+      -26.0
+    ],
+    [
+      -3.0,
+      0.65,
+      14.0
+    ],
+    [
+      6.0,
+      4.05,
+      18.0
+    ],
+    [
+      -8.0,
+      4.05,
+      -6.0
+    ],
+    [
+      24.0,
+      -1.75,
+      9.0
+    ],
+    [
+      22.0,
+      -1.75,
+      -10.0
+    ],
+    [
+      31.0,
+      0.65,
+      -1.0
+    ],
+    [
+      18.0,
+      0.65,
+      -25.0
+    ],
+    [
+      6.0,
+      4.05,
+      -32.0
+    ],
+    [
+      -12.0,
       0.65,
       -40.0
     ],
     [
-      -13.0,
-      3.6500000000000004,
-      -42.0
-    ],
-    [
-      0.0,
-      3.6500000000000004,
-      -42.0
-    ],
-    [
-      13.0,
-      3.6500000000000004,
-      -42.0
-    ],
-    [
-      14.0,
+      12.0,
       0.65,
-      -33.0
+      -43.0
     ],
     [
-      26.0,
+      -30.0,
       0.65,
-      -29.0
-    ],
-    [
-      -6.0,
-      0.65,
-      -17.0
-    ],
-    [
-      6.0,
-      0.65,
-      -17.0
-    ],
-    [
-      0.0,
-      0.65,
-      -8.0
-    ],
-    [
-      -17.0,
-      0.65,
-      17.0
-    ],
-    [
-      17.0,
-      0.65,
-      24.0
-    ],
-    [
-      -4.0,
-      0.65,
-      35.0
-    ],
-    [
-      4.0,
-      0.65,
-      50.0
+      -36.0
     ]
   ],
   "triggers": [],
   "lightmaps": [
-    "lm_0000.png"
+    "lm_0000.png",
+    "lm_0002.png"
   ],
   "sky": "sky.png",
   "materials": [
@@ -175,17 +202,6 @@
     },
     {
       "id": 1,
-      "name": "textures/sandstone/brick",
-      "texture": "textures__sandstone__brick.png",
-      "glow": null,
-      "width": 256,
-      "height": 256,
-      "emissive": false,
-      "alpha": false,
-      "blend": false
-    },
-    {
-      "id": 2,
       "name": "textures/sandstone/plaster",
       "texture": "textures__sandstone__plaster.png",
       "glow": null,
@@ -196,7 +212,7 @@
       "blend": false
     },
     {
-      "id": 3,
+      "id": 2,
       "name": "textures/sandstone/stone",
       "texture": "textures__sandstone__stone.png",
       "glow": null,
@@ -207,9 +223,20 @@
       "blend": false
     },
     {
+      "id": 3,
+      "name": "textures/sandstone/brick",
+      "texture": "textures__sandstone__brick.png",
+      "glow": null,
+      "width": 256,
+      "height": 256,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
       "id": 4,
-      "name": "textures/sandstone/window",
-      "texture": "textures__sandstone__window.png",
+      "name": "textures/sandstone/wood",
+      "texture": "textures__sandstone__wood.png",
       "glow": null,
       "width": 256,
       "height": 256,
@@ -219,28 +246,6 @@
     },
     {
       "id": 5,
-      "name": "textures/sandstone/wood_decor",
-      "texture": "textures__sandstone__wood_decor.png",
-      "glow": null,
-      "width": 256,
-      "height": 256,
-      "emissive": false,
-      "alpha": false,
-      "blend": false
-    },
-    {
-      "id": 6,
-      "name": "textures/sandstone/teal",
-      "texture": "textures__sandstone__teal.png",
-      "glow": null,
-      "width": 256,
-      "height": 256,
-      "emissive": false,
-      "alpha": false,
-      "blend": false
-    },
-    {
-      "id": 7,
       "name": "textures/sandstone/blue",
       "texture": "textures__sandstone__blue.png",
       "glow": null,
@@ -251,12 +256,34 @@
       "blend": false
     },
     {
-      "id": 8,
-      "name": "textures/sandstone/wood",
-      "texture": "textures__sandstone__wood.png",
+      "id": 6,
+      "name": "textures/sandstone/plaster_ochre",
+      "texture": "textures__sandstone__plaster_ochre.png",
+      "glow": null,
+      "width": 512,
+      "height": 512,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "id": 7,
+      "name": "textures/sandstone/roof",
+      "texture": "textures__sandstone__roof.png",
       "glow": null,
       "width": 256,
       "height": 256,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "id": 8,
+      "name": "textures/sandstone/plaster_rose",
+      "texture": "textures__sandstone__plaster_rose.png",
+      "glow": null,
+      "width": 512,
+      "height": 512,
       "emissive": false,
       "alpha": false,
       "blend": false
@@ -274,8 +301,8 @@
     },
     {
       "id": 10,
-      "name": "textures/sandstone/water",
-      "texture": "textures__sandstone__water.png",
+      "name": "textures/sandstone/kashi",
+      "texture": "textures__sandstone__kashi.png",
       "glow": null,
       "width": 256,
       "height": 256,
@@ -285,6 +312,138 @@
     },
     {
       "id": 11,
+      "name": "textures/sandstone/spice",
+      "texture": "textures__sandstone__spice.png",
+      "glow": null,
+      "width": 256,
+      "height": 256,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "id": 12,
+      "name": "textures/sandstone/wood_decor",
+      "texture": "textures__sandstone__wood_decor.png",
+      "glow": null,
+      "width": 256,
+      "height": 256,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "id": 13,
+      "name": "textures/sandstone/window",
+      "texture": "textures__sandstone__window.png",
+      "glow": null,
+      "width": 256,
+      "height": 256,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "id": 14,
+      "name": "textures/sandstone/teal",
+      "texture": "textures__sandstone__teal.png",
+      "glow": null,
+      "width": 256,
+      "height": 256,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "id": 15,
+      "name": "textures/sandstone/eave",
+      "texture": "textures__sandstone__eave.png",
+      "glow": null,
+      "width": 256,
+      "height": 256,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "id": 16,
+      "name": "textures/sandstone/jali",
+      "texture": "textures__sandstone__jali.png",
+      "glow": null,
+      "width": 256,
+      "height": 256,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "id": 17,
+      "name": "textures/sandstone/shutter",
+      "texture": "textures__sandstone__shutter.png",
+      "glow": null,
+      "width": 256,
+      "height": 256,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "id": 18,
+      "name": "textures/sandstone/sign",
+      "texture": "textures__sandstone__sign.png",
+      "glow": null,
+      "width": 256,
+      "height": 256,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "id": 19,
+      "name": "textures/sandstone/cloth_yellow",
+      "texture": "textures__sandstone__cloth_yellow.png",
+      "glow": null,
+      "width": 256,
+      "height": 256,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "id": 20,
+      "name": "textures/sandstone/cloth_teal",
+      "texture": "textures__sandstone__cloth_teal.png",
+      "glow": null,
+      "width": 256,
+      "height": 256,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "id": 21,
+      "name": "textures/sandstone/brass",
+      "texture": "textures__sandstone__brass.png",
+      "glow": null,
+      "width": 256,
+      "height": 256,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "id": 22,
+      "name": "textures/sandstone/lantern",
+      "texture": "textures__sandstone__lantern.png",
+      "glow": null,
+      "width": 256,
+      "height": 256,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "id": 23,
       "name": "textures/sandstone/cloth_red",
       "texture": "textures__sandstone__cloth_red.png",
       "glow": null,
@@ -295,9 +454,31 @@
       "blend": false
     },
     {
-      "id": 12,
-      "name": "textures/sandstone/cloth_teal",
-      "texture": "textures__sandstone__cloth_teal.png",
+      "id": 24,
+      "name": "textures/sandstone/water",
+      "texture": "textures__sandstone__water.png",
+      "glow": null,
+      "width": 256,
+      "height": 256,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "id": 25,
+      "name": "textures/sandstone/clock",
+      "texture": "textures__sandstone__clock.png",
+      "glow": null,
+      "width": 256,
+      "height": 256,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "id": 26,
+      "name": "textures/sandstone/shade",
+      "texture": "textures__sandstone__shade.png",
       "glow": null,
       "width": 256,
       "height": 256,
@@ -307,8 +488,8 @@
     }
   ],
   "counts": {
-    "brushes": 4250
+    "brushes": 360
   },
-  "collision_triangles": 51340,
-  "render_triangles": 38970
+  "collision_triangles": 4492,
+  "render_triangles": 40737
 }
