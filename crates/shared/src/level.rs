@@ -25,6 +25,8 @@ pub struct MapData {
     pub lightmaps: Vec<String>,
     pub sky: Option<String>,
     pub materials: Vec<MapMaterial>,
+    pub pixelated: bool,
+    pub crystals: Vec<crate::crystals::CrystalSpawn>,
 }
 
 #[derive(Deserialize, Clone, Copy, Debug)]
@@ -48,6 +50,9 @@ pub struct MapMaterial {
 pub enum TriggerKind {
     Push {
         velocity: Vec3,
+    },
+    Launch {
+        speed: f32,
     },
     Teleport {
         destination: Vec3,

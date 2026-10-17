@@ -69,7 +69,7 @@ with zipfile.ZipFile(destination / 'maps-source.zip', 'w', zipfile.ZIP_DEFLATED)
     paths = {p for folder in roots for p in folder.rglob('*') if p.is_file() and 'built' not in p.parts}
     for path in sorted(paths):
         archive.write(path, path)
-    for path in map(pathlib.Path, ['scripts/import-map.py', 'scripts/map_bake.py',
+    for path in map(pathlib.Path, ['scripts/import-map.py', 'scripts/import-voxel-map.py', 'scripts/voxel_bake.py', 'scripts/map_bake.py',
                                   'scripts/map_bsp.py', 'scripts/setup-map-tools.sh',
                                   'scripts/requirements-maps.txt', 'scripts/export-skyfracture-sky.py', 'LICENSE']):
         archive.write(path, path)

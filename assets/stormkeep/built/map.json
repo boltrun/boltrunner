@@ -2714,5 +2714,7 @@
   },
   "collision_triangles": 59484,
   "render_triangles": 50359,
-  "id": "stormkeep"
+  "id": "stormkeep",
+  "pixelated": false,
+  "crystals": []
 }

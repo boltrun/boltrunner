@@ -88,6 +88,7 @@ impl Ease for Projectile {
 pub enum Impact {
     Wall,
     Player(u64),
+    Crystal(u16),
 }
 
 /// Sweep the complete segment, choosing the first collision. This prevents a
@@ -176,15 +177,25 @@ pub fn trace_moving(
 /// world location. The returned hit position is already stored in the bolt.
 pub fn advance_map_moving(
     projectile: &mut Projectile,
-    mut delta: Vec3,
+    delta: Vec3,
     players: impl IntoIterator<Item = (u64, Vec3, Vec3, f32, f32)>,
 ) -> Option<Impact> {
+    advance_map_with_crystals(projectile, delta, players, std::iter::empty())
+}
+
+pub fn advance_map_with_crystals(
+    projectile: &mut Projectile,
+    mut delta: Vec3,
+    players: impl IntoIterator<Item = (u64, Vec3, Vec3, f32, f32)>,
+    crystals: impl IntoIterator<Item = (u16, Vec3, f32)>,
+) -> Option<Impact> {
     let mut players: Vec<_> = players.into_iter().collect();
+    let crystals: Vec<_> = crystals.into_iter().collect();
     for _ in 0..4 {
         let crossing = crate::level::warp_crossing(projectile.position, delta, projectile.radius);
         let fraction = crossing.map_or(1.0, |crossing| crossing.fraction);
         let segment = delta * fraction;
-        if let Some((hit, impact)) = trace_moving(
+        let mut hit = trace_moving(
             crate::level::world(),
             projectile,
             segment,
@@ -193,7 +204,19 @@ pub fn advance_map_moving(
                 .map(|&(id, position, movement, radius, height)| {
                     (id, position, movement * fraction, radius, height)
                 }),
-        ) {
+        );
+        for &(slot, position, radius) in &crystals {
+            if let Some(fraction) = crate::crystals::hit_fraction(
+                projectile.position,
+                segment,
+                position,
+                radius + projectile.radius,
+            ) && hit.as_ref().is_none_or(|(t, _)| fraction < *t)
+            {
+                hit = Some((fraction, Impact::Crystal(slot)));
+            }
+        }
+        if let Some((hit, impact)) = hit {
             projectile.position += segment * hit;
             return Some(impact);
         }

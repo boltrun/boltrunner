@@ -1,4 +1,5 @@
 mod baked_material;
+mod crystals;
 mod debug_menu;
 #[cfg(target_arch = "wasm32")]
 mod direct_output;
@@ -49,6 +50,7 @@ fn main() -> AppExit {
             map_menu::MapMenuPlugin,
             nameplates::NameplatesPlugin,
             powerups::PowerupVisualsPlugin,
+            crystals::CrystalVisualsPlugin,
             weapon::WeaponPlugin,
         ))
         .run()

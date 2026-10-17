@@ -1,6 +1,8 @@
 use bevy::prelude::*;
 use boltrunner_shared::{
-    PlayerId, PlayerInput, PlayerState, TICK_DURATION, health,
+    PlayerId, PlayerInput, PlayerState, TICK_DURATION,
+    crystals::{self, Crystal, CrystalExplosion},
+    health, level,
     weapon::{self, Impact, Projectile, ShotImpact},
 };
 use lightyear::prelude::{input::native::ActionState, *};
@@ -24,7 +26,14 @@ pub fn advance_projectiles(
     mut projectiles: Query<(Entity, &mut Projectile, &crate::history::ProjectileLag)>,
     timeline: Res<LocalTimeline>,
     history: Res<crate::history::PlayerHistory>,
-    mut clients: Query<&mut MessageSender<ShotImpact>, With<Connected>>,
+    mut clients: Query<
+        (
+            &mut MessageSender<ShotImpact>,
+            &mut MessageSender<CrystalExplosion>,
+        ),
+        With<Connected>,
+    >,
+    mut crystals: Query<&mut Crystal>,
     mut round: ResMut<crate::matches::CurrentMatch>,
     settings: Res<crate::tuning::ServerSettings>,
     mut players: Query<(&PlayerId, &mut PlayerState, &ActionState<PlayerInput>)>,
@@ -34,7 +43,7 @@ pub fn advance_projectiles(
     }
     for (entity, mut bolt, lag) in &mut projectiles {
         let delta = bolt.direction * bolt.speed * TICK_DURATION.as_secs_f32();
-        let hit = weapon::advance_map_moving(
+        let hit = weapon::advance_map_with_crystals(
             &mut bolt,
             delta,
             players.iter().filter_map(|(id, state, _)| {
@@ -50,9 +59,47 @@ pub fn advance_projectiles(
                         )
                     })
             }),
+            crystals.iter().filter(|c| c.active).map(|c| {
+                (
+                    c.slot,
+                    c.position,
+                    level::data().crystals[c.slot as usize].radius,
+                )
+            }),
         );
         if let Some(impact) = hit {
             let mut damaged = None;
+            if let Impact::Crystal(slot) = impact {
+                let spawn = &level::data().crystals[slot as usize];
+                if let Some(mut crystal) = crystals.iter_mut().find(|c| c.slot == slot)
+                    && crystal.detonate(spawn)
+                {
+                    for (id, mut state, input) in &mut players {
+                        if state.death.is_some() || state.match_paused {
+                            continue;
+                        }
+                        let damage = crystals::blast_damage(
+                            level::world(),
+                            spawn,
+                            state.position,
+                            &state.tuning,
+                        );
+                        if damage > 0
+                            && health::apply_damage(&mut state, damage, input.0.pitch_radians())
+                        {
+                            round.record_death(id.0, Some(bolt.owner), settings.values.rules);
+                        }
+                    }
+                    let explosion = CrystalExplosion {
+                        position: spawn.position,
+                        radius: spawn.blast_radius,
+                        map_revision: round.map_revision,
+                    };
+                    for (_, mut sender) in &mut clients {
+                        sender.send::<boltrunner_shared::protocol::LobbyChannel>(explosion.clone());
+                    }
+                }
+            }
             if let Impact::Player(victim) = impact {
                 for (id, mut state, input) in &mut players {
                     if id.0 == victim && state.death.is_none() && !state.match_paused {
@@ -72,7 +119,7 @@ pub fn advance_projectiles(
                 normal: -bolt.direction,
                 victim: damaged,
             };
-            for mut sender in &mut clients {
+            for (mut sender, _) in &mut clients {
                 sender.send::<boltrunner_shared::protocol::LobbyChannel>(event.clone());
             }
             commands.entity(entity).despawn();
