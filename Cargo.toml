@@ -1,5 +1,6 @@
 [workspace]
 members = ["crates/shared", "crates/server", "crates/client", "crates/game"]
+exclude = ["vendor/lightyear_transport"]
 default-members = ["crates/shared", "crates/server", "crates/client"]
 resolver = "3"
 
@@ -34,3 +35,7 @@ inherits = "release"
 opt-level = "s"
 lto = false
 codegen-units = 16
+
+# Keep the 0.26.4 API with the transport clock fix; see vendor source provenance.
+[patch.crates-io]
+lightyear_transport = { path = "vendor/lightyear_transport" }

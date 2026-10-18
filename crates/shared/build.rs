@@ -80,6 +80,7 @@ fn main() {
     for path in [
         "Cargo.toml",
         "Cargo.lock",
+        "vendor/lightyear_transport",
         "crates/shared/Cargo.toml",
         "crates/shared/build.rs",
         "crates/server/Cargo.toml",
