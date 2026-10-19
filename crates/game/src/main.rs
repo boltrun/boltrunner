@@ -1,5 +1,7 @@
 mod baked_material;
 mod debug_menu;
+#[cfg(target_arch = "wasm32")]
+mod direct_output;
 mod hud;
 mod hud_font;
 mod loading;
@@ -25,6 +27,8 @@ use boltrunner_client::GameNetworkingPlugin;
 fn main() -> AppExit {
     let mut app = App::new();
     platform::configure(&mut app);
+    #[cfg(target_arch = "wasm32")]
+    direct_output::install(&mut app);
     // Bundle the full font for identical Unicode coverage on web and native.
     app.world_mut()
         .resource_mut::<Assets<Font>>()
