@@ -79,8 +79,8 @@ pub(crate) struct Crosshair;
 fn build_scene(mut commands: Commands) {
     commands.spawn((
         Camera3d::default(),
-        // The weapon/UI camera presents the combined intermediate color target.
-        // Presenting the world first would add a redundant full-resolution blit.
+        // Compose the world before the weapon/UI view. WebGL draws both views
+        // directly to the output; native presents their shared intermediate once.
         Camera {
             output_mode: CameraOutputMode::Skip,
             ..default()
@@ -94,7 +94,7 @@ fn build_scene(mut commands: Commands) {
         }),
         Transform::from_xyz(0.0, 5.0, 0.0),
         PlayerCamera,
-        Msaa::Sample4,
+        Msaa::Off,
     ));
     commands.spawn((
         Node {

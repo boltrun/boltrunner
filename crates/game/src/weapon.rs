@@ -118,7 +118,7 @@ fn setup(
             ..default()
         }),
     };
-    // A separate depth buffer keeps the first-person gun out of nearby walls.
+    // Clear depth for the first-person view so nearby walls do not hide the gun.
     // The HUD panels share this view; screen UI is drawn above both.
     commands.spawn((
         Camera3d::default(),
@@ -134,8 +134,8 @@ fn setup(
             ..default()
         }),
         Exposure::INDOOR,
-        // Keep weapon fill independent of the map. The coated materials limit
-        // black-paint reflections while this fill keeps the surface wear visible.
+        // The unlit view-model materials retain their base-color textures and do
+        // not depend on this view lighting.
         AmbientLight {
             brightness: 450.,
             ..default()
@@ -143,7 +143,7 @@ fn setup(
         Tonemapping::None,
         Transform::default(),
         RenderLayers::layer(VIEW_LAYER),
-        Msaa::Sample4,
+        Msaa::Off,
         IsDefaultUiCamera,
     ));
     commands
@@ -179,8 +179,18 @@ fn prepare_view_model(
     names: Query<&Name>,
     mut commands: Commands,
     assets: Res<WeaponAssets>,
+    mesh_materials: Query<&MeshMaterial3d<StandardMaterial>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     for entity in children.iter_descendants(event.entity) {
+        if let Ok(handle) = mesh_materials.get(entity) {
+            if let Some(material) = materials.get_mut(&handle.0) {
+                material.unlit = true;
+                material.normal_map_texture = None;
+                material.metallic_roughness_texture = None;
+                material.occlusion_texture = None;
+            }
+        }
         commands
             .entity(entity)
             .insert((RenderLayers::layer(VIEW_LAYER), NotShadowCaster));
