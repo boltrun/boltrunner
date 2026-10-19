@@ -34,10 +34,7 @@ fn main() -> AppExit {
         .resource_mut::<Assets<Font>>()
         .insert(
             bevy::asset::AssetId::default(),
-            Font::try_from_bytes(
-                include_bytes!("../../../assets/fonts/DejaVuSansMono.ttf").to_vec(),
-            )
-            .expect("bundled UI font must be valid"),
+            Font::from_bytes(include_bytes!("../../../assets/fonts/DejaVuSansMono.ttf").to_vec()),
         )
         .unwrap();
     app.insert_resource(WinitSettings::continuous())

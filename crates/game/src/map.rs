@@ -59,9 +59,9 @@ pub fn build_map(
     let mut textures = Vec::new();
     let mut mipmapped = Vec::new();
     let mut texture = |name: &str, repeat: bool, mipmaps: bool| {
-        let handle = assets.load_with_settings(
-            format!("{}/built/textures/{name}", level::active().id),
-            move |settings: &mut ImageLoaderSettings| {
+        let handle = assets
+            .load_builder()
+            .with_settings(move |settings: &mut ImageLoaderSettings| {
                 let mode = if repeat {
                     ImageAddressMode::Repeat
                 } else {
@@ -73,8 +73,8 @@ pub fn build_map(
                     anisotropy_clamp: if mipmaps { 4 } else { 1 },
                     ..ImageSamplerDescriptor::linear()
                 });
-            },
-        );
+            })
+            .load(format!("{}/built/textures/{name}", level::active().id));
         textures.push(handle.clone());
         if mipmaps {
             mipmapped.push(handle.clone());
@@ -245,7 +245,7 @@ pub fn finish_loading(
     let started = bevy::platform::time::Instant::now();
     let budget = std::time::Duration::from_micros(16_667);
     while let Some(handle) = textures.mipmapped.get(textures.prepared) {
-        let image = images.get_mut(handle).expect("loaded map image");
+        let mut image = images.get_mut(handle).expect("loaded map image");
         assert_eq!(
             image.texture_descriptor.format,
             TextureFormat::Rgba8UnormSrgb
@@ -266,7 +266,7 @@ pub fn finish_loading(
         }
     }
     if let Some(sky) = &textures.sky {
-        let image = images.get_mut(sky).expect("loaded sky image");
+        let mut image = images.get_mut(sky).expect("loaded sky image");
         if image.texture_descriptor.size.depth_or_array_layers == 1 {
             image
                 .reinterpret_stacked_2d_as_array(6)
@@ -277,7 +277,7 @@ pub fn finish_loading(
             ..default()
         });
         commands.entity(camera.0).insert(Skybox {
-            image: sky.clone(),
+            image: Some(sky.clone()),
             brightness: camera.1.exposure().recip(),
             ..default()
         });

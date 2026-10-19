@@ -64,7 +64,7 @@ fn setup(mut commands: Commands) {
                 LoadingLabel,
                 Text::new("Loading 0%"),
                 TextFont {
-                    font_size: 20.0,
+                    font_size: FontSize::Px(20.0),
                     ..default()
                 },
                 TextColor(Color::srgb(0.78, 0.78, 0.78)),

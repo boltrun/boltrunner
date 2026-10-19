@@ -1,13 +1,7 @@
 use crate::NetworkStats;
 use bevy::prelude::*;
 use boltrunner_shared::{PlayerState, TICK_DURATION};
-use lightyear::{
-    interpolation::{
-        interpolation_history::ConfirmedHistory,
-        timeline::{InterpolationConfig, InterpolationTimeline},
-    },
-    prelude::*,
-};
+use lightyear::prelude::*;
 use std::time::Duration;
 
 #[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
@@ -26,35 +20,7 @@ impl Plugin for TimingPlugin {
                 capture_correction.after(PredictionSystems::Rollback),
             )
             .add_systems(Update, present_owner.in_set(NetworkPresentation))
-            .add_systems(
-                Update,
-                (
-                    trim_history::<PlayerState>,
-                    trim_history::<boltrunner_shared::weapon::Projectile>,
-                )
-                    .after(InterpolationSystems::Prepare)
-                    .before(InterpolationSystems::Interpolate),
-            )
             .add_systems(PostUpdate, adapt_buffer.before(SyncSystems::Sync));
-    }
-}
-
-fn trim_history<C: Component>(
-    timelines: Query<&InterpolationTimeline, With<Connected>>,
-    mut histories: Query<&mut ConfirmedHistory<C>, With<Interpolated>>,
-) {
-    let Ok(timeline) = timelines.single() else {
-        return;
-    };
-    for mut history in &mut histories {
-        // Prepare removes one old sample; a stalled frame or burst can require
-        // several removals to reach the pair bracketing the actual render time.
-        while history
-            .end()
-            .is_some_and(|(tick, _)| tick <= timeline.tick())
-        {
-            history.pop();
-        }
     }
 }
 
@@ -145,23 +111,21 @@ fn adapt_buffer(
     time: Res<Time<Real>>,
     mut arrivals: Local<Arrivals>,
     stats: Res<NetworkStats>,
-    mut links: Query<
-        (
-            &PingManager,
-            &mut InterpolationConfig,
-            &mut InputTimelineConfig,
-        ),
-        With<Connected>,
-    >,
-    updates: Query<&ConfirmedTick, (With<Interpolated>, Changed<Confirmed<PlayerState>>)>,
+    links: Query<&PingManager, With<Connected>>,
+    mut config: ResMut<InterpolationConfig>,
+    mut input_config: ResMut<InputTimelineConfig>,
+    updates: Query<&ConfirmedHistory<PlayerState>, With<Interpolated>>,
 ) {
-    let Ok((ping, mut config, mut input_config)) = links.single_mut() else {
+    let Ok(ping) = links.single() else {
         *arrivals = Arrivals::default();
         return;
     };
     let tick_ms = TICK_DURATION.as_secs_f32() * 1000.0;
     let now = time.elapsed_secs_f64();
-    let received = updates.iter().map(|confirmed| confirmed.tick).max();
+    let received = updates
+        .iter()
+        .filter_map(|history| history.newest_present().map(|(tick, _)| tick))
+        .max();
     if received.is_some() && received != arrivals.tick {
         if arrivals.tick.is_some() {
             let gap = ((now - arrivals.last_time) * 1000.0) as f32;
@@ -180,7 +144,7 @@ fn adapt_buffer(
     // low frame rates so inputs arrive before their authoritative tick; local
     // input delay stays zero.
     *input_config = InputTimelineConfig::default().with_sync_config(SyncConfig {
-        jitter_margin: Duration::from_secs_f32((frame_ms * 1.5).max(tick_ms * 2.0) / 1000.0),
+        jitter_margin: (frame_ms * 1.5).max(tick_ms * 2.0) / tick_ms,
         error_margin: 0.5,
         ..default()
     });

@@ -9,9 +9,9 @@ license.workspace = true
 bevy.workspace = true
 lightyear.workspace = true
 serde.workspace = true
-serde_json = "1"
-parry3d = "=0.25.3"
+serde_json = "1.0.154"
+parry3d = "=0.31.1"
 
 [build-dependencies]
-serde_json = "1"
-sha2 = "0.10.9"
+serde_json = "1.0.154"
+sha2 = "0.11.1"

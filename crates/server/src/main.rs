@@ -43,17 +43,19 @@ fn main() {
     App::new()
         .add_plugins((
             MinimalPlugins.set(ScheduleRunnerPlugin::run_loop(Duration::from_millis(2))),
+            bevy::state::app::StatesPlugin,
             bevy::log::LogPlugin::default(),
         ))
         .add_plugins(ServerPlugins {
             tick_duration: TICK_DURATION,
         })
         .add_plugins(ProtocolPlugin)
+        .insert_resource(ReplicationMetadata::new(SEND_INTERVAL))
         .add_plugins(tuning::TuningPlugin)
         .add_plugins(loading::LoadingPlugin)
         .add_plugins(maps::MapsPlugin)
         .insert_resource(BindAddress(address))
-        .init_resource::<boltrunner_shared::match_state::MatchState>()
+        .init_resource::<matches::CurrentMatch>()
         .init_resource::<matches::MatchClock>()
         .init_resource::<history::PlayerHistory>()
         .init_resource::<powerups::PickupDirector>()
@@ -110,11 +112,7 @@ fn start(mut commands: Commands, address: Res<BindAddress>) {
 }
 
 fn configure_link(event: On<Add, LinkOf>, mut commands: Commands) {
-    commands.entity(event.entity).insert(ReplicationSender::new(
-        SEND_INTERVAL,
-        SendUpdatesMode::SinceLastAck,
-        false,
-    ));
+    commands.entity(event.entity).insert(ReplicationSender);
 }
 
 #[derive(Component)]
@@ -132,8 +130,8 @@ fn spawn_players(
         (With<ClientOf>, With<Connected>),
     >,
     players: Query<(&PlayerState, &PlayerColor)>,
-    round: Res<boltrunner_shared::match_state::MatchState>,
-    settings: Res<boltrunner_shared::tuning::FeatureSettings>,
+    round: Res<crate::matches::CurrentMatch>,
+    settings: Res<crate::tuning::ServerSettings>,
     mut commands: Commands,
 ) {
     let mut occupied = Vec::new();
@@ -233,8 +231,8 @@ fn spawn_players(
 
 fn simulate(
     mut commands: Commands,
-    mut round: ResMut<boltrunner_shared::match_state::MatchState>,
-    settings: Res<boltrunner_shared::tuning::FeatureSettings>,
+    mut round: ResMut<crate::matches::CurrentMatch>,
+    settings: Res<crate::tuning::ServerSettings>,
     mut players: Query<(
         &PlayerId,
         &mut PlayerState,

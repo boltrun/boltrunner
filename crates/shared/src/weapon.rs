@@ -2,7 +2,7 @@
 //! projectile movement and hits are authoritative on the server.
 use bevy::{math::Curve, prelude::*};
 use parry3d::{
-    na::{Isometry3, Vector3},
+    math::{Pose, Vector},
     query::{ShapeCastOptions, cast_shapes},
     shape::{Ball, Capsule},
 };
@@ -121,7 +121,7 @@ pub fn trace<'a>(
 pub struct ShotImpact {
     pub owner: u64,
     pub shot: u16,
-    pub tick: u16,
+    pub tick: u32,
     pub position: Vec3,
     pub normal: Vec3,
     /// Only populated after the server actually applied damage.
@@ -144,15 +144,15 @@ pub fn trace_moving(
         let capsule = Capsule::new_y(height / 2.0 - radius, radius);
         let center = position + Vec3::Y * (height / 2.0);
         let hit = cast_shapes(
-            &Isometry3::translation(center.x, center.y, center.z),
-            &Vector3::new(movement.x, movement.y, movement.z),
+            &Pose::translation(center.x, center.y, center.z),
+            Vector::new(movement.x, movement.y, movement.z),
             &capsule,
-            &Isometry3::translation(
+            &Pose::translation(
                 projectile.position.x,
                 projectile.position.y,
                 projectile.position.z,
             ),
-            &Vector3::new(delta.x, delta.y, delta.z),
+            Vector::new(delta.x, delta.y, delta.z),
             &Ball::new(projectile.radius),
             ShapeCastOptions {
                 max_time_of_impact: 1.0,

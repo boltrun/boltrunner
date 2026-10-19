@@ -75,10 +75,10 @@ fn setup(mut commands: Commands) {
                 panel.spawn((
                     Text::new("BOLTRUNNER"),
                     TextFont {
-                        font_size: 42.0,
+                        font_size: FontSize::Px(42.0),
                         ..default()
                     },
-                    TextLayout::new_with_justify(Justify::Center),
+                    TextLayout::justify(Justify::Center),
                     Node {
                         width: percent(100),
                         ..default()
@@ -100,7 +100,7 @@ fn setup(mut commands: Commands) {
                             NicknameText,
                             Text::new("Nickname"),
                             TextFont {
-                                font_size: 22.0,
+                                font_size: FontSize::Px(22.0),
                                 ..default()
                             },
                         ));
@@ -138,7 +138,7 @@ fn setup(mut commands: Commands) {
                                     OccupiedMark(index as u8),
                                     Text::new(""),
                                     TextFont {
-                                        font_size: 20.0,
+                                        font_size: FontSize::Px(20.0),
                                         ..default()
                                     },
                                     TextColor(Color::WHITE),
@@ -163,7 +163,7 @@ fn setup(mut commands: Commands) {
                             PlayLabel,
                             Text::new("Play"),
                             TextFont {
-                                font_size: 22.0,
+                                font_size: FontSize::Px(22.0),
                                 ..default()
                             },
                         ));
@@ -176,7 +176,7 @@ fn setup(mut commands: Commands) {
                     },
                     Text::new(""),
                     TextFont {
-                        font_size: 16.0,
+                        font_size: FontSize::Px(16.0),
                         ..default()
                     },
                     TextColor(Color::srgb(1.0, 0.65, 0.5)),

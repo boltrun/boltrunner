@@ -149,7 +149,7 @@ fn sync(
                     plate.spawn((
                         Text::new(name.0.clone()),
                         TextFont {
-                            font_size: 16.0,
+                            font_size: FontSize::Px(16.0),
                             ..default()
                         },
                         TextColor(Color::srgb(r, g, b)),
@@ -180,7 +180,7 @@ fn sync(
                         HealthText { player: entity },
                         Text::new(format!("{health} / {}", state.tuning.max_health)),
                         TextFont {
-                            font_size: 12.0,
+                            font_size: FontSize::Px(12.0),
                             ..default()
                         },
                         TextColor(Color::srgb(r, g, b)),

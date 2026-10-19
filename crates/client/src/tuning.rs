@@ -49,7 +49,7 @@ pub fn sync(
     mut connections: Query<
         (
             &mut MessageSender<EditRequest>,
-            &mut MessageReceiver<EditReply>,
+            Option<&mut MessageReceiver<EditReply>>,
         ),
         SettingsConnection,
     >,
@@ -67,22 +67,24 @@ pub fn sync(
     {
         state.settings = Some(snapshot.clone());
     }
-    let Ok((mut sender, mut replies)) = connections.single_mut() else {
+    let Ok((mut sender, replies)) = connections.single_mut() else {
         return;
     };
-    for reply in replies.receive() {
-        if state
-            .settings
-            .as_ref()
-            .is_none_or(|current| reply.settings.revision >= current.revision)
-        {
-            state.settings = Some(reply.settings);
-        }
-        if state.pending == Some(reply.id) {
-            state.pending = None;
-            state.error = reply.error;
-            if state.error.is_some() {
-                state.queue.clear();
+    if let Some(mut replies) = replies {
+        for reply in replies.receive() {
+            if state
+                .settings
+                .as_ref()
+                .is_none_or(|current| reply.settings.revision >= current.revision)
+            {
+                state.settings = Some(reply.settings);
+            }
+            if state.pending == Some(reply.id) {
+                state.pending = None;
+                state.error = reply.error;
+                if state.error.is_some() {
+                    state.queue.clear();
+                }
             }
         }
     }

@@ -4,7 +4,6 @@ use boltrunner_shared::{
     match_state::MatchState,
     powerups::Pickup,
     protocol::{ChangeMap, LobbyChannel, MapChangeReply},
-    tuning::FeatureSettings,
     weapon::Projectile,
 };
 use lightyear::prelude::{server::ClientOf, *};
@@ -23,7 +22,7 @@ impl Plugin for MapsPlugin {
 
 type MapConnections = (
     Entity,
-    &'static mut MessageReceiver<ChangeMap>,
+    Option<&'static mut MessageReceiver<ChangeMap>>,
     &'static mut MessageSender<MapChangeReply>,
     Has<crate::Joined>,
 );
@@ -33,14 +32,17 @@ fn change(
     mut commands: Commands,
     mut clients: Query<MapConnections, (With<ClientOf>, With<Connected>)>,
     entities: Query<Entity, MapEntities>,
-    mut round: ResMut<MatchState>,
-    settings: Res<FeatureSettings>,
+    mut round: ResMut<crate::matches::CurrentMatch>,
+    settings: Res<crate::tuning::ServerSettings>,
     mut clock: ResMut<crate::matches::MatchClock>,
     mut history: ResMut<crate::history::PlayerHistory>,
     mut pickups: ResMut<crate::powerups::PickupDirector>,
 ) {
     let mut selected = None;
-    for (_, mut requests, mut replies, joined) in &mut clients {
+    for (_, requests, mut replies, joined) in &mut clients {
+        let Some(mut requests) = requests else {
+            continue;
+        };
         for request in requests.receive() {
             let error = if !joined {
                 Some("Join the match before changing maps.".into())
@@ -68,7 +70,7 @@ fn change(
     *history = default();
     *pickups = default();
     clock.restart(settings.values.rules.match_duration);
-    *round = MatchState {
+    round.0 = MatchState {
         map,
         map_revision: round.map_revision + 1,
         number: round.number + 1,

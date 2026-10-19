@@ -1,7 +1,7 @@
 //! Registered map assets and cached worlds, selected by the authoritative server.
 use bevy::prelude::*;
 use parry3d::{
-    na::{Isometry3, Point3, Vector3},
+    math::{Pose, Vector},
     query::{ShapeCastOptions, cast_shapes},
     shape::{Ball, Capsule, TriMesh, TriMeshFlags},
 };
@@ -181,7 +181,7 @@ impl MapAsset {
             let vertices = reader.u32() as usize;
             let triangles = reader.u32() as usize;
             let vertices = (0..vertices)
-                .map(|_| Point3::new(reader.f32(), reader.f32(), reader.f32()))
+                .map(|_| Vector::new(reader.f32(), reader.f32(), reader.f32()))
                 .collect();
             let indices = (0..triangles)
                 .map(|_| [reader.u32(), reader.u32(), reader.u32()])
@@ -301,11 +301,11 @@ impl CollisionWorld {
     /// Continuous collision for cameras and small, fast energy projectiles.
     pub fn sweep_sphere(&self, origin: Vec3, delta: Vec3, radius: f32) -> Option<f32> {
         cast_shapes(
-            &Isometry3::identity(),
-            &Vector3::zeros(),
+            &Pose::IDENTITY,
+            Vector::ZERO,
             &self.mesh,
-            &Isometry3::translation(origin.x, origin.y, origin.z),
-            &Vector3::new(delta.x, delta.y, delta.z),
+            &Pose::translation(origin.x, origin.y, origin.z),
+            Vector::new(delta.x, delta.y, delta.z),
             &Ball::new(radius),
             ShapeCastOptions {
                 max_time_of_impact: 1.0,
@@ -317,7 +317,7 @@ impl CollisionWorld {
         .map(|hit| hit.time_of_impact)
     }
 
-    pub fn new(vertices: Vec<Point3<f32>>, indices: Vec<[u32; 3]>) -> Self {
+    pub fn new(vertices: Vec<Vector>, indices: Vec<[u32; 3]>) -> Self {
         Self {
             mesh: TriMesh::with_flags(
                 vertices,
@@ -352,11 +352,11 @@ impl CharacterWorld<'_> {
         }
         let center = feet + Vec3::Y * (self.tuning.player_height / 2.0);
         cast_shapes(
-            &Isometry3::identity(),
-            &Vector3::zeros(),
+            &Pose::IDENTITY,
+            Vector::ZERO,
             &self.world.mesh,
-            &Isometry3::translation(center.x, center.y, center.z),
-            &Vector3::new(delta.x, delta.y, delta.z),
+            &Pose::translation(center.x, center.y, center.z),
+            Vector::new(delta.x, delta.y, delta.z),
             &self.capsule,
             ShapeCastOptions {
                 max_time_of_impact: 1.0,

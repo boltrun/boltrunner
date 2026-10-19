@@ -10,6 +10,9 @@ use boltrunner_shared::{
 use lightyear::prelude::{input::native::ActionState, *};
 use std::time::Duration;
 
+#[derive(Resource, Default, Deref, DerefMut)]
+pub struct CurrentMatch(pub MatchState);
+
 #[derive(Resource)]
 pub struct MatchClock {
     pub remaining: Duration,
@@ -49,8 +52,8 @@ pub fn setup(mut commands: Commands) {
 pub fn advance(
     time: Res<Time<Real>>,
     mut clock: ResMut<MatchClock>,
-    mut round: ResMut<MatchState>,
-    settings: Res<boltrunner_shared::tuning::FeatureSettings>,
+    mut round: ResMut<CurrentMatch>,
+    settings: Res<crate::tuning::ServerSettings>,
     mut players: Query<(
         &PlayerId,
         &PlayerName,
@@ -150,8 +153,8 @@ pub fn advance(
     }
 }
 
-pub fn publish(round: Res<MatchState>, mut snapshot: Single<&mut MatchState>) {
-    if **snapshot != *round {
-        **snapshot = round.clone();
+pub fn publish(round: Res<CurrentMatch>, mut snapshot: Single<&mut MatchState>) {
+    if **snapshot != round.0 {
+        **snapshot = round.0.clone();
     }
 }

@@ -24,10 +24,32 @@ pub struct NetworkStats {
 
 impl Plugin for GameNetworkingPlugin {
     fn build(&self, app: &mut App) {
+        if !app.is_plugin_added::<bevy::state::app::StatesPlugin>() {
+            app.add_plugins(bevy::state::app::StatesPlugin);
+        }
         app.add_plugins(ClientPlugins {
             tick_duration: TICK_DURATION,
         })
         .add_plugins(ProtocolPlugin)
+        .init_resource::<PredictionManager>()
+        .insert_resource(InterpolationConfig {
+            // Updated from measured RTT, jitter, arrival gaps and render cadence.
+            send_interval_ratio: 2.0,
+            sync: SyncConfig {
+                jitter_margin: 0.001 / TICK_DURATION.as_secs_f32(),
+                error_margin: 0.25,
+                max_error_margin: 30.0,
+                speedup_factor: 1.25,
+                ..default()
+            },
+            ..default()
+        })
+        .insert_resource(InputTimelineConfig::default().with_sync_config(SyncConfig {
+            // Inputs must arrive before the server enters their fixed tick.
+            jitter_margin: 2.0,
+            error_margin: 0.5,
+            ..default()
+        }))
         .init_resource::<NetworkStats>()
         .init_resource::<Session>()
         .init_resource::<PredictedShots>()
@@ -128,27 +150,7 @@ fn open_connection(commands: &mut Commands, url: &ServerUrl, session: &mut Sessi
             RawClient,
             // Browsers do not expose their local socket address. Ownership is assigned by the server.
             LocalAddr("0.0.0.0:0".parse().unwrap()),
-            ReplicationReceiver::default(),
-            PredictionManager::default(),
-            InterpolationConfig {
-                // Updated from measured RTT, jitter, arrival gaps and render cadence.
-                send_interval_ratio: 2.0,
-                sync: SyncConfig {
-                    jitter_margin: std::time::Duration::from_millis(1),
-                    error_margin: 0.25,
-                    max_error_margin: 30.0,
-                    speedup_factor: 1.25,
-                    ..default()
-                },
-                ..default()
-            },
-            InputTimelineConfig::default().with_sync_config(SyncConfig {
-                // Inputs must arrive before the server enters their fixed tick. A sub-tick
-                // margin can leave every packet one tick late even on loopback.
-                jitter_margin: TICK_DURATION * 2,
-                error_margin: 0.5,
-                ..default()
-            }),
+            ReplicationReceiver,
             WebSocketClientIo::from_url(config, endpoint.as_str()),
         ))
         .id();
@@ -194,7 +196,10 @@ pub fn update_session(
     mut session: ResMut<Session>,
     mut shots: ResMut<PredictedShots>,
     mut connections: Query<
-        (Option<&Disconnected>, &mut MessageReceiver<JoinRejected>),
+        (
+            Option<&Disconnected>,
+            Option<&mut MessageReceiver<JoinRejected>>,
+        ),
         With<Client>,
     >,
     players: Query<(&PlayerName, &boltrunner_shared::player_color::PlayerColor), With<Predicted>>,
@@ -207,9 +212,11 @@ pub fn update_session(
     let mut changing = None;
     let mut rejection = None;
     let mut failure = None;
-    if let Ok((disconnected, mut replies)) = connections.get_mut(entity) {
-        for reply in replies.receive() {
-            rejection = Some(reply.reason);
+    if let Ok((disconnected, replies)) = connections.get_mut(entity) {
+        if let Some(mut replies) = replies {
+            for reply in replies.receive() {
+                rejection = Some(reply.reason);
+            }
         }
         if disconnected.is_some() {
             failure = Some("Disconnected. Check the server and try again.".into());
@@ -290,8 +297,13 @@ fn maintain_lobby(
     url: Res<ServerUrl>,
     time: Res<Time<Real>>,
     mut session: ResMut<Session>,
+    mutations: Res<ServerMutateTicks>,
 ) {
     if session.connection.is_some() || session.is_playing() {
+        return;
+    }
+    // The previous replication epoch must reset before another link connects.
+    if mutations.last_confirmed_tick().is_some() {
         return;
     }
     session.retry_elapsed += time.delta_secs();
