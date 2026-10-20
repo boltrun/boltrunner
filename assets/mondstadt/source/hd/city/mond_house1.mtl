@@ -1,0 +1,45 @@
+# Source baseDiffuse only; original decoded full-resolution VTF pixels.
+newmtl mond_house_base
+Ka 1 1 1
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+d 1
+illum 1
+map_Kd textures/mond_house_base-d969cb8f.png
+
+newmtl mond_house_outd
+Ka 1 1 1
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+d 1
+illum 1
+map_Kd textures/mond_house_outd-3e4ef29c.png
+
+newmtl mond_house_roof
+Ka 1 1 1
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+d 1
+illum 1
+map_Kd textures/mond_house_roof-9f2f4eba.png
+
+newmtl mond_house_bricks
+Ka 1 1 1
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+d 1
+illum 1
+map_Kd textures/mond_house_bricks-9cffb738.png
+
+newmtl mond_house_wood
+Ka 1 1 1
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+d 1
+illum 1
+map_Kd textures/mond_house_wood-e9cff59c.png

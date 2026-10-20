@@ -48,6 +48,7 @@ impl Plugin for ViewPlugin {
                     follow_camera.in_set(CameraUpdated),
                 )
                     .chain()
+                    .after(boltrunner_client::update_session)
                     .after(InterpolationSystems::Interpolate)
                     .after(NetworkPresentation),
             );
@@ -58,12 +59,19 @@ impl Plugin for ViewPlugin {
 pub(crate) struct Look {
     yaw: f32,
     pitch: f32,
-    locked: bool,
+    pub(crate) locked: bool,
     dash_press: u16,
     jump_press: u16,
+    interact_press: u16,
+    fire_press: u16,
+    reload_press: u16,
+    slot: u8,
+    slot_press: u16,
+    dev_press_seen: u16,
+    player: Option<u64>,
 }
 #[derive(Component)]
-struct PlayerVisual;
+pub(crate) struct PlayerVisual;
 #[derive(Component)]
 struct BodyShape {
     radius: f32,
@@ -142,6 +150,7 @@ fn attach_visuals(
         });
         commands.entity(entity).with_children(|parent| {
             parent.spawn((
+                crate::characters::FallbackCharacter,
                 Mesh3d(meshes.add(Capsule3d::new(
                     state.tuning.player_radius,
                     state.tuning.player_height - 2.0 * state.tuning.player_radius,
@@ -154,6 +163,7 @@ fn attach_visuals(
                 Transform::from_xyz(0.0, state.tuning.player_height / 2.0, 0.0),
             ));
             parent.spawn((
+                crate::characters::FallbackCharacter,
                 Mesh3d(meshes.add(Cuboid::new(0.55, 0.18, 0.16))),
                 Visor,
                 MeshMaterial3d(visor),
@@ -168,19 +178,55 @@ pub(crate) fn look_input(
     settings: Res<boltrunner_client::tuning::TuningClient>,
     menu: Res<crate::debug_menu::DebugMenu>,
     maps: Res<crate::map_menu::MapMenu>,
+    weapons: Res<crate::weapon_menu::WeaponMenu>,
+    characters: Res<crate::character_menu::CharacterMenu>,
     session: Res<Session>,
     motion: Res<AccumulatedMouseMotion>,
     keys: Res<ButtonInput<KeyCode>>,
+    mouse: Res<ButtonInput<MouseButton>>,
     window: Single<(&Window, &CursorOptions), With<PrimaryWindow>>,
     local: Query<&PlayerState, With<Predicted>>,
+    player_ids: Query<&PlayerId, With<Predicted>>,
+    blast_view: Res<crate::arsenal::DroneBlastView>,
 ) {
+    let player = player_ids.iter().next().map(|id| id.0);
+    if look.player != player {
+        look.player = player;
+        look.slot = 0;
+        look.slot_press = 0;
+    }
+    let developer_changed = look.dev_press_seen != weapons.request_press;
+    look.dev_press_seen = weapons.request_press;
     look.locked = session.is_playing()
+        && blast_view.remaining <= 0.0
         && !menu.open
         && !maps.open
+        && !weapons.open
+        && !characters.open
         && !local.iter().any(|p| p.match_paused)
         && window.0.focused
         && crate::platform::pointer_locked(window.1);
     if look.locked {
+        if !developer_changed {
+            for (slot, key) in [KeyCode::Digit1, KeyCode::Digit2, KeyCode::Digit3]
+                .into_iter()
+                .enumerate()
+            {
+                if keys.just_pressed(key) {
+                    look.slot = slot as u8;
+                    look.slot_press = look.slot_press.wrapping_add(1);
+                }
+            }
+        }
+        if mouse.just_pressed(MouseButton::Left) {
+            look.fire_press = look.fire_press.wrapping_add(1);
+        }
+        if !developer_changed && keys.just_pressed(KeyCode::KeyE) {
+            look.interact_press = look.interact_press.wrapping_add(1);
+        }
+        if keys.just_pressed(KeyCode::KeyR) {
+            look.reload_press = look.reload_press.wrapping_add(1);
+        }
         if keys.just_pressed(KeyCode::Space) {
             look.jump_press = look.jump_press.wrapping_add(1);
         }
@@ -188,11 +234,25 @@ pub(crate) fn look_input(
             look.dash_press = look.dash_press.wrapping_add(1);
         }
         if !local.iter().any(|state| state.death.is_some()) {
-            look.yaw = (look.yaw
-                - motion.delta.x * settings.values().presentation.mouse_sensitivity)
-                .rem_euclid(std::f32::consts::TAU);
-            look.pitch = (look.pitch
-                - motion.delta.y * settings.values().presentation.mouse_sensitivity)
+            let scoped = mouse.pressed(MouseButton::Right)
+                && local.iter().any(|state| {
+                    state.weapon.selected == boltrunner_shared::arsenal::WeaponKind::Sniper
+                        && state.weapon.reload_ticks == 0
+                });
+            let sensitivity = settings.values().presentation.mouse_sensitivity
+                * if scoped {
+                    local
+                        .iter()
+                        .next()
+                        .unwrap()
+                        .tuning
+                        .scoped_fov_degrees(settings.values().presentation.camera_fov)
+                        / settings.values().presentation.camera_fov
+                } else {
+                    1.0
+                };
+            look.yaw = (look.yaw - motion.delta.x * sensitivity).rem_euclid(std::f32::consts::TAU);
+            look.pitch = (look.pitch - motion.delta.y * sensitivity)
                 .clamp(-PlayerInput::MAX_PITCH, PlayerInput::MAX_PITCH);
         }
     }
@@ -200,6 +260,7 @@ pub(crate) fn look_input(
 
 fn buffer_input(
     look: Res<Look>,
+    weapons: Res<crate::weapon_menu::WeaponMenu>,
     mouse: Res<ButtonInput<MouseButton>>,
     keys: Res<ButtonInput<KeyCode>>,
     mut players: Query<&mut ActionState<PlayerInput>, With<InputMarker<PlayerInput>>>,
@@ -211,8 +272,19 @@ fn buffer_input(
             left: look.locked && keys.pressed(KeyCode::KeyA),
             right: look.locked && keys.pressed(KeyCode::KeyD),
             jump_press: look.jump_press,
+            interact_press: look.interact_press,
             dash_press: look.dash_press,
             fire: look.locked && mouse.pressed(MouseButton::Left),
+            fire_press: look.fire_press,
+            reload_press: look.reload_press,
+            alt: look.locked && mouse.pressed(MouseButton::Right),
+            up: look.locked && keys.pressed(KeyCode::Space),
+            down: look.locked
+                && (keys.pressed(KeyCode::ShiftLeft) || keys.pressed(KeyCode::ShiftRight)),
+            slot: look.slot,
+            slot_press: look.slot_press,
+            dev_weapon: weapons.selected,
+            dev_weapon_press: weapons.request_press,
             yaw: PlayerInput::encode_yaw(look.yaw),
             pitch: PlayerInput::encode_pitch(look.pitch),
         };
@@ -262,6 +334,12 @@ fn follow_camera(
     settings: Res<boltrunner_client::tuning::TuningClient>,
     look: Res<Look>,
     menu: Res<crate::debug_menu::DebugMenu>,
+    weapons: Res<crate::weapon_menu::WeaponMenu>,
+    mouse: Res<ButtonInput<MouseButton>>,
+    time: Res<Time>,
+    real_time: Res<Time<Real>>,
+    mut blast_view: ResMut<crate::arsenal::DroneBlastView>,
+    characters: Res<crate::character_menu::CharacterMenu>,
     mut local: Query<
         (&PlayerState, Option<&PresentationPosition>, &mut Visibility),
         With<Predicted>,
@@ -275,10 +353,30 @@ fn follow_camera(
     let tuning = settings.values().presentation;
     let (camera, projection) = &mut *camera;
     if let Projection::Perspective(projection) = &mut **projection {
-        projection.fov = tuning.camera_fov.to_radians();
+        let scoped = local.iter().next().is_some_and(|(state, _, _)| {
+            state.weapon.selected == boltrunner_shared::arsenal::WeaponKind::Sniper
+                && state.weapon.reload_ticks == 0
+                && state.death.is_none()
+                && state.drone.is_none_or(|d| !d.controlling)
+        }) && look.locked
+            && mouse.pressed(MouseButton::Right);
+        let target = if scoped {
+            local
+                .iter()
+                .next()
+                .unwrap()
+                .0
+                .tuning
+                .scoped_fov_degrees(tuning.camera_fov)
+        } else {
+            tuning.camera_fov
+        };
+        projection.fov +=
+            (target.to_radians() - projection.fov) * (1.0 - (-16.0 * time.delta_secs()).exp());
     }
     crosshair.width = px(tuning.crosshair_size);
     crosshair.height = px(tuning.crosshair_size);
+    blast_view.remaining = (blast_view.remaining - real_time.delta_secs()).max(0.0);
     if let Ok((state, presentation, mut body)) = local.single_mut() {
         let canonical_eye = state.position + Vec3::Y * state.tuning.eye_height;
         let eye = level::world().clip_camera(
@@ -287,6 +385,46 @@ fn follow_camera(
                 + Vec3::Y * state.tuning.eye_height,
             tuning.camera_collision_radius,
         );
+        if blast_view.remaining > 0.0 {
+            let progress = 1.0 - blast_view.remaining / blast_view.duration.max(f32::EPSILON);
+            let rotation =
+                Quat::from_rotation_y(look.yaw + state.view_yaw_offset + progress * 0.12);
+            let desired = blast_view.center + rotation * Vec3::new(2.3, 2.0, 4.0 + progress * 0.8);
+            camera.translation = level::world().clip_camera(
+                blast_view.center,
+                desired,
+                tuning.camera_collision_radius,
+            );
+            camera.look_at(blast_view.center, Vec3::Y);
+            let mut probe = boltrunner_shared::weapon::Projectile::from_shot(0, state, &default());
+            probe.position = camera.translation;
+            probe.radius = 0.01;
+            probe.can_hit_owner = true;
+            let obscures_blast = matches!(
+                boltrunner_shared::weapon::trace_moving(
+                    level::world(),
+                    &probe,
+                    blast_view.center - camera.translation,
+                    [(
+                        0,
+                        state.position,
+                        Vec3::ZERO,
+                        state.tuning.player_radius,
+                        state.tuning.player_height
+                    )],
+                ),
+                Some((_, boltrunner_shared::weapon::Impact::Player(_)))
+            );
+            *body = if !obscures_blast
+                && camera.translation.distance(eye) > state.tuning.player_radius + 0.2
+            {
+                Visibility::Inherited
+            } else {
+                Visibility::Hidden
+            };
+            crosshair.display = Display::None;
+            return;
+        }
         if let Some(death) = state.death {
             // Quadratic ease-out, then hold until respawn.
             let progress = if tuning.death_camera_time == 0.0 {
@@ -329,13 +467,20 @@ fn follow_camera(
             crosshair.display = Display::None;
             return;
         }
-        *body = Visibility::Hidden;
-        crosshair.display = if menu.open {
+        *body = if state.drone.is_some_and(|d| d.controlling) {
+            Visibility::Inherited
+        } else {
+            Visibility::Hidden
+        };
+        crosshair.display = if menu.open || weapons.open || characters.open {
             Display::None
         } else {
             Display::Flex
         };
-        camera.translation = eye;
+        camera.translation = state
+            .drone
+            .filter(|d| d.controlling)
+            .map_or(eye, |d| d.position);
         camera.rotation = Quat::from_euler(
             EulerRot::YXZ,
             look.yaw + state.view_yaw_offset,

@@ -12,6 +12,11 @@ def srgb_to_linear(color):
     return np.where(color <= 0.04045, color / 12.92, ((color + .055) / 1.055) ** 2.4)
 
 
+def linear_to_srgb(color):
+    color = np.asarray(color, dtype=float)
+    return np.where(color <= .0031308, color * 12.92, 1.055 * np.maximum(color, 0) ** (1 / 2.4) - .055)
+
+
 def skybox(source, built, prefix):
     """Convert Quake's six environment images into Bevy's cube-map convention."""
     # DarkPlaces' cube vertices/UV convention, before the Quake suffix transforms.
@@ -83,7 +88,7 @@ class Bsp:
         offset, size = self.lumps[index]
         return self.bytes[offset:offset + size]
 
-    def render(self, compiler, built, rotate, scale):
+    def render(self, compiler, built, rotate, scale, lightmap_export_scale=1.0):
         meshes = defaultdict(list)
         lightmaps = []
         for path in sorted(self.path.with_suffix('').glob('lm_*.tga')):
@@ -91,7 +96,13 @@ class Bsp:
             if int(path.stem[3:]) % 2:
                 continue
             filename = path.with_suffix('.png').name
-            Image.open(path).save(built / 'textures' / filename)
+            image = Image.open(path)
+            if lightmap_export_scale != 1.0:
+                # Author exposure in linear light, preserving the cached ray bake.
+                pixels = np.asarray(image.convert('RGB'), dtype=float) / 255
+                pixels = linear_to_srgb(srgb_to_linear(pixels) * lightmap_export_scale)
+                image = Image.fromarray(np.rint(pixels.clip(0, 1) * 255).astype('uint8'))
+            image.save(built / 'textures' / filename)
             lightmaps.append(filename)
         if not lightmaps:
             raise ValueError('The q3map2 bake produced no external lightmaps')
@@ -116,6 +127,8 @@ class Bsp:
                     verts[:, 10:14] = 1
                     if lm % 2 or lm // 2 >= len(lightmaps):
                         raise ValueError(f'Invalid irradiance lightmap index {lm}')
+                if lm < 0 and not material['emissive']:
+                    verts[:, 10:13] *= lightmap_export_scale
                 if material['emissive']:
                     verts[:, 10:14] = 1
                     lm = -1

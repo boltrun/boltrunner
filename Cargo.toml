@@ -1,5 +1,6 @@
 [workspace]
 members = ["crates/shared", "crates/server", "crates/client", "crates/game"]
+exclude = ["vendor/aeronet_websocket"]
 default-members = ["crates/shared", "crates/server", "crates/client"]
 resolver = "3"
 
@@ -34,3 +35,6 @@ inherits = "release"
 opt-level = "s"
 lto = false
 codegen-units = 16
+
+[patch.crates-io]
+aeronet_websocket = { path = "vendor/aeronet_websocket" }

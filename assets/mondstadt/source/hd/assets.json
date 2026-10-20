@@ -1,0 +1,156 @@
+{
+  "apartment": {
+    "dae": "apartment/WarmAndDryMondstadtApartment.dae",
+    "textures": {
+      "Area_MdBuild_House_Roof03_Diffuse.png": "textures/d35609158bda-Area_MdBuild_House_Roof03_Diffuse.png",
+      "Area_MdBuild_House_Wall07_Diffuse.png": "textures/687590b1a3da-Area_MdBuild_House_Wall07_Diffuse.png",
+      "Area_Mdbuild_Edge01_Diffuse.png": "textures/543e59ce1da6-Area_Mdbuild_Edge01_Diffuse.png",
+      "Stages_Wood_Pillar_01_T2_Diffuse.png": "textures/b5b372dbd74c-Stages_Wood_Pillar_01_T2_Diffuse.png",
+      "Area_MdBuild_Window_A_Diffuse.png": "textures/46ec9d25b748-Area_MdBuild_Window_A_Diffuse.png"
+    }
+  },
+  "attic": {
+    "dae": "attic/MondstadtHouseWithOverhangingAttic.dae",
+    "textures": {
+      "Area_MdBuild_House_Roof03_Diffuse.png": "textures/d35609158bda-Area_MdBuild_House_Roof03_Diffuse.png",
+      "Area_MdBuild_House_Wall07_Diffuse.png": "textures/687590b1a3da-Area_MdBuild_House_Wall07_Diffuse.png",
+      "Area_MdBuild_Window_A_Diffuse.png": "textures/46ec9d25b748-Area_MdBuild_Window_A_Diffuse.png",
+      "Stages_Wood_Pillar_01_T2_Diffuse.png": "textures/b5b372dbd74c-Stages_Wood_Pillar_01_T2_Diffuse.png",
+      "Area_Mdbuild_Edge01_Diffuse.png": "textures/543e59ce1da6-Area_Mdbuild_Edge01_Diffuse.png"
+    }
+  },
+  "cathedral": {
+    "dae": "cathedral/FavoniusCathedralExterior.dae",
+    "textures": {
+      "Area_MdBuild_Church02_Diffuse.png": "textures/80c3b0324ef3-Area_MdBuild_Church02_Diffuse.png",
+      "Area_MdBuild_Church04_Diffuse.png": "textures/32a236ea784a-Area_MdBuild_Church04_Diffuse.png",
+      "Area_MdBuild_Church05_Diffuse.png": "textures/47272897b6fb-Area_MdBuild_Church05_Diffuse.png",
+      "Area_MdBuild_House_Roof05_Diffuse.png": "textures/76822a85ab41-Area_MdBuild_House_Roof05_Diffuse.png",
+      "Area_Mdbuild_Stage01_Diffuse.png": "textures/7336a670f180-Area_Mdbuild_Stage01_Diffuse.png",
+      "Area_MdBuild_Church03_Diffuse.png": "textures/712bb48948ed-Area_MdBuild_Church03_Diffuse.png",
+      "Area_MdBuild_Church01_Diffuse.png": "textures/e645d88c9df7-Area_MdBuild_Church01_Diffuse.png",
+      "Area_MdBuild_Church06_Diffuse.png": "textures/ae923dfce395-Area_MdBuild_Church06_Diffuse.png"
+    }
+  },
+  "headquarters": {
+    "dae": "headquarters/KnightsOfFavoniusHeadquartersExterior.dae",
+    "textures": {
+      "Area_Mdbuild_Wall06_Diffuse.png": "textures/0dd10cb036ea-Area_Mdbuild_Wall06_Diffuse.png",
+      "Area_MdBuild_Wall09_Diffuse.png": "textures/41f3d16f5427-Area_MdBuild_Wall09_Diffuse.png",
+      "Area_MdBuild_Wall08_Diffuse.png": "textures/eb85bf4e228a-Area_MdBuild_Wall08_Diffuse.png",
+      "Area_MdBuild_KnightHQ02_Assembly01_Diffuse.png": "textures/ea6677ebc654-Area_MdBuild_KnightHQ02_Assembly01_Diffuse.png",
+      "Area_MdBuild_House_Roof05_Diffuse.png": "textures/76822a85ab41-Area_MdBuild_House_Roof05_Diffuse.png",
+      "Area_Mdcity_Ground15_Diffuse.png": "textures/1d8d5bba537d-Area_Mdcity_Ground15_Diffuse.png",
+      "Area_MdBuild_Window_A_Diffuse.png": "textures/46ec9d25b748-Area_MdBuild_Window_A_Diffuse.png",
+      "Area_Mdbuild_Stage01_Diffuse.png": "textures/7336a670f180-Area_Mdbuild_Stage01_Diffuse.png",
+      "Area_Mdbuild_Edge01_Diffuse.png": "textures/543e59ce1da6-Area_Mdbuild_Edge01_Diffuse.png"
+    }
+  },
+  "tavern": {
+    "dae": "tavern/AngelsShare.dae",
+    "textures": {
+      "Area_MdBuild_House_Wall07_Diffuse.png": "textures/687590b1a3da-Area_MdBuild_House_Wall07_Diffuse.png",
+      "Area_MdBuild_House_Roof05_Diffuse.png": "textures/76822a85ab41-Area_MdBuild_House_Roof05_Diffuse.png",
+      "Stages_Wood_Pillar_01_T2_Diffuse.png": "textures/b5b372dbd74c-Stages_Wood_Pillar_01_T2_Diffuse.png",
+      "Area_Mdbuild_Edge01_Diffuse.png": "textures/543e59ce1da6-Area_Mdbuild_Edge01_Diffuse.png",
+      "Area_MdBuild_Window_A_Diffuse.png": "textures/46ec9d25b748-Area_MdBuild_Window_A_Diffuse.png",
+      "Area_MdBuild_AngelShare_Diffuse.png": "textures/7321ca415749-Area_MdBuild_AngelShare_Diffuse.png"
+    }
+  },
+  "tall-attic": {
+    "dae": "tall-attic/CountryHomeWithTallAttic.dae",
+    "textures": {
+      "Area_MdBuild_House_Roof_A_Diffuse.png": "textures/1596002f7fc5-Area_MdBuild_House_Roof_A_Diffuse.png",
+      "Stages_House_Wall_01_T2_Diffuse.png": "textures/833a1e835543-Stages_House_Wall_01_T2_Diffuse.png",
+      "Stages_Wood_Pillar_01_T2_Diffuse.png": "textures/b5b372dbd74c-Stages_Wood_Pillar_01_T2_Diffuse.png",
+      "Area_MdBuild_House_Wall06_Diffuse.png": "textures/87e6a1fb50e7-Area_MdBuild_House_Wall06_Diffuse.png",
+      "Area_MdBuild_Window_A_Diffuse.png": "textures/46ec9d25b748-Area_MdBuild_Window_A_Diffuse.png",
+      "Area_MdBuild_Window50_Diffuse.png": "textures/ba771ca03b9f-Area_MdBuild_Window50_Diffuse.png"
+    }
+  },
+  "house1": {
+    "mesh": "city/mond_house1.obj",
+    "textures": {
+      "mond_house_wood-e9cff59c.png": "textures/8c4f86ea49dd-mond_house_wood-e9cff59c.png",
+      "mond_house_bricks-9cffb738.png": "textures/9d914bdf3c7d-mond_house_bricks-9cffb738.png",
+      "mond_house_roof-9f2f4eba.png": "textures/52dc7fcb893a-mond_house_roof-9f2f4eba.png",
+      "mond_house_outd-3e4ef29c.png": "textures/cd01050aeae0-mond_house_outd-3e4ef29c.png",
+      "mond_house_base-d969cb8f.png": "textures/bd5afc5a8fbf-mond_house_base-d969cb8f.png"
+    }
+  },
+  "house5": {
+    "mesh": "city/mond_house5.obj",
+    "textures": {
+      "mond_house_bricks-9cffb738.png": "textures/9d914bdf3c7d-mond_house_bricks-9cffb738.png",
+      "mond_house_base-d969cb8f.png": "textures/bd5afc5a8fbf-mond_house_base-d969cb8f.png",
+      "mond_house_wood-e9cff59c.png": "textures/8c4f86ea49dd-mond_house_wood-e9cff59c.png",
+      "mond_house_awning-91aab6e6.png": "textures/59ea167d43e6-mond_house_awning-91aab6e6.png",
+      "mond_house_outd-3e4ef29c.png": "textures/cd01050aeae0-mond_house_outd-3e4ef29c.png",
+      "mond_house_roof-9f2f4eba.png": "textures/52dc7fcb893a-mond_house_roof-9f2f4eba.png"
+    }
+  },
+  "house6": {
+    "mesh": "city/mond_house6.obj",
+    "textures": {
+      "mond_house_wood-e9cff59c.png": "textures/8c4f86ea49dd-mond_house_wood-e9cff59c.png",
+      "mond_house_bricks-9cffb738.png": "textures/9d914bdf3c7d-mond_house_bricks-9cffb738.png",
+      "mond_house_base-d969cb8f.png": "textures/bd5afc5a8fbf-mond_house_base-d969cb8f.png",
+      "mond_house_outd-3e4ef29c.png": "textures/cd01050aeae0-mond_house_outd-3e4ef29c.png",
+      "mond_house_roof2-fd2a8e6a.png": "textures/79d94878f332-mond_house_roof2-fd2a8e6a.png"
+    }
+  },
+  "house7": {
+    "mesh": "city/mond_house7.obj",
+    "textures": {
+      "mond_house_roof2-fd2a8e6a.png": "textures/79d94878f332-mond_house_roof2-fd2a8e6a.png",
+      "mond_house_bricks-9cffb738.png": "textures/9d914bdf3c7d-mond_house_bricks-9cffb738.png",
+      "mond_house_awning-91aab6e6.png": "textures/59ea167d43e6-mond_house_awning-91aab6e6.png",
+      "mond_house_base-d969cb8f.png": "textures/bd5afc5a8fbf-mond_house_base-d969cb8f.png",
+      "mond_house_wood-e9cff59c.png": "textures/8c4f86ea49dd-mond_house_wood-e9cff59c.png",
+      "mond_house_outd-3e4ef29c.png": "textures/cd01050aeae0-mond_house_outd-3e4ef29c.png"
+    }
+  },
+  "services_windmill": {
+    "mesh": "city/mond_services_windmill.obj",
+    "textures": {
+      "mond_favonius_base-447ee9f8.png": "textures/c41f9971260e-mond_favonius_base-447ee9f8.png",
+      "mond_service_roof-9b4cc1b6.png": "textures/74d53b3b32f7-mond_service_roof-9b4cc1b6.png",
+      "mond_services_windmill-7d943a18.png": "textures/0d0fa5fb51d8-mond_services_windmill-7d943a18.png",
+      "mond_windmill_top-f9f4b124.png": "textures/dfd355d12ab6-mond_windmill_top-f9f4b124.png",
+      "mond_services_mossy-8b2d586a.png": "textures/37d9c9d48111-mond_services_mossy-8b2d586a.png",
+      "mond_house_wood-e9cff59c.png": "textures/8c4f86ea49dd-mond_house_wood-e9cff59c.png",
+      "mond_favonius_chisel-786fc1de.png": "textures/e03c1e438507-mond_favonius_chisel-786fc1de.png"
+    },
+    "rotor": {
+      "material": "mond_services_windmill",
+      "pivot": [
+        1.185,
+        18.886,
+        -1.778
+      ],
+      "axis": [
+        -0.5760459483818203,
+        0.0,
+        0.8174173140770198
+      ]
+    }
+  },
+  "props_barbatos": {
+    "mesh": "city/mond_props_barbatos.obj",
+    "textures": {
+      "mond_props_barbatos-c9b217cb.png": "textures/4a73a808592b-mond_props_barbatos-c9b217cb.png"
+    }
+  },
+  "services_hotel": {
+    "mesh": "city/mond_services_hotel.obj",
+    "textures": {
+      "mond_house_bricks-9cffb738.png": "textures/9d914bdf3c7d-mond_house_bricks-9cffb738.png",
+      "mond_favonius_ceiling-138ae47e.png": "textures/bf349a964ea8-mond_favonius_ceiling-138ae47e.png",
+      "mond_house_outd-3e4ef29c.png": "textures/cd01050aeae0-mond_house_outd-3e4ef29c.png",
+      "mond_house_wood-e9cff59c.png": "textures/8c4f86ea49dd-mond_house_wood-e9cff59c.png",
+      "mond_services_decor2-c9f7183d.png": "textures/bd1f730ed27f-mond_services_decor2-c9f7183d.png",
+      "mond_house_base-d969cb8f.png": "textures/bd5afc5a8fbf-mond_house_base-d969cb8f.png",
+      "mond_service_roof-9b4cc1b6.png": "textures/74d53b3b32f7-mond_service_roof-9b4cc1b6.png"
+    }
+  }
+}

@@ -195,6 +195,7 @@ pub fn finish_loading(
     mut images: ResMut<Assets<Image>>,
     textures: Option<ResMut<MapTextures>>,
     weapon: Option<Res<crate::weapon::WeaponAssets>>,
+    effects: Option<Res<crate::arsenal::VfxAssets>>,
     camera: Single<(Entity, &bevy::camera::Exposure), With<crate::view::PlayerCamera>>,
     mut progress: ResMut<crate::loading::LoadingProgress>,
     mut session: ResMut<boltrunner_client::Session>,
@@ -202,7 +203,7 @@ pub fn finish_loading(
     if progress.percent == 100 || progress.error.is_some() {
         return;
     }
-    let (Some(mut textures), Some(weapon)) = (textures, weapon) else {
+    let (Some(mut textures), Some(weapon), Some(effects)) = (textures, weapon, effects) else {
         return;
     };
     if session.map.as_deref() != Some(textures.map) {
@@ -213,7 +214,10 @@ pub fn finish_loading(
         .iter()
         .map(|handle| handle.id().untyped())
         .collect();
-    ids.push(weapon.scene.id().untyped());
+    ids.extend(weapon.scenes.iter().map(|scene| scene.id().untyped()));
+    ids.push(weapon.drone.id().untyped());
+    ids.push(effects.texture.id().untyped());
+    ids.push(effects.flame_texture.id().untyped());
     for id in &ids {
         let failure = match assets.load_state(*id) {
             bevy::asset::LoadState::Failed(error) => Some(error),

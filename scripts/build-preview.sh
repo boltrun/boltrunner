@@ -16,5 +16,15 @@ server="${CARGO_TARGET_DIR:-target}/release/boltrunner-server"
 cp "$server" "$package_dir/"
 "$server" --print-build > "$package_dir/simulation-build.txt"
 cp -R dist "$package_dir/dist"
-tar -C "$package_dir" -czf dist/preview.tar.gz boltrunner-server simulation-build.txt dist
-echo 'Preview bundle: dist/preview.tar.gz'
+# Editable source archives are available in the repository and full web build;
+# preview uploads contain the playable package only.
+tar -C "$package_dir" \
+  --exclude='dist/pkg/*/maps-source.zip' \
+  --exclude='dist/pkg/*/starter-pistol-source.zip' \
+  -czf dist/preview.tar.gz boltrunner-server simulation-build.txt dist
+bundle_bytes=$(stat -c %s dist/preview.tar.gz)
+if (( bundle_bytes > 256 * 1024 * 1024 )); then
+  echo "Preview bundle exceeds the 256 MiB upload limit ($bundle_bytes bytes)." >&2
+  exit 1
+fi
+echo "Preview bundle: dist/preview.tar.gz ($bundle_bytes bytes)"

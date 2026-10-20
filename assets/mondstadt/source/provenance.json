@@ -1,0 +1,195 @@
+{
+  "repository": "https://github.com/flatypus/hoyomap",
+  "city_mesh_url": "https://cdn.flatypus.me/genshin/game_data/hlod_all/Area_Mengde_City_Constant_HLOD_Lod0.obj",
+  "city_atlas_url": "https://raw.githubusercontent.com/flatypus/hoyomap/main/public/Stages_Texture_Area_Mengde_City_HLOD_Combined_Diffuse.png",
+  "reference_plan_url": "https://upload-static.hoyoverse.com/hoyolab-wiki/2023/06/08/47826599/15987cc6e0dace9e5d818b2c08900a3d_8961596101360035824.png",
+  "files": {
+    "city.obj": "c04108b77bcb7661556045b635209f67dd13c1ed5c9fc2158986ba054120c801",
+    "sky.png": "2eb304f7d28fa784a0609e6468b75309882f9b1fdcda19956c5f63574562ee71",
+    "city-atlas.png": "2c37916172e268e5ef69061eead7fe78278e5c7be7e24d2e3ed8be1d0cefc71e"
+  },
+  "coordinate_conversion": {
+    "rotation_y_degrees": 180,
+    "vertical_offset_metres": 53.1,
+    "scale": 1
+  },
+  "preserved": "Real city reference footprints, streets, terraces, ramparts and roof silhouettes. Detailed original prefabs replace distant HLOD where measured fits are available; explicit source face IDs remove all associated obsolete LOD parts.",
+  "reconstructed": [
+    "Missing lake/island approach",
+    "Main entrance bridge aligned to source gate",
+    "Three omitted windmills and animated sails",
+    "Central lower-plaza fountain: measured source circular paving footprint; two cups, carved stone rim, shallow basin and non-solid water cascades reconstructed from HoYoWiki screenshot. Exact original fountain mesh was not available."
+  ],
+  "lighting": "Vertex daylight authored for baked map material; stone/grass source atlas tiles repeat at human scale on large HLOD surfaces",
+  "restored": [
+    "Six walkable staircases, including the missing gate threshold, along source terrace approaches",
+    "Thirty-eight measured or authored placements of original detailed building/statue/windmill assets",
+    "Four-tower stone building retains original source mesh and facade window/door positions; missing high-resolution facades are reconstructed from original stone, roof, and window/door trim textures",
+    "Historic perimeter towers and rampart sections retain source topology and use repeating original full-resolution stone and roof materials"
+  ],
+  "hd_asset_archives": [
+    {
+      "source": "https://models.spriters-resource.com/pc_computer/genshinimpact/asset/610356/",
+      "archive": "mondstadt-apartment.zip",
+      "sha256": "5a2fa95e62e6d6e6aa48e03ab5dbc6f7806904a5e4c1fc363ab063a632da572a",
+      "bytes": 21929425
+    },
+    {
+      "source": "https://models.spriters-resource.com/pc_computer/genshinimpact/asset/610353/",
+      "archive": "attic.zip",
+      "sha256": "eccb7afa01891692678ef9ed076173f6cc6d7ac6e5a975f3138bc54916177ac2",
+      "bytes": 21844600
+    },
+    {
+      "source": "https://models.spriters-resource.com/pc_computer/genshinimpact/asset/615256/",
+      "archive": "cathedral.zip",
+      "sha256": "f3981414a14f1b5dd34ed5399919d5aa0078e8767ba3d0aa038d2fc6f734af21",
+      "bytes": 21929435
+    },
+    {
+      "source": "https://models.spriters-resource.com/pc_computer/genshinimpact/asset/615080/",
+      "archive": "tavern.zip",
+      "sha256": "a6d7900b26f0d91341fc11c200d0a4cb43380d61c5e03f841776b437aeb66e9b",
+      "bytes": 22148322
+    },
+    {
+      "source": "https://models.spriters-resource.com/pc_computer/genshinimpact/asset/615253/",
+      "archive": "headquarters.zip",
+      "sha256": "fa7dc5e47d22f06afbb466968de08010a4c35d75a3a739e19773822ee92744d4",
+      "bytes": 33313303
+    },
+    {
+      "source": "https://models.spriters-resource.com/pc_computer/genshinimpact/asset/612565/",
+      "archive": "tall-attic.zip",
+      "sha256": "c4fb296ba51837585c425c766814cb25444454221f690308774a4bee10c8ea5b",
+      "bytes": 23634152
+    }
+  ],
+  "steam_assets": {
+    "original_author": "HoYoverse",
+    "original_work": "Genshin Impact",
+    "source_engine_porter": "Swift",
+    "steam_creator_id": "76561199195658212",
+    "steam_creator_profile": "https://steamcommunity.com/profiles/76561199195658212",
+    "workshop_url": "https://steamcommunity.com/sharedfiles/filedetails/?id=2857188127",
+    "author_credit_source": "Steam Workshop item metadata creator; item description explicitly credits HoYoverse. Display name Swift was verified by root from the Steam item.",
+    "gma_author_field_note": "The GMA author string \"Author Name\" is a placeholder, not the creator attribution.",
+    "archive_sha256": "a930c4b0bb86c9cb1ab3433e48bb6bd3ad2026a9c7c1a92c51d8a8962ddc9d64",
+    "sourceio_repo": "https://github.com/REDxEYE/SourceIO",
+    "sourceio_sha": "f303db3c5fe88697ec2e765bbd6ff4d366f54c9f",
+    "conversion": "Static original LOD0 meshes; Source unit to metres factor0.0254, Y-up(x,z,-y); original diffuse VTF decoded losslessly to PNG. Converter is offline, no imported code at runtime."
+  },
+  "source_file_sha256": {
+    "hd/apartment/WarmAndDryMondstadtApartment.dae": "b188591f9a971cc894012098065b3d2a0a2bc99ded4ca466f90b480cf98399ac",
+    "hd/assets.json": "3c4ae4539e89a9e1b16a748d00d176aa4bcebcf7447a6a2985a16b749f02610e",
+    "hd/attic/MondstadtHouseWithOverhangingAttic.dae": "5dcbec0bdd044c7a91cdec4ca7a8a63f01bba567f3bfb2432fd0fdbb9dab5b29",
+    "hd/cathedral/FavoniusCathedralExterior.dae": "026307d7a27a4316fac101492f9ec42e5450c466cc08ea21544b095a63976eae",
+    "hd/city/mond_house1.mtl": "e807d775fafa76a6854be589d53ed02b0cf51927ac9ac058776dc253fad09ddf",
+    "hd/city/mond_house1.obj": "dc2ba0be397dd2fab5a0d10c841d6ebab1d7a7fb6d664fa84c766bd0132f70f3",
+    "hd/city/mond_house5.mtl": "91221e23e63e1938801abddfc901b702905f93562ba68f96584d24294939e35e",
+    "hd/city/mond_house5.obj": "3241345ae775b9eaa99475ca168fea7c682013f37c0bef0d64ae2821e186a754",
+    "hd/city/mond_house6.mtl": "a7db621e96129042a02805fae982847c69c2f1bf64578508ef3b7da8bee3df7c",
+    "hd/city/mond_house6.obj": "902324907e172a0af2453f619c0e93385b6d97ad88051df2397007914ee4ecae",
+    "hd/city/mond_house7.mtl": "5c3451f1e07c11fea38c6a4f07b93f8698860026afa51476a2469ce9e48dff1c",
+    "hd/city/mond_house7.obj": "0be7f6c16f755d4a8dd50a87a7bb6cc4536256223416dc362b9c092a9b45cd82",
+    "hd/city/mond_props_barbatos.mtl": "b4c06c54392d1cca6b086ed9922d0b171efd5bb2d8d76a5b5b0428946cfb3841",
+    "hd/city/mond_props_barbatos.obj": "601c2f8413f1354b7ec7c47cced03696991281cc7766c91cba8f55472414c812",
+    "hd/city/mond_services_hotel.mtl": "7ec825d2d6f05a282d24c4e65e2f2ebe51b5418f1c6874e97ca49b3daf95ae50",
+    "hd/city/mond_services_hotel.obj": "f8774b6e3c3a9da57a9525187358f109f2b7caeb5d568e38b456e7e734eac465",
+    "hd/city/mond_services_windmill.mtl": "9830c6eda3506d14a5ed06bb03c8fd39b92132f4e166dbba592336aa0b6704a7",
+    "hd/city/mond_services_windmill.obj": "3f0c6b160e36624c6521bcb1d40e279d38f72efff915f593d2364a5d8a084b24",
+    "hd/headquarters/KnightsOfFavoniusHeadquartersExterior.dae": "5be74c3c6f8f592cd0d7fed8d33f4a04c509f1afe3aca9325c6dfb7761da0201",
+    "hd/tall-attic/CountryHomeWithTallAttic.dae": "36027bb52aecf813dc750d2e283f9638005c87677ddb467841a9cfc5f5fc3f33",
+    "hd/tavern/AngelsShare.dae": "6418c4a73685cb87a817e94c04697b801b9e96c3e95fe409adbfbb9d5479a6df",
+    "hd/textures/0d0fa5fb51d8-mond_services_windmill-7d943a18.png": "0d0fa5fb51d843c4ab64e9c766803009306d976866f855f77f320ea482b7e8e8",
+    "hd/textures/0dd10cb036ea-Area_Mdbuild_Wall06_Diffuse.png": "0dd10cb036eae7f38c041feb8f5651a16d6c5d62e7643549127961b01a96b602",
+    "hd/textures/1596002f7fc5-Area_MdBuild_House_Roof_A_Diffuse.png": "1596002f7fc5b7a73c65e91ab19965029e189f15ff476a1891237cfb88924fcc",
+    "hd/textures/1d8d5bba537d-Area_Mdcity_Ground15_Diffuse.png": "1d8d5bba537d3964ee6569fdaf46b7904dce9b2c629e8b4ea28cf9d517c8ab79",
+    "hd/textures/32a236ea784a-Area_MdBuild_Church04_Diffuse.png": "32a236ea784ad9b0e92691231101a84b53895cdee188f34d2b742aba25226928",
+    "hd/textures/37d9c9d48111-mond_services_mossy-8b2d586a.png": "37d9c9d481117986768d714518f0bad61f2fb727dcc0a168d42f36d7c9029ed3",
+    "hd/textures/41f3d16f5427-Area_MdBuild_Wall09_Diffuse.png": "41f3d16f5427a8382ec9425fc9dc07410280ebbc50aeeec108cce74f9429d767",
+    "hd/textures/46ec9d25b748-Area_MdBuild_Window_A_Diffuse.png": "46ec9d25b74843dae9c56584168c776ab20a5ffb57e99ed1253aee6f44a0c3c5",
+    "hd/textures/47272897b6fb-Area_MdBuild_Church05_Diffuse.png": "47272897b6fb75779e95b98064c2b68a1cbc335278c0d2b619ed4845c902b596",
+    "hd/textures/4a73a808592b-mond_props_barbatos-c9b217cb.png": "4a73a808592b672081c037a5fddc027af3d5f1fac8c4ebba2bcaa49cb27a37fe",
+    "hd/textures/52dc7fcb893a-mond_house_roof-9f2f4eba.png": "52dc7fcb893a2f4f6ce1ddc3cbcf63f395bdd6ce74bd5bfd53b9a0ebbae8da2a",
+    "hd/textures/543e59ce1da6-Area_Mdbuild_Edge01_Diffuse.png": "543e59ce1da68687f5c171db8dcb0ab5aa948b60a2fd274999b95020000c5c82",
+    "hd/textures/59ea167d43e6-mond_house_awning-91aab6e6.png": "59ea167d43e69d9714fee1f19a25a6bdf24a8cf1c03aa11a21a2cb006bf97835",
+    "hd/textures/687590b1a3da-Area_MdBuild_House_Wall07_Diffuse.png": "687590b1a3da8bc5c84f27f55c12de670e728f6078fd4fe1e48dd65dd5b8299d",
+    "hd/textures/712bb48948ed-Area_MdBuild_Church03_Diffuse.png": "712bb48948ed90e7d8d4e8064294e6adc42d5702600f0d2165a0acf0b8ddf3d7",
+    "hd/textures/7321ca415749-Area_MdBuild_AngelShare_Diffuse.png": "7321ca41574966b45435e194de6b9e2a59e2fa27d83ba5b8165a65298a9686ca",
+    "hd/textures/7336a670f180-Area_Mdbuild_Stage01_Diffuse.png": "7336a670f18083b6d89aa01fd1891afe7042913ba9fb8add4c1636b8acdb09da",
+    "hd/textures/74d53b3b32f7-mond_service_roof-9b4cc1b6.png": "74d53b3b32f765fafaa84295f9500bded7ea78f6642d6c64b9427fa06bd89508",
+    "hd/textures/76822a85ab41-Area_MdBuild_House_Roof05_Diffuse.png": "76822a85ab4161865d152ff6b2e20d07ae6bb9acae3f6e4fbbef7a80e62263ad",
+    "hd/textures/79d94878f332-mond_house_roof2-fd2a8e6a.png": "79d94878f332c34cba83f7f3dfe778e1daac96f60d82f61a27dc4fd1671786db",
+    "hd/textures/80c3b0324ef3-Area_MdBuild_Church02_Diffuse.png": "80c3b0324ef3e9098c343fdb1826ab2b98c64470c51149f830fea2dd3065b538",
+    "hd/textures/833a1e835543-Stages_House_Wall_01_T2_Diffuse.png": "833a1e8355432068c9bbb97f551116232ce19a5aa7fbc9b0d3b6e9493825e9ec",
+    "hd/textures/87e6a1fb50e7-Area_MdBuild_House_Wall06_Diffuse.png": "87e6a1fb50e73d4736d247014c0111d5d654a5cec6474d5f67a1759daa9f82c4",
+    "hd/textures/8c4f86ea49dd-mond_house_wood-e9cff59c.png": "8c4f86ea49dd2a7a3df14d8a18cb8846df921f00b10f645f71900af3d4452c1c",
+    "hd/textures/9d914bdf3c7d-mond_house_bricks-9cffb738.png": "9d914bdf3c7d69133b5d9d0ddff5f23fce908747f3ff519acae7d9bdb81146fe",
+    "hd/textures/ae923dfce395-Area_MdBuild_Church06_Diffuse.png": "ae923dfce39509b14fb94c8a0e8a622b3af4e587cbc7c4e483a8409a97f053e2",
+    "hd/textures/b5b372dbd74c-Stages_Wood_Pillar_01_T2_Diffuse.png": "b5b372dbd74ced634973c05b380d1ba6f7494a2b75ecc94e5117168207614b65",
+    "hd/textures/ba771ca03b9f-Area_MdBuild_Window50_Diffuse.png": "ba771ca03b9f0459a7df0845d9300d6e18243d75f4b266ec4efd050328f1dc22",
+    "hd/textures/bd1f730ed27f-mond_services_decor2-c9f7183d.png": "bd1f730ed27f86011e6f2f27afb50d9ad60c28fdf8f01a3342bc90606fb48a8f",
+    "hd/textures/bd5afc5a8fbf-mond_house_base-d969cb8f.png": "bd5afc5a8fbfd5d66e79f329fe537bc9362e5239b8613653a0597b8333a8c6ec",
+    "hd/textures/bf349a964ea8-mond_favonius_ceiling-138ae47e.png": "bf349a964ea8ec7ab18c282feb7f9aadcd3205ded3b66a3a6532abb2a9c9576d",
+    "hd/textures/c41f9971260e-mond_favonius_base-447ee9f8.png": "c41f9971260e5fa923336820b90a8db9bf78f46de02b1e09744cba38079a8e18",
+    "hd/textures/cd01050aeae0-mond_house_outd-3e4ef29c.png": "cd01050aeae0a04332da0b9e4e82d6d3115f3bc8e0c3b119b5797d0a09bb3dca",
+    "hd/textures/d35609158bda-Area_MdBuild_House_Roof03_Diffuse.png": "d35609158bdaeeeb6dfb3091277f399f22a69ceac876632527468eb3c86044a4",
+    "hd/textures/dfd355d12ab6-mond_windmill_top-f9f4b124.png": "dfd355d12ab6912bf3d8dd8a697bad0253228975aaecde6bd96e32c4f6b56c94",
+    "hd/textures/e03c1e438507-mond_favonius_chisel-786fc1de.png": "e03c1e43850711605a682d65a0f57c99a64358abfa0f6fefba2ffeda151c9785",
+    "hd/textures/e645d88c9df7-Area_MdBuild_Church01_Diffuse.png": "e645d88c9df7165c5efe0a50f9e50708fbe625d40ae115b4605a268cfaed85bb",
+    "hd/textures/ea6677ebc654-Area_MdBuild_KnightHQ02_Assembly01_Diffuse.png": "ea6677ebc654fcfcfdf3d53fe073ac475fe710639d02bd62812b8d4950688c2a",
+    "hd/textures/eb85bf4e228a-Area_MdBuild_Wall08_Diffuse.png": "eb85bf4e228a7ce247ddd412919bdd7051c4135b4678564cd90d2ac0e9ac103c",
+    "exact/grass-meadow-v2.png": "00ae1e99f99a98ca88f47fd93965e83ba4621efba75c966e43856b714b5e1cde",
+    "plaza.json": "886bffca95c520396469378e604390960b2b059a95a62d8addcece8ed8ea2988"
+  },
+  "bridge_reference": {
+    "gate_front_opening_edges_raw": [
+      [
+        50.25,
+        -53.52,
+        -166.36
+      ],
+      [
+        55.15,
+        -53.52,
+        -163.67
+      ]
+    ],
+    "gate_back_opening_edges_raw": [
+      [
+        46.25,
+        -53.52,
+        -159.06
+      ],
+      [
+        51.15,
+        -53.52,
+        -156.37
+      ]
+    ],
+    "axis_xz": [
+      4,
+      -7.3
+    ],
+    "bridge_start_raw": [
+      50.7,
+      -52.9,
+      -161.365
+    ],
+    "missing_threshold_height_metres": 1.03
+  },
+  "upstream_city_obj_sha256": "6ebc352dd4ab8fb081ebb675767c679ced82a54b42c3af9172d14832688d2d39",
+  "source_text_normalization": "LF line endings; trailing empty MTL lines removed; numeric geometry, UVs, normals and diffuse bindings unchanged",
+  "plaza_corrections": "plaza.json records measured source face IDs and underlying city-floor heights; floating decorative overlays are lowered without changing XZ outlines/UVs. The nineteen original underside support pillars have only their top vertices clipped below that floor.",
+  "grass_material": {
+    "source": "Generated painted meadow albedo, OpenAI imagegen",
+    "file": "exact/grass-meadow-v2.png",
+    "sha256": "00ae1e99f99a98ca88f47fd93965e83ba4621efba75c966e43856b714b5e1cde",
+    "size": [
+      1254,
+      1254
+    ],
+    "usage": "Only original grass atlas region (3,2), repeated every 6 metres; original road and stone materials unchanged."
+  }
+}
