@@ -16,6 +16,9 @@ pub fn configure(app: &mut App) {
     });
     app.insert_resource(ServerUrl(server)).add_plugins(
         DefaultPlugins
+            .set(bevy::asset::io::web::WebAssetPlugin {
+                silence_startup_warning: true,
+            })
             .set(AssetPlugin {
                 file_path: window
                     .document()
