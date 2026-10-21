@@ -339,6 +339,36 @@ macro_rules! default_number {
     };
 }
 
+macro_rules! snapshot_tuning {
+    (simulation: $struct:ident { $($field:ident: $ty:ident,)+ }) => {
+        impl $struct {
+            pub(crate) fn serialize_overrides<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+                let defaults = Self::default();
+                let mut changes = Vec::<(u16, Number)>::new();
+                let mut index = 0u16;
+                $(if self.$field != defaults.$field { changes.push((index, self.$field.number())); } index += 1;)+
+                let _ = index;
+                changes.serialize(serializer)
+            }
+            pub(crate) fn deserialize_overrides<'de, D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+                let changes = Vec::<(u16, Number)>::deserialize(deserializer)?;
+                let mut result = Self::default();
+                for (field, value) in changes {
+                    let mut index = 0u16;
+                    $(if field == index {
+                        result.$field = <$ty as TunableNumber>::from_number(value).map_err(serde::de::Error::custom)?;
+                        continue;
+                    } index += 1;)+
+                    let _ = index;
+                    return Err(serde::de::Error::custom("unknown simulation tuning field"));
+                }
+                Ok(result)
+            }
+        }
+    };
+    ($group:ident: $struct:ident { $($field:ident: $ty:ident,)+ }) => {};
+}
+
 macro_rules! tuning_parameters {
     ($($group:ident: $struct:ident { $($id:ident => $field:ident: $ty:ident = $default:expr, $category:ident, $min:expr, $max:expr, $units:expr, $help:expr;)+ })+) => {
         #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -350,6 +380,7 @@ macro_rules! tuning_parameters {
         },)+)+];
         $(#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize, Reflect)]
         pub struct $struct { $(pub $field: $ty,)+ }
+        snapshot_tuning!($group: $struct { $($field: $ty,)+ });
         impl Default for $struct { fn default() -> Self { Self { $($field: $default,)+ } } })+
         #[derive(Clone, Copy, Debug, Default, PartialEq, Serialize, Deserialize)]
         pub struct SettingsValues { $(pub $group: $struct,)+ }
@@ -729,5 +760,22 @@ pub fn seconds_to_ticks(seconds: f32) -> u16 {
         0
     } else {
         (seconds * crate::TICK_HZ as f32).round().max(1.0) as u16
+    }
+}
+
+/// Player snapshots carry exact deviations from the shared build's defaults.
+/// Full F2 settings are still replicated separately when they change.
+pub(crate) mod simulation_wire {
+    use super::SimulationTuning;
+    pub fn serialize<S: serde::Serializer>(
+        value: &SimulationTuning,
+        serializer: S,
+    ) -> Result<S::Ok, S::Error> {
+        value.serialize_overrides(serializer)
+    }
+    pub fn deserialize<'de, D: serde::Deserializer<'de>>(
+        deserializer: D,
+    ) -> Result<SimulationTuning, D::Error> {
+        SimulationTuning::deserialize_overrides(deserializer)
     }
 }

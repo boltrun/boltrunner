@@ -117,3 +117,120 @@ map textures/sandstone/tile.png
 rgbGen identity
 }
 }
+textures/sandstone/eave
+{
+qer_editorimage textures/sandstone/eave.png
+surfaceparm nonsolid
+{
+map textures/sandstone/eave.png
+rgbGen identity
+}
+}
+textures/sandstone/plaster_ochre
+{
+qer_editorimage textures/sandstone/plaster_ochre.png
+{
+map textures/sandstone/plaster_ochre.png
+rgbGen identity
+}
+}
+textures/sandstone/plaster_rose
+{
+qer_editorimage textures/sandstone/plaster_rose.png
+{
+map textures/sandstone/plaster_rose.png
+rgbGen identity
+}
+}
+textures/sandstone/shutter
+{
+qer_editorimage textures/sandstone/shutter.png
+{
+map textures/sandstone/shutter.png
+rgbGen identity
+}
+}
+textures/sandstone/sign
+{
+qer_editorimage textures/sandstone/sign.png
+{
+map textures/sandstone/sign.png
+rgbGen identity
+}
+}
+textures/sandstone/jali
+{
+qer_editorimage textures/sandstone/jali.png
+surfaceparm nonsolid
+{
+map textures/sandstone/jali.png
+rgbGen identity
+}
+}
+textures/sandstone/kashi
+{
+qer_editorimage textures/sandstone/kashi.png
+{
+map textures/sandstone/kashi.png
+rgbGen identity
+}
+}
+textures/sandstone/clock
+{
+qer_editorimage textures/sandstone/clock.png
+{
+map textures/sandstone/clock.png
+rgbGen identity
+}
+}
+textures/sandstone/roof
+{
+qer_editorimage textures/sandstone/roof.png
+{
+map textures/sandstone/roof.png
+rgbGen identity
+}
+}
+textures/sandstone/spice
+{
+qer_editorimage textures/sandstone/spice.png
+{
+map textures/sandstone/spice.png
+rgbGen identity
+}
+}
+textures/sandstone/shade
+{
+qer_editorimage textures/sandstone/shade.png
+{
+map textures/sandstone/shade.png
+rgbGen identity
+}
+}
+textures/sandstone/brass
+{
+qer_editorimage textures/sandstone/brass.png
+surfaceparm nonsolid
+{
+map textures/sandstone/brass.png
+rgbGen identity
+}
+}
+textures/sandstone/lantern
+{
+qer_editorimage textures/sandstone/lantern.png
+surfaceparm nonsolid
+{
+map textures/sandstone/lantern.png
+rgbGen identity
+}
+}
+textures/sandstone/cloth_yellow
+{
+qer_editorimage textures/sandstone/cloth_yellow.png
+surfaceparm nonsolid
+{
+map textures/sandstone/cloth_yellow.png
+rgbGen identity
+}
+}
