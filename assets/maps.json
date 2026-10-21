@@ -1,7 +1,17 @@
 {
   "default": "stormkeep",
   "maps": [
-    { "id": "stormkeep", "source": "stormkeep/source" },
-    { "id": "skyfracture", "source": "stormkeep/source" }
+    {
+      "id": "stormkeep",
+      "source": "stormkeep/source"
+    },
+    {
+      "id": "skyfracture",
+      "source": "stormkeep/source"
+    },
+    {
+      "id": "bottle_shipyard",
+      "source": "bottle_shipyard/source"
+    }
   ]
 }

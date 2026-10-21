@@ -1,0 +1,542 @@
+{
+  "id": "bottle_shipyard",
+  "name": "Bottle Shipyard",
+  "spawns": [
+    {
+      "position": [
+        -33,
+        5.5,
+        9
+      ],
+      "yaw": -1.3045442776439713
+    },
+    {
+      "position": [
+        -31,
+        5.5,
+        -8
+      ],
+      "yaw": -1.8233506025729562
+    },
+    {
+      "position": [
+        -6,
+        5.5,
+        13
+      ],
+      "yaw": -0.43240777557053783
+    },
+    {
+      "position": [
+        -1,
+        5.5,
+        -14
+      ],
+      "yaw": -3.070285188804503
+    },
+    {
+      "position": [
+        22,
+        5.5,
+        13
+      ],
+      "yaw": 1.0370881351556351
+    },
+    {
+      "position": [
+        30,
+        5.5,
+        -7
+      ],
+      "yaw": 1.800028260071892
+    },
+    {
+      "position": [
+        -31,
+        17.5,
+        9
+      ],
+      "yaw": -1.2882413743253092
+    },
+    {
+      "position": [
+        -7,
+        17.5,
+        -16
+      ],
+      "yaw": -2.729182211992406
+    },
+    {
+      "position": [
+        26,
+        17.5,
+        14
+      ],
+      "yaw": 1.0768549578753155
+    },
+    {
+      "position": [
+        23,
+        17.5,
+        -4
+      ],
+      "yaw": 1.7429871413178357
+    }
+  ],
+  "pickup_spawns": [
+    [
+      -33,
+      5.5,
+      0
+    ],
+    [
+      -24,
+      5.5,
+      0
+    ],
+    [
+      2,
+      5.5,
+      2
+    ],
+    [
+      26,
+      5.5,
+      7
+    ],
+    [
+      -31,
+      17.5,
+      0
+    ],
+    [
+      -1,
+      17.5,
+      5
+    ],
+    [
+      27,
+      17.5,
+      -13
+    ],
+    [
+      -2,
+      17.5,
+      14
+    ]
+  ],
+  "triggers": [
+    {
+      "kind": "launch",
+      "speed": 30.0,
+      "planes": [
+        [
+          1,
+          0,
+          0,
+          -26.9
+        ],
+        [
+          -1,
+          0,
+          0,
+          29.1
+        ],
+        [
+          0,
+          1,
+          0,
+          5.56
+        ],
+        [
+          0,
+          -1,
+          0,
+          -5.4
+        ],
+        [
+          0,
+          0,
+          1,
+          -7.9
+        ],
+        [
+          0,
+          0,
+          -1,
+          10.1
+        ]
+      ]
+    },
+    {
+      "kind": "launch",
+      "speed": 30.0,
+      "planes": [
+        [
+          1,
+          0,
+          0,
+          -18.9
+        ],
+        [
+          -1,
+          0,
+          0,
+          21.1
+        ],
+        [
+          0,
+          1,
+          0,
+          5.56
+        ],
+        [
+          0,
+          -1,
+          0,
+          -5.4
+        ],
+        [
+          0,
+          0,
+          1,
+          12.1
+        ],
+        [
+          0,
+          0,
+          -1,
+          -9.9
+        ]
+      ]
+    },
+    {
+      "kind": "launch",
+      "speed": 30.0,
+      "planes": [
+        [
+          1,
+          0,
+          0,
+          -0.8999999999999999
+        ],
+        [
+          -1,
+          0,
+          0,
+          3.1
+        ],
+        [
+          0,
+          1,
+          0,
+          5.56
+        ],
+        [
+          0,
+          -1,
+          0,
+          -5.4
+        ],
+        [
+          0,
+          0,
+          1,
+          -9.9
+        ],
+        [
+          0,
+          0,
+          -1,
+          12.1
+        ]
+      ]
+    },
+    {
+      "kind": "launch",
+      "speed": 30.0,
+      "planes": [
+        [
+          1,
+          0,
+          0,
+          24.1
+        ],
+        [
+          -1,
+          0,
+          0,
+          -21.9
+        ],
+        [
+          0,
+          1,
+          0,
+          5.56
+        ],
+        [
+          0,
+          -1,
+          0,
+          -5.4
+        ],
+        [
+          0,
+          0,
+          1,
+          11.1
+        ],
+        [
+          0,
+          0,
+          -1,
+          -8.9
+        ]
+      ]
+    }
+  ],
+  "lightmaps": [
+    "lm_0000.png"
+  ],
+  "sky": "sky.png",
+  "materials": [
+    {
+      "name": "voxel:barrel_bottom",
+      "texture": "barrel_bottom.png",
+      "glow": null,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "name": "voxel:barrel_side",
+      "texture": "barrel_side.png",
+      "glow": null,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "name": "voxel:barrel_top",
+      "texture": "barrel_top.png",
+      "glow": null,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "name": "voxel:bookshelf",
+      "texture": "bookshelf.png",
+      "glow": null,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "name": "voxel:chain",
+      "texture": "chain.png",
+      "glow": null,
+      "emissive": true,
+      "alpha": true,
+      "blend": false
+    },
+    {
+      "name": "voxel:crafting_table_front",
+      "texture": "crafting_table_front.png",
+      "glow": null,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "name": "voxel:crafting_table_side",
+      "texture": "crafting_table_side.png",
+      "glow": null,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "name": "voxel:crafting_table_top",
+      "texture": "crafting_table_top.png",
+      "glow": null,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "name": "voxel:dark_oak_planks",
+      "texture": "dark_oak_planks.png",
+      "glow": null,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "name": "voxel:glass",
+      "texture": "glass.png",
+      "glow": null,
+      "emissive": true,
+      "alpha": false,
+      "blend": true
+    },
+    {
+      "name": "voxel:lantern",
+      "texture": "lantern.png",
+      "glow": null,
+      "emissive": true,
+      "alpha": true,
+      "blend": false
+    },
+    {
+      "name": "voxel:light_blue_stained_glass",
+      "texture": "light_blue_stained_glass.png",
+      "glow": null,
+      "emissive": true,
+      "alpha": false,
+      "blend": true
+    },
+    {
+      "name": "voxel:light_blue_wool",
+      "texture": "light_blue_wool.png",
+      "glow": null,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "name": "voxel:oak_log",
+      "texture": "oak_log.png",
+      "glow": null,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "name": "voxel:oak_log_top",
+      "texture": "oak_log_top.png",
+      "glow": null,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "name": "voxel:oak_planks",
+      "texture": "oak_planks.png",
+      "glow": null,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "name": "voxel:obsidian",
+      "texture": "obsidian.png",
+      "glow": null,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "name": "voxel:polished_blackstone",
+      "texture": "polished_blackstone.png",
+      "glow": null,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "name": "voxel:sand",
+      "texture": "sand.png",
+      "glow": null,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "name": "voxel:sandstone",
+      "texture": "sandstone.png",
+      "glow": null,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "name": "voxel:sandstone_bottom",
+      "texture": "sandstone_bottom.png",
+      "glow": null,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "name": "voxel:slime_block",
+      "texture": "slime_block.png",
+      "glow": null,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "name": "voxel:spruce_planks",
+      "texture": "spruce_planks.png",
+      "glow": null,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "name": "voxel:stone_bricks",
+      "texture": "stone_bricks.png",
+      "glow": null,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "name": "voxel:stripped_oak_log",
+      "texture": "stripped_oak_log.png",
+      "glow": null,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "name": "voxel:stripped_oak_log_top",
+      "texture": "stripped_oak_log_top.png",
+      "glow": null,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    },
+    {
+      "name": "voxel:water_still",
+      "texture": "water_still.png",
+      "glow": null,
+      "emissive": true,
+      "alpha": false,
+      "blend": true
+    },
+    {
+      "name": "voxel:white_wool",
+      "texture": "white_wool.png",
+      "glow": null,
+      "emissive": false,
+      "alpha": false,
+      "blend": false
+    }
+  ],
+  "pixelated": true,
+  "crystals": [
+    {
+      "position": [
+        -0.5,
+        20.1,
+        6.5
+      ],
+      "radius": 1.4,
+      "blast_radius": 9.0,
+      "damage": 180,
+      "respawn_seconds": 15.0
+    }
+  ]
+}

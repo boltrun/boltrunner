@@ -2,7 +2,10 @@ use crate::baked_material::BakedMaterial;
 use bevy::{
     asset::RenderAssetUsages,
     core_pipeline::Skybox,
-    image::{ImageAddressMode, ImageLoaderSettings, ImageSampler, ImageSamplerDescriptor},
+    image::{
+        ImageAddressMode, ImageFilterMode, ImageLoaderSettings, ImageSampler,
+        ImageSamplerDescriptor,
+    },
     mesh::{Indices, PrimitiveTopology},
     prelude::*,
     render::render_resource::{TextureFormat, TextureViewDescriptor, TextureViewDimension},
@@ -58,6 +61,7 @@ pub fn build_map(
     camera.1.rotation = Quat::from_rotation_y(spawn.yaw);
     let mut textures = Vec::new();
     let mut mipmapped = Vec::new();
+    let pixelated = level::data().pixelated;
     let mut texture = |name: &str, repeat: bool, mipmaps: bool| {
         let handle = assets
             .load_builder()
@@ -70,7 +74,17 @@ pub fn build_map(
                 settings.sampler = ImageSampler::Descriptor(ImageSamplerDescriptor {
                     address_mode_u: mode,
                     address_mode_v: mode,
-                    anisotropy_clamp: if mipmaps { 4 } else { 1 },
+                    mag_filter: if pixelated && repeat {
+                        ImageFilterMode::Nearest
+                    } else {
+                        ImageFilterMode::Linear
+                    },
+                    min_filter: if pixelated && repeat {
+                        ImageFilterMode::Nearest
+                    } else {
+                        ImageFilterMode::Linear
+                    },
+                    anisotropy_clamp: if mipmaps && !pixelated { 4 } else { 1 },
                     ..ImageSamplerDescriptor::linear()
                 });
             })
@@ -126,7 +140,7 @@ pub fn build_map(
                         } else {
                             AlphaMode::Opaque
                         },
-                        double_sided: material.blend || material.alpha,
+                        double_sided: material.alpha || (material.blend && !pixelated),
                     })
                 })
                 .collect()

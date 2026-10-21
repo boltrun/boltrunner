@@ -398,7 +398,7 @@ class Compiler:
             f.write(np.asarray(vertices, dtype='<f4').tobytes())
             f.write(np.asarray(indices, dtype='<u4').tobytes())
         lightmaps, render_triangles = bsp.render(self, BUILT, ROTATE, SCALE)
-        metadata = dict(id=MAP_ID, name=self.entities[0][0].get('message', MAP_ID), units_per_metre=40, spawns=self.spawns, pickup_spawns=self.pickup_spawns, triggers=self.triggers,
+        metadata = dict(id=MAP_ID, name=self.entities[0][0].get('message', MAP_ID), units_per_metre=40, spawns=self.spawns, pickup_spawns=self.pickup_spawns, triggers=self.triggers, pixelated=False, crystals=[],
                         lightmaps=lightmaps, sky=skybox(SOURCE, BUILT, prefix) if prefix else None, materials=list(self.materials.values()), counts=dict(self.counts),
                         collision_triangles=len(indices), render_triangles=render_triangles)
         used_textures = {*lightmaps}

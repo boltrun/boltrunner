@@ -229,6 +229,13 @@ fn apply_map_triggers(state: &mut PlayerState, input: &PlayerInput, previous: Ve
                 state.dash.remaining_ticks = 0;
                 state.jump.air_jumps_remaining = state.tuning.air_jumps as u8;
             }
+            TriggerKind::Launch { speed } => {
+                state.velocity = Vec2::ZERO;
+                state.vertical_velocity = speed * state.tuning.jump_pad_multiplier;
+                state.grounded = false;
+                state.dash.remaining_ticks = 0;
+                state.jump.air_jumps_remaining = state.tuning.air_jumps as u8;
+            }
             TriggerKind::Teleport {
                 destination,
                 rotation,

@@ -312,12 +312,31 @@ fn detect_shots(
     }
 }
 
+fn predict_map(
+    bolt: &mut Projectile,
+    delta: Vec3,
+    crystals: &Query<&boltrunner_shared::crystals::Crystal>,
+) -> Option<boltrunner_shared::weapon::Impact> {
+    boltrunner_shared::weapon::advance_map_with_crystals(
+        bolt,
+        delta,
+        std::iter::empty(),
+        crystals.iter().filter(|c| c.active).filter_map(|c| {
+            boltrunner_shared::level::data()
+                .crystals
+                .get(c.slot as usize)
+                .map(|spawn| (c.slot, c.position, spawn.radius))
+        }),
+    )
+}
+
 fn local_shots(
     mut commands: Commands,
     assets: Res<WeaponAssets>,
     mut feedback: ResMut<Feedback>,
     timeline: Res<LocalTimeline>,
     muzzle: MuzzleView,
+    crystals: Query<&boltrunner_shared::crystals::Crystal>,
 ) {
     let geometry = muzzle.shot_geometry();
     for shot in feedback.pending_shots.drain(..) {
@@ -329,7 +348,7 @@ fn local_shots(
         }
         let muzzle_offset = geometry.map_or(Vec3::ZERO, |(muzzle, _, _)| muzzle - bolt.origin);
         let advance = bolt.direction * bolt.speed * age;
-        if boltrunner_shared::weapon::advance_map(&mut bolt, advance).is_some() {
+        if predict_map(&mut bolt, advance, &crystals).is_some() {
             continue;
         }
         commands
@@ -429,6 +448,7 @@ fn reconcile_bolts(
     timeline: Res<LocalTimeline>,
     authoritative: Query<&ConfirmedHistory<Projectile>, With<Interpolated>>,
     mut locals: Query<&mut LocalBolt>,
+    crystals: Query<&boltrunner_shared::crystals::Crystal>,
 ) {
     for mut local in &mut locals {
         let Some((tick, confirmed)) = authoritative
@@ -447,7 +467,7 @@ fn reconcile_bolts(
             * boltrunner_shared::TICK_DURATION.as_secs_f32();
         let mut predicted = confirmed.clone();
         let delta = predicted.direction * predicted.speed * lead;
-        boltrunner_shared::weapon::advance_map(&mut predicted, delta);
+        predict_map(&mut predicted, delta, &crystals);
         let position = predicted.position;
         let relocated = local.bolt.relocation != predicted.relocation;
         let difference = local.bolt.position - position;
@@ -473,13 +493,14 @@ fn advance_local_bolts(
     mut commands: Commands,
     time: Res<Time>,
     mut bolts: Query<(Entity, &mut LocalBolt, &mut Transform)>,
+    crystals: Query<&boltrunner_shared::crystals::Crystal>,
 ) {
     for (entity, mut local, mut transform) in &mut bolts {
         let delta = local.bolt.direction * local.bolt.speed * time.delta_secs();
         // Predicted wall occlusion is cosmetic. Player hits and impact splashes
         // are exclusively confirmed by the server.
         let relocation = local.bolt.relocation;
-        if boltrunner_shared::weapon::advance_map(&mut local.bolt, delta).is_some() {
+        if predict_map(&mut local.bolt, delta, &crystals).is_some() {
             commands.entity(entity).despawn();
             continue;
         }

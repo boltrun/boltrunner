@@ -1,5 +1,6 @@
 //! Gameplay data and fixed-step movement shared by the server and predicted client.
 pub mod arena;
+pub mod crystals;
 pub mod health;
 pub mod level;
 pub mod match_state;

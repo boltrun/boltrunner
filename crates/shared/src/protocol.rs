@@ -235,6 +235,9 @@ impl Plugin for ProtocolPlugin {
         .add_direction(NetworkDirection::Bidirectional);
         app.register_message::<crate::weapon::ShotImpact>()
             .add_direction(NetworkDirection::ServerToClient);
+        app.register_message::<crate::crystals::CrystalExplosion>()
+            .add_direction(NetworkDirection::ServerToClient);
+        app.component::<crate::crystals::Crystal>().replicate();
         app.register_message::<ChangeMap>()
             .add_direction(NetworkDirection::ClientToServer);
         app.register_message::<MapChangeReply>()

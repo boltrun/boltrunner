@@ -243,5 +243,7 @@
     "brushes": 887
   },
   "collision_triangles": 10816,
-  "render_triangles": 12542
+  "render_triangles": 12542,
+  "pixelated": false,
+  "crystals": []
 }

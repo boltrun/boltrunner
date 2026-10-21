@@ -1,0 +1,11 @@
+{
+  "edition": "Minecraft Java Edition",
+  "version": "1.21.1",
+  "version_manifest_url": "https://piston-meta.mojang.com/v1/packages/499680d659b7a0ccb2fa9a809c345c5baf2ace7d/1.21.1.json",
+  "client_url": "https://piston-data.mojang.com/v1/objects/30c73b1c5da787909b2f73340419fdf13b9def88/client.jar",
+  "client_sha1": "30c73b1c5da787909b2f73340419fdf13b9def88",
+  "client_bytes": 26836906,
+  "texture_files": 3167,
+  "usage": "Selected original Mojang textures from the official client archive. Original rights retained by Mojang; not relicensed as original project artwork.",
+  "guidelines": "https://www.minecraft.net/en-us/usage-guidelines"
+}

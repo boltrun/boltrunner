@@ -1,5 +1,6 @@
 mod build_check;
 mod combat;
+mod crystals;
 mod history;
 mod loading;
 mod maps;
@@ -72,6 +73,7 @@ fn main() {
                 history::capture_after,
                 powerups::collect,
                 powerups::manage,
+                crystals::maintain,
                 combat::advance_projectiles,
             )
                 .chain(),
