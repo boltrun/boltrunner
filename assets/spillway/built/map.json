@@ -651,11 +651,59 @@
         0.0
       ],
       "water": false
+    },
+    {
+      "id": 25,
+      "name": "textures/spillway/rubber",
+      "texture": "textures__spillway__rubber.png",
+      "glow": null,
+      "width": 64,
+      "height": 64,
+      "emissive": false,
+      "alpha": false,
+      "blend": false,
+      "uv_scroll": [
+        0.0,
+        0.0
+      ],
+      "water": false
+    },
+    {
+      "id": 26,
+      "name": "textures/spillway/wood",
+      "texture": "textures__spillway__wood.png",
+      "glow": null,
+      "width": 256,
+      "height": 256,
+      "emissive": false,
+      "alpha": false,
+      "blend": false,
+      "uv_scroll": [
+        0.0,
+        0.0
+      ],
+      "water": false
+    },
+    {
+      "id": 27,
+      "name": "textures/spillway/cardboard",
+      "texture": "textures__spillway__cardboard.png",
+      "glow": null,
+      "width": 256,
+      "height": 256,
+      "emissive": false,
+      "alpha": false,
+      "blend": false,
+      "uv_scroll": [
+        0.0,
+        0.0
+      ],
+      "water": false
     }
   ],
   "counts": {
-    "brushes": 4646
+    "brushes": 5964
   },
-  "collision_triangles": 100796,
-  "render_triangles": 88918
+  "collision_triangles": 128016,
+  "render_triangles": 114265
 }

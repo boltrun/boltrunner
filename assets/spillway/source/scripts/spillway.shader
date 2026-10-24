@@ -85,6 +85,32 @@ textures/spillway/tread
  rgbGen identity
  }
 }
+textures/spillway/cardboard
+{
+ qer_editorimage textures/spillway/cardboard.png
+ {
+ map $lightmap
+ rgbGen identity
+ }
+ {
+ map textures/spillway/cardboard.png
+ blendFunc filter
+ rgbGen identity
+ }
+}
+textures/spillway/wood
+{
+ qer_editorimage textures/spillway/wood.png
+ {
+ map $lightmap
+ rgbGen identity
+ }
+ {
+ map textures/spillway/wood.png
+ blendFunc filter
+ rgbGen identity
+ }
+}
 textures/spillway/ivory
 {
  qer_editorimage textures/spillway/ivory.png
