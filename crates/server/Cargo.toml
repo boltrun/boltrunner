@@ -9,6 +9,6 @@ license.workspace = true
 bevy = { workspace = true, features = ["bevy_log", "multi_threaded"] }
 lightyear = { workspace = true, features = ["server"] }
 boltrunner-shared.workspace = true
-rand = "0.9"
-aeronet_websocket = { version = "=0.19.1", default-features = false, features = ["server"] }
-url = "2"
+rand = "0.10.3"
+aeronet_websocket = { version = "=0.21.0", default-features = false, features = ["server"] }
+url = "2.5.8"

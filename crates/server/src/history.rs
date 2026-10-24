@@ -87,7 +87,7 @@ impl PlayerHistory {
 
     pub fn sweep(&self, id: u64, now: Tick, lag: f32, state: &PlayerState) -> Option<(Vec3, Vec3)> {
         let lag = lag.clamp(0.0, MAX_REWIND_TICKS);
-        let whole = lag.ceil() as u16;
+        let whole = lag.ceil() as u32;
         let fraction = whole as f32 - lag;
         let start_tick = now - whole - 1;
         let start = self.sample(id, start_tick, fraction, state)?;

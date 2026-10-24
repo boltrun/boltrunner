@@ -349,12 +349,12 @@ tuning_parameters! {
     WeaponX => weapon_x: f32 = 0.23, Viewmodel, -3.0, 3.0, "units", "First-person weapon rest position on the horizontal axis.";
     WeaponY => weapon_y: f32 = -0.20, Viewmodel, -3.0, 3.0, "units", "First-person weapon rest position on the vertical axis.";
     WeaponZ => weapon_z: f32 = -0.46, Viewmodel, -3.0, -0.02, "units", "First-person weapon rest position on the depth axis. Negative values place it in front of the camera.";
-    WeaponYaw => weapon_yaw: f32 = 0.08, Viewmodel, -3.14, 3.14, "radians", "Rest yaw of the first-person weapon.";
-    WeaponPitch => weapon_pitch: f32 = 0.025, Viewmodel, -3.14, 3.14, "radians", "Rest pitch of the first-person weapon.";
+    WeaponYaw => weapon_yaw: f32 = 0.08, Viewmodel, -std::f64::consts::PI, std::f64::consts::PI, "radians", "Rest yaw of the first-person weapon.";
+    WeaponPitch => weapon_pitch: f32 = 0.025, Viewmodel, -std::f64::consts::PI, std::f64::consts::PI, "radians", "Rest pitch of the first-person weapon.";
     RecoilBack => recoil_back: f32 = 0.055, Recoil, -1.0, 1.0, "units", "Weapon movement toward the camera per shot. Cosmetic; does not affect aim.";
     RecoilUp => recoil_up: f32 = 0.012, Recoil, -1.0, 1.0, "units", "Upward weapon movement per shot. Cosmetic; does not affect aim.";
-    RecoilPitch => recoil_pitch: f32 = 0.16, Recoil, -3.14, 3.14, "radians", "Weapon pitch kick per shot. Cosmetic; does not affect aim.";
-    RecoilRoll => recoil_roll: f32 = -0.035, Recoil, -3.14, 3.14, "radians", "Weapon roll kick per shot. Cosmetic; does not affect aim.";
+    RecoilPitch => recoil_pitch: f32 = 0.16, Recoil, -std::f64::consts::PI, std::f64::consts::PI, "radians", "Weapon pitch kick per shot. Cosmetic; does not affect aim.";
+    RecoilRoll => recoil_roll: f32 = -0.035, Recoil, -std::f64::consts::PI, std::f64::consts::PI, "radians", "Weapon roll kick per shot. Cosmetic; does not affect aim.";
     RecoilReturn => recoil_return_speed: f32 = 18.0, Recoil, 0.0, 1000.0, "1/s", "Exponential recoil recovery rate. Zero holds the last shot kick.";
     MuzzleFlashTime => muzzle_flash_time: f32 = 0.07, Effects, 0.0, 10.0, "seconds", "Duration of the first-person muzzle flash for new shots.";
     MuzzleFlashSize => muzzle_flash_size: f32 = 1.0, Effects, 0.0, 10.0, "multiplier", "Size of the muzzle flash. Zero hides it.";
@@ -383,7 +383,7 @@ impl Parameter {
     }
 }
 
-#[derive(Component, Resource, Clone, Debug, PartialEq, Serialize, Deserialize, Default)]
+#[derive(Component, Clone, Debug, PartialEq, Serialize, Deserialize, Default)]
 pub struct FeatureSettings {
     pub revision: u64,
     pub values: SettingsValues,

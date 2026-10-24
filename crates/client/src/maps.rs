@@ -33,7 +33,7 @@ fn sync(
     mut links: Query<
         (
             &mut MessageSender<ChangeMap>,
-            &mut MessageReceiver<MapChangeReply>,
+            Option<&mut MessageReceiver<MapChangeReply>>,
         ),
         (With<Client>, With<Connected>),
     >,
@@ -42,13 +42,15 @@ fn sync(
         *selection = default();
         return;
     }
-    let Ok((mut sender, mut replies)) = links.single_mut() else {
+    let Ok((mut sender, replies)) = links.single_mut() else {
         return;
     };
-    for reply in replies.receive() {
-        if reply.error.is_some() {
-            selection.pending = false;
-            selection.error = reply.error;
+    if let Some(mut replies) = replies {
+        for reply in replies.receive() {
+            if reply.error.is_some() {
+                selection.pending = false;
+                selection.error = reply.error;
+            }
         }
     }
     if let Some(map) = selection.queued.take() {

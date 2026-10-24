@@ -90,8 +90,10 @@ fn main() {
     ] {
         hash_path(root, &root.join(path), &mut digest);
     }
-    println!(
-        "cargo:rustc-env=BOLTRUNNER_SIMULATION_BUILD={:x}",
-        digest.finalize()
-    );
+    let build: String = digest
+        .finalize()
+        .iter()
+        .map(|byte| format!("{byte:02x}"))
+        .collect();
+    println!("cargo:rustc-env=BOLTRUNNER_SIMULATION_BUILD={build}");
 }

@@ -1,9 +1,8 @@
 use bevy::prelude::*;
 use boltrunner_shared::{
     PlayerId, PlayerState, level,
-    match_state::MatchState,
     powerups::{Pickup, PickupKind},
-    tuning::{FeatureSettings, MatchTuning, seconds_to_ticks},
+    tuning::{MatchTuning, seconds_to_ticks},
 };
 use lightyear::prelude::*;
 
@@ -15,8 +14,8 @@ pub struct PickupDirector {
 
 pub fn collect(
     mut commands: Commands,
-    round: Res<MatchState>,
-    settings: Res<FeatureSettings>,
+    round: Res<crate::matches::CurrentMatch>,
+    settings: Res<crate::tuning::ServerSettings>,
     pickups: Query<(Entity, &Pickup)>,
     mut players: Query<(&PlayerId, &mut PlayerState)>,
 ) {
@@ -50,8 +49,8 @@ pub fn collect(
 pub fn manage(
     mut commands: Commands,
     mut director: ResMut<PickupDirector>,
-    round: Res<MatchState>,
-    settings: Res<FeatureSettings>,
+    round: Res<crate::matches::CurrentMatch>,
+    settings: Res<crate::tuning::ServerSettings>,
     pickups: Query<(Entity, &Pickup)>,
     players: Query<&PlayerState>,
 ) {

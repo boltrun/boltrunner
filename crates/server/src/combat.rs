@@ -25,8 +25,8 @@ pub fn advance_projectiles(
     timeline: Res<LocalTimeline>,
     history: Res<crate::history::PlayerHistory>,
     mut clients: Query<&mut MessageSender<ShotImpact>, With<Connected>>,
-    mut round: ResMut<boltrunner_shared::match_state::MatchState>,
-    settings: Res<boltrunner_shared::tuning::FeatureSettings>,
+    mut round: ResMut<crate::matches::CurrentMatch>,
+    settings: Res<crate::tuning::ServerSettings>,
     mut players: Query<(&PlayerId, &mut PlayerState, &ActionState<PlayerInput>)>,
 ) {
     if round.results {

@@ -5,7 +5,7 @@ use bevy::{
     prelude::*,
     window::{CursorOptions, PrimaryWindow},
 };
-use boltrunner_client::{NetworkPresentation, NetworkStats, PresentationPosition, Session};
+use boltrunner_client::{NetworkPresentation, PresentationPosition, Session};
 use boltrunner_shared::{PlayerId, PlayerInput, PlayerState, level, player_color::PlayerColor};
 use lightyear::prelude::{client::input::InputSystems, input::native::*, *};
 
@@ -46,7 +46,6 @@ impl Plugin for ViewPlugin {
                     sync_bodies,
                     sync_shapes,
                     follow_camera.in_set(CameraUpdated),
-                    update_hud,
                 )
                     .chain()
                     .after(InterpolationSystems::Interpolate)
@@ -75,15 +74,13 @@ struct Visor;
 #[derive(Component)]
 pub(crate) struct PlayerCamera;
 #[derive(Component)]
-struct Hud;
-#[derive(Component)]
 pub(crate) struct Crosshair;
 
 fn build_scene(mut commands: Commands) {
     commands.spawn((
         Camera3d::default(),
-        // The weapon/UI camera presents the combined intermediate color target.
-        // Presenting the world first would add a redundant full-resolution blit.
+        // Compose the world before the weapon/UI view. WebGL draws both views
+        // directly to the output; native presents their shared intermediate once.
         Camera {
             output_mode: CameraOutputMode::Skip,
             ..default()
@@ -97,22 +94,7 @@ fn build_scene(mut commands: Commands) {
         }),
         Transform::from_xyz(0.0, 5.0, 0.0),
         PlayerCamera,
-        Msaa::Sample4,
-    ));
-    commands.spawn((
-        Text::new("0 fps, — ms"),
-        TextFont {
-            font_size: 18.0,
-            ..default()
-        },
-        TextColor(Color::srgb(0.88, 0.95, 0.96)),
-        Node {
-            position_type: PositionType::Absolute,
-            left: px(22),
-            top: px(20),
-            ..default()
-        },
-        Hud,
+        Msaa::Off,
     ));
     commands.spawn((
         Node {
@@ -360,109 +342,5 @@ fn follow_camera(
             look.pitch,
             0.0,
         );
-    }
-}
-
-fn update_hud(
-    mut commands: Commands,
-    rounds: Query<&boltrunner_shared::match_state::MatchState>,
-    players: Query<(&PlayerId, &PlayerState, &PlayerColor), With<Predicted>>,
-    stats: Res<NetworkStats>,
-    session: Res<Session>,
-    time: Res<Time<Real>>,
-    mut elapsed: Local<f32>,
-    mut hud: Single<(Entity, &mut Text), With<Hud>>,
-    mut previous_spans: Local<Vec<(String, Option<PlayerColor>)>>,
-) {
-    *elapsed += time.delta_secs();
-    if *elapsed < 0.1 {
-        return;
-    }
-    *elapsed = 0.0;
-    let ping = stats
-        .ping_ms
-        .map(|ms| format!("{ms:.0}"))
-        .unwrap_or_else(|| "—".into());
-    let fps = if stats.frame_ms > 0.0 {
-        1000.0 / stats.frame_ms
-    } else {
-        0.0
-    };
-    let label = if session.is_playing() {
-        format!("{fps:.0} fps, {ping} ms\n")
-    } else {
-        String::new()
-    };
-    let mut spans = Vec::new();
-    if session.is_playing() {
-        if let Some((_, state, color)) = players.iter().next() {
-            spans.push((session.nickname.clone(), Some(*color)));
-            spans.push((
-                format!("\nHP: {} / {}", state.health.0, state.tuning.max_health),
-                Some(*color),
-            ));
-            if state.speed_ticks > 0 {
-                let seconds = (state.speed_ticks as f64 / boltrunner_shared::TICK_HZ).ceil() as u32;
-                spans.push((format!("\nSpeed boost: {seconds}s"), None));
-            }
-            if state.rapid_fire_ticks > 0 {
-                let seconds =
-                    (state.rapid_fire_ticks as f64 / boltrunner_shared::TICK_HZ).ceil() as u32;
-                spans.push((format!("\nRapid fire: {seconds}s"), None));
-            }
-            if let Some(death) = state.death {
-                if state.match_paused {
-                    spans.push((" | Waiting for next match".into(), None));
-                } else {
-                    let seconds =
-                        (death.remaining_ticks as f64 / boltrunner_shared::TICK_HZ).ceil() as u32;
-                    spans.push((format!(" | Respawn in {seconds}s"), None));
-                }
-            }
-        }
-        if let Some(round) = rounds.iter().next() {
-            let remaining = round.remaining_seconds;
-            let phase = if round.results {
-                "Next match"
-            } else {
-                "Time left"
-            };
-            spans.push((
-                format!("\n{phase} {:02}:{:02}\n", remaining / 60, remaining % 60),
-                None,
-            ));
-            let ranked = round.ranked();
-            for (rank, row) in ranked.iter().take(3).enumerate() {
-                spans.push((format!("\n{}. ", rank + 1), None));
-                spans.push((row.nickname.clone(), Some(row.color)));
-                spans.push((format!("  {}K / {}D", row.kills, row.deaths), None));
-            }
-            let own = players.iter().next().map(|(id, _, _)| id.0);
-            if let Some((rank, row)) = ranked
-                .iter()
-                .enumerate()
-                .find(|(_, row)| Some(row.id) == own)
-            {
-                spans.push((format!("\nYou: #{} ", rank + 1), None));
-                spans.push((row.nickname.clone(), Some(row.color)));
-                spans.push((format!("  {}K / {}D", row.kills, row.deaths), None));
-            }
-        }
-    }
-    if hud.1.0 != label {
-        hud.1.0 = label;
-    }
-    if *previous_spans != spans {
-        commands.entity(hud.0).despawn_related::<Children>();
-        commands.entity(hud.0).with_children(|parent| {
-            for (segment, color) in &spans {
-                let mut span = parent.spawn(TextSpan::new(segment.clone()));
-                if let Some(color) = color {
-                    let [r, g, b] = color.rgb();
-                    span.insert(TextColor(Color::srgb(r, g, b)));
-                }
-            }
-        });
-        *previous_spans = spans;
     }
 }

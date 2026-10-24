@@ -247,17 +247,22 @@ impl Plugin for ProtocolPlugin {
             .add_direction(NetworkDirection::ClientToServer);
         app.register_message::<crate::tuning::EditReply>()
             .add_direction(NetworkDirection::ServerToClient);
-        app.register_component::<crate::tuning::FeatureSettings>();
-        app.register_component::<crate::match_state::MatchState>();
-        app.register_component::<PlayerName>();
-        app.register_component::<crate::player_color::PlayerColor>();
-        app.register_component::<PlayerId>();
-        app.register_component::<crate::weapon::Projectile>()
+        app.component::<crate::tuning::FeatureSettings>()
+            .replicate();
+        app.component::<crate::match_state::MatchState>()
+            .replicate();
+        app.component::<PlayerName>().replicate();
+        app.component::<crate::player_color::PlayerColor>()
+            .replicate();
+        app.component::<PlayerId>().replicate();
+        app.component::<crate::weapon::Projectile>()
+            .replicate()
             .add_linear_interpolation();
-        app.register_component::<crate::powerups::Pickup>();
-        app.register_component::<PlayerState>()
-            .add_prediction()
-            .add_should_rollback(PlayerState::should_rollback)
+        app.component::<crate::powerups::Pickup>().replicate();
+        app.component::<PlayerState>()
+            .replicate()
+            .predict()
+            .with_rollback_condition(PlayerState::should_rollback)
             .add_linear_interpolation();
     }
 }

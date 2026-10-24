@@ -5,17 +5,23 @@ use boltrunner_shared::{
 };
 use lightyear::prelude::{server::ClientOf, *};
 
+#[derive(Resource, Default, Deref, DerefMut)]
+pub struct ServerSettings(pub FeatureSettings);
+
 pub struct TuningPlugin;
 impl Plugin for TuningPlugin {
     fn build(&self, app: &mut App) {
-        app.init_resource::<FeatureSettings>()
+        app.init_resource::<ServerSettings>()
             .add_systems(Startup, setup)
             .add_systems(PreUpdate, edit.after(MessageSystems::Receive))
             .add_systems(PostUpdate, publish.before(ReplicationSystems::Send));
     }
 }
-fn setup(mut commands: Commands, settings: Res<FeatureSettings>) {
-    commands.spawn((settings.clone(), Replicate::to_clients(NetworkTarget::All)));
+fn setup(mut commands: Commands, settings: Res<ServerSettings>) {
+    commands.spawn((
+        settings.0.clone(),
+        Replicate::to_clients(NetworkTarget::All),
+    ));
 }
 type EditingClients = (With<ClientOf>, With<Connected>);
 type EditConnection = (
@@ -24,7 +30,7 @@ type EditConnection = (
     Has<crate::Joined>,
 );
 pub(crate) fn edit(
-    mut settings: ResMut<FeatureSettings>,
+    mut settings: ResMut<ServerSettings>,
     mut clients: Query<EditConnection, EditingClients>,
 ) {
     for (mut requests, mut replies, joined) in &mut clients {
@@ -36,14 +42,15 @@ pub(crate) fn edit(
             };
             replies.send::<LobbyChannel>(EditReply {
                 id: request.id,
-                settings: settings.clone(),
+                settings: settings.0.clone(),
                 error,
             });
         }
     }
 }
-fn publish(settings: Res<FeatureSettings>, mut snapshot: Single<&mut FeatureSettings>) {
-    if **snapshot != *settings {
-        **snapshot = settings.clone();
+
+fn publish(settings: Res<ServerSettings>, mut snapshot: Single<&mut FeatureSettings>) {
+    if **snapshot != settings.0 {
+        **snapshot = settings.0.clone();
     }
 }

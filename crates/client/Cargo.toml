@@ -9,4 +9,4 @@ license.workspace = true
 bevy = { workspace = true, features = ["bevy_log"] }
 lightyear = { workspace = true, features = ["client"] }
 boltrunner-shared.workspace = true
-url = "2"
+url = "2.5.8"

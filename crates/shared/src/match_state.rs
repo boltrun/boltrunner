@@ -22,7 +22,7 @@ pub struct ScoreRow {
     pub connected: bool,
 }
 
-#[derive(Component, Resource, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Component, Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct MatchState {
     pub map: String,
     pub map_revision: u64,

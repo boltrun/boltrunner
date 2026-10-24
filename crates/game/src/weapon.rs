@@ -4,8 +4,8 @@ use bevy::{
     ecs::system::SystemParam,
     light::NotShadowCaster,
     prelude::*,
-    scene::SceneInstanceReady,
     transform::helper::TransformHelper,
+    world_serialization::{WorldAsset, WorldAssetRoot, WorldInstanceReady},
 };
 use boltrunner_client::{PredictedShot, PredictedShots};
 use boltrunner_shared::{
@@ -15,7 +15,7 @@ use boltrunner_shared::{
 use lightyear::prelude::*;
 use std::collections::VecDeque;
 
-const VIEW_LAYER: usize = 1;
+pub(crate) const VIEW_LAYER: usize = 1;
 
 const MUZZLE_CLEARANCE: f32 = 0.015;
 const FLASH_HALF_LENGTH: f32 = 0.055;
@@ -48,7 +48,7 @@ impl Plugin for WeaponPlugin {
 
 #[derive(Resource)]
 pub(crate) struct WeaponAssets {
-    pub scene: Handle<Scene>,
+    pub scene: Handle<WorldAsset>,
     beam: Handle<Mesh>,
     spark: Handle<Mesh>,
     cyan: Handle<StandardMaterial>,
@@ -73,7 +73,7 @@ struct MuzzleFlash;
 #[derive(Component)]
 struct MuzzleSocket;
 #[derive(Component)]
-struct WeaponCamera;
+pub(crate) struct WeaponCamera;
 #[derive(Component)]
 struct BoltVisual;
 #[derive(Component)]
@@ -118,8 +118,8 @@ fn setup(
             ..default()
         }),
     };
-    // A separate depth buffer keeps the first-person gun out of nearby walls.
-    // This camera also draws the existing crosshair/FPS UI above the weapon.
+    // Clear depth for the first-person view so nearby walls do not hide the gun.
+    // The HUD panels share this view; screen UI is drawn above both.
     commands.spawn((
         Camera3d::default(),
         WeaponCamera,
@@ -134,8 +134,8 @@ fn setup(
             ..default()
         }),
         Exposure::INDOOR,
-        // Keep weapon fill independent of the map. The coated materials limit
-        // black-paint reflections while this fill keeps the surface wear visible.
+        // The unlit view-model materials retain their base-color textures and do
+        // not depend on this view lighting.
         AmbientLight {
             brightness: 450.,
             ..default()
@@ -143,12 +143,12 @@ fn setup(
         Tonemapping::None,
         Transform::default(),
         RenderLayers::layer(VIEW_LAYER),
-        Msaa::Sample4,
+        Msaa::Off,
         IsDefaultUiCamera,
     ));
     commands
         .spawn((
-            SceneRoot(weapon.scene.clone()),
+            WorldAssetRoot(weapon.scene.clone()),
             Transform::from_translation(Vec3::new(0.23, -0.20, -0.46)),
             Visibility::Hidden,
             ViewWeapon,
@@ -162,7 +162,7 @@ fn setup(
             PointLight {
                 intensity,
                 color,
-                shadows_enabled: false,
+                shadow_maps_enabled: false,
                 range: 3.,
                 ..default()
             },
@@ -174,13 +174,23 @@ fn setup(
 }
 
 fn prepare_view_model(
-    event: On<SceneInstanceReady>,
+    event: On<WorldInstanceReady>,
     children: Query<&Children>,
     names: Query<&Name>,
     mut commands: Commands,
     assets: Res<WeaponAssets>,
+    mesh_materials: Query<&MeshMaterial3d<StandardMaterial>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     for entity in children.iter_descendants(event.entity) {
+        if let Ok(handle) = mesh_materials.get(entity) {
+            if let Some(mut material) = materials.get_mut(&handle.0) {
+                material.unlit = true;
+                material.normal_map_texture = None;
+                material.metallic_roughness_texture = None;
+                material.occlusion_texture = None;
+            }
+        }
         commands
             .entity(entity)
             .insert((RenderLayers::layer(VIEW_LAYER), NotShadowCaster));
@@ -371,7 +381,7 @@ fn receive_impacts(
     assets: Res<WeaponAssets>,
     mut feedback: ResMut<Feedback>,
     mut receivers: Query<&mut MessageReceiver<ShotImpact>, With<Connected>>,
-    timelines: Query<&lightyear::interpolation::timeline::InterpolationTimeline, With<Connected>>,
+    timeline: Res<InterpolationTimeline>,
     locals: Query<(Entity, &LocalBolt)>,
 ) {
     let now = time.elapsed_secs_f64();
@@ -390,7 +400,7 @@ fn receive_impacts(
             feedback.impacts.push((impact, now));
         }
     }
-    let tick = timelines.iter().next().map(|timeline| timeline.tick());
+    let tick = timeline.is_synced().then(|| timeline.tick());
     let owner = feedback.player;
     let mut completed = Vec::new();
     feedback.impacts.retain(|(impact, received)| {
@@ -417,21 +427,25 @@ fn receive_impacts(
 
 fn reconcile_bolts(
     timeline: Res<LocalTimeline>,
-    authoritative: Query<(&Confirmed<Projectile>, &ConfirmedTick), With<Interpolated>>,
+    authoritative: Query<&ConfirmedHistory<Projectile>, With<Interpolated>>,
     mut locals: Query<&mut LocalBolt>,
 ) {
     for mut local in &mut locals {
-        let Some((confirmed, tick)) = authoritative.iter().find(|(confirmed, _)| {
-            (confirmed.0.owner, confirmed.0.shot) == (local.bolt.owner, local.bolt.shot)
-        }) else {
+        let Some((tick, confirmed)) = authoritative
+            .iter()
+            .filter_map(ConfirmedHistory::newest_present)
+            .find(|(_, confirmed)| {
+                (confirmed.owner, confirmed.shot) == (local.bolt.owner, local.bolt.shot)
+            })
+        else {
             continue;
         };
-        if local.confirmed_tick == Some(tick.tick) {
+        if local.confirmed_tick == Some(tick) {
             continue;
         }
-        let lead = ((timeline.tick() - tick.tick) as f32).clamp(0.0, 30.0)
+        let lead = ((timeline.tick() - tick) as f32).clamp(0.0, 30.0)
             * boltrunner_shared::TICK_DURATION.as_secs_f32();
-        let mut predicted = confirmed.0.clone();
+        let mut predicted = confirmed.clone();
         let delta = predicted.direction * predicted.speed * lead;
         boltrunner_shared::weapon::advance_map(&mut predicted, delta);
         let position = predicted.position;
@@ -450,7 +464,7 @@ fn reconcile_bolts(
             .saturating_sub(local.bolt.remaining_ticks)) as f32
             * boltrunner_shared::TICK_DURATION.as_secs_f32()
             + lead;
-        local.confirmed_tick = Some(tick.tick);
+        local.confirmed_tick = Some(tick);
     }
 }
 

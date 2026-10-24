@@ -1,13 +1,15 @@
 mod baked_material;
 mod debug_menu;
-mod kill_feed;
+#[cfg(target_arch = "wasm32")]
+mod direct_output;
+mod hud;
+mod hud_font;
 mod loading;
 mod map;
 mod map_menu;
 mod mipmaps;
 mod nameplates;
 mod powerups;
-mod scoreboard;
 mod title;
 mod view;
 mod weapon;
@@ -25,15 +27,14 @@ use boltrunner_client::GameNetworkingPlugin;
 fn main() -> AppExit {
     let mut app = App::new();
     platform::configure(&mut app);
+    #[cfg(target_arch = "wasm32")]
+    direct_output::install(&mut app);
     // Bundle the full font for identical Unicode coverage on web and native.
     app.world_mut()
         .resource_mut::<Assets<Font>>()
         .insert(
             bevy::asset::AssetId::default(),
-            Font::try_from_bytes(
-                include_bytes!("../../../assets/fonts/DejaVuSansMono.ttf").to_vec(),
-            )
-            .expect("bundled UI font must be valid"),
+            Font::from_bytes(include_bytes!("../../../assets/fonts/DejaVuSansMono.ttf").to_vec()),
         )
         .unwrap();
     app.insert_resource(WinitSettings::continuous())
@@ -41,8 +42,7 @@ fn main() -> AppExit {
             GameNetworkingPlugin,
             loading::LoadingPlugin,
             title::TitlePlugin,
-            scoreboard::ScoreboardPlugin,
-            kill_feed::KillFeedPlugin,
+            hud::HudPlugin,
             MaterialPlugin::<baked_material::BakedMaterial>::default(),
             view::ViewPlugin,
             debug_menu::DebugMenuPlugin,
