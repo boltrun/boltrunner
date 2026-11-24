@@ -166,6 +166,22 @@ def shader_blocks(text):
     return blocks
 
 
+def material_motion(shader, diffuse):
+    # tcMod belongs to a texture stage: a lightmap or later detail layer must
+    # never animate the base texture by accident.
+    scroll = np.zeros(2)
+    if diffuse is not None:
+        start = shader.rfind('{', 0, diffuse.start())
+        end = shader.find('}', diffuse.end())
+        stage = shader[start + 1:end] if start >= 0 and end >= 0 else ''
+        for match in re.finditer(r'(?im)^\s*tcMod\s+scroll\s+(\S+)\s+(\S+)', stage):
+            scroll += [float(match[1]), float(match[2])]
+    if not np.isfinite(scroll).all():
+        raise ValueError('Material scroll must be finite')
+    water = bool(re.search(r'(?im)^\s*surfaceparm\s+water\s*$', shader))
+    return scroll.tolist(), water
+
+
 class Compiler:
     def __init__(self, entities):
         self.entities = entities
@@ -217,6 +233,7 @@ class Compiler:
         texture = name
         editor = re.search(r'(?im)^\s*qer_editorimage\s+(\S+)', shader)
         diffuse = re.search(r'(?im)^\s*map\s+((?:textures|models)/\S+)', shader)
+        uv_scroll, water = material_motion(shader, diffuse)
         if diffuse:
             texture = diffuse[1]
         elif editor:
@@ -237,7 +254,8 @@ class Compiler:
         alpha = 'alphaFunc' in shader or 'alphafunc' in shader or 'grate' in name
         blend = 'warpzone' in name or 'energy_' in name or 'jumpglow' in name or 'misc-glass' in name
         result = dict(id=len(self.materials), name=name, texture=filename, glow=glow,
-                      width=image.width, height=image.height, emissive=emissive, alpha=alpha, blend=blend)
+                      width=image.width, height=image.height, emissive=emissive, alpha=alpha, blend=blend,
+                      uv_scroll=uv_scroll, water=water)
         self.materials[name] = result
         return result
 
@@ -247,8 +265,11 @@ class Compiler:
     def solid(self, materials):
         if any('lava' in m for m in materials):
             return False
+        def nonsolid(material):
+            name = material if material.startswith(('textures/', 'models/')) else 'textures/' + material
+            return bool(re.search(r'(?im)^\s*surfaceparm\s+(?:nonsolid|water)\s*$', self.shaders.get(name, '')))
         return any(m not in ['common/caulk', 'common/hint', 'common/donotenter', 'common/trigger', 'common/weapclip', 'common/origin']
-                   and not m.startswith('skies/') for m in materials) or 'common/clip' in materials or all(m == 'common/caulk' for m in materials)
+                   and not m.startswith('skies/') and not nonsolid(m) for m in materials) or 'common/clip' in materials or all(m == 'common/caulk' for m in materials)
 
     def triangle(self, points):
         if np.linalg.norm(np.cross(points[1] - points[0], points[2] - points[0])) >= 1e-9:

@@ -25,6 +25,8 @@ pub struct BakedMaterial {
     #[texture(5)]
     #[sampler(6)]
     pub glow: Handle<Image>,
+    #[uniform(7)]
+    pub flow: Vec4, // UV scroll per second, water surface, reserved
     pub alpha: AlphaMode,
     pub double_sided: bool,
 }
@@ -35,6 +37,8 @@ pub struct BakedMaterialKey {
     glow: bool,
     masked: bool,
     opaque: bool,
+    animated: bool,
+    water: bool,
 }
 
 impl From<&BakedMaterial> for BakedMaterialKey {
@@ -44,6 +48,8 @@ impl From<&BakedMaterial> for BakedMaterialKey {
             glow: material.settings.y != 0.0,
             masked: material.settings.z > 0.0,
             opaque: material.settings.w > 0.0,
+            animated: material.flow.truncate() != Vec3::ZERO,
+            water: material.flow.z > 0.0,
         }
     }
 }
@@ -69,6 +75,8 @@ impl Material for BakedMaterial {
             (key.bind_group_data.glow, "MAP_GLOW"),
             (key.bind_group_data.masked, "MAP_MASKED"),
             (key.bind_group_data.opaque, "MAP_OPAQUE"),
+            (key.bind_group_data.animated, "MAP_ANIMATED"),
+            (key.bind_group_data.water, "MAP_WATER"),
         ] {
             if enabled {
                 fragment.shader_defs.push(name.into());

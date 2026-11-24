@@ -2,6 +2,7 @@
   "default": "stormkeep",
   "maps": [
     { "id": "stormkeep", "source": "stormkeep/source" },
-    { "id": "skyfracture", "source": "stormkeep/source" }
+    { "id": "skyfracture", "source": "stormkeep/source" },
+    { "id": "spillway", "source": "spillway/source" }
   ]
 }

@@ -41,6 +41,8 @@ pub struct MapMaterial {
     pub emissive: bool,
     pub alpha: bool,
     pub blend: bool,
+    pub uv_scroll: Vec2,
+    pub water: bool,
 }
 
 #[derive(Deserialize, Clone, Copy, PartialEq, Debug)]

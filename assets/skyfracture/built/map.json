@@ -159,7 +159,12 @@
       "height": 512,
       "emissive": false,
       "alpha": false,
-      "blend": false
+      "blend": false,
+      "uv_scroll": [
+        0.0,
+        0.0
+      ],
+      "water": false
     },
     {
       "id": 1,
@@ -170,7 +175,12 @@
       "height": 512,
       "emissive": false,
       "alpha": false,
-      "blend": false
+      "blend": false,
+      "uv_scroll": [
+        0.0,
+        0.0
+      ],
+      "water": false
     },
     {
       "id": 2,
@@ -181,7 +191,12 @@
       "height": 512,
       "emissive": false,
       "alpha": false,
-      "blend": false
+      "blend": false,
+      "uv_scroll": [
+        0.0,
+        0.0
+      ],
+      "water": false
     },
     {
       "id": 3,
@@ -192,7 +207,12 @@
       "height": 512,
       "emissive": false,
       "alpha": false,
-      "blend": false
+      "blend": false,
+      "uv_scroll": [
+        0.0,
+        0.0
+      ],
+      "water": false
     },
     {
       "id": 4,
@@ -203,7 +223,12 @@
       "height": 128,
       "emissive": false,
       "alpha": false,
-      "blend": false
+      "blend": false,
+      "uv_scroll": [
+        0.0,
+        0.0
+      ],
+      "water": false
     },
     {
       "id": 5,
@@ -214,7 +239,12 @@
       "height": 512,
       "emissive": false,
       "alpha": false,
-      "blend": false
+      "blend": false,
+      "uv_scroll": [
+        0.0,
+        0.0
+      ],
+      "water": false
     },
     {
       "id": 6,
@@ -225,7 +255,12 @@
       "height": 512,
       "emissive": false,
       "alpha": false,
-      "blend": false
+      "blend": false,
+      "uv_scroll": [
+        0.0,
+        0.0
+      ],
+      "water": false
     },
     {
       "id": 7,
@@ -236,7 +271,12 @@
       "height": 512,
       "emissive": false,
       "alpha": true,
-      "blend": false
+      "blend": false,
+      "uv_scroll": [
+        0.0,
+        0.0
+      ],
+      "water": false
     }
   ],
   "counts": {
